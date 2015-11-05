@@ -10,6 +10,7 @@ namespace HelloWorld.Program.Client
     {
         static void Main(string[] args)
         {
+            
         }
     }
 }
