@@ -42,11 +42,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\PacketSerializer.cs">
-      <Link>PacketSerializer.cs</Link>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Session\ActorSessionClient.cs">
+      <Link>Session\ActorSessionClient.cs</Link>
     </Compile>
-    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\TcpConnection.cs">
-      <Link>TcpConnection.cs</Link>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Session\ObserverChannel.cs">
+      <Link>Session\ObserverChannel.cs</Link>
+    </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Transport\PacketSerializer.cs">
+      <Link>Transport\PacketSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Transport\TcpConnection.cs">
+      <Link>Transport\TcpConnection.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

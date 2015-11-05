@@ -45,9 +45,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PacketSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TcpConnection.cs" />
+    <Compile Include="Session\ActorSessionClient.cs" />
+    <Compile Include="Session\ObserverChannel.cs" />
+    <Compile Include="Transport\PacketSerializer.cs" />
+    <Compile Include="Transport\TcpConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Akka.Interfaced.SlimSocket.Base\Akka.Interfaced.SlimSocket.Base.csproj">

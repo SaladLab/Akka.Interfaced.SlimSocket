@@ -9,15 +9,15 @@ namespace Akka.Interfaced.SlimSocket.Server
     public class ClientGateway : ReceiveActor
     {
         private readonly ILog _logger;
-        private readonly Func<Socket, IActorRef> _clientSessionCreator;
+        private readonly Func<IActorContext, Socket, IActorRef> _clientSessionFactory;
         private TcpAcceptor _tcpAcceptor;
         private readonly HashSet<IActorRef> _sessionSet = new HashSet<IActorRef>();
         private bool _isStopped;
 
-        public ClientGateway(ILog logger, Func<Socket, IActorRef> clientSessionCreator)
+        public ClientGateway(ILog logger, Func<IActorContext, Socket, IActorRef> clientSessionFactory)
         {
             _logger = logger;
-            _clientSessionCreator = clientSessionCreator;
+            _clientSessionFactory = clientSessionFactory;
 
             Receive<ClientGatewayMessage.Start>(m => Handle(m));
             Receive<ClientGatewayMessage.Accept>(m => Handle(m));
@@ -35,7 +35,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 _tcpAcceptor = new TcpAcceptor();
                 _tcpAcceptor.Accepted += (sender, socket) =>
                 {
-                    self.Tell(new ClientGatewayMessage.Accept { Socket = socket }, self);
+                    self.Tell(new ClientGatewayMessage.Accept(socket), self);
                     return TcpAcceptor.AcceptResult.Accept;
                 };
                 _tcpAcceptor.Listen(m.ServiceEndPoint);
@@ -51,7 +51,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             if (_isStopped)
                 return;
 
-            var clientSession = _clientSessionCreator(m.Socket);
+            var clientSession = _clientSessionFactory(Context, m.Socket);
             if (clientSession == null)
             {
                 _logger?.TraceFormat("Deny a connection. (EndPoint={0})", m.Socket.RemoteEndPoint);

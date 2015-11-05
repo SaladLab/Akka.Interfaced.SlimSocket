@@ -19,6 +19,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         private IActorRef _self;
         private TcpConnection _connection;
         private Socket _socket;
+        private Func<IActorContext, Socket, Tuple<IActorRef, Type>> _initialActorFactory;
 
         private class BoundActorItem
         {
@@ -27,53 +28,33 @@ namespace Akka.Interfaced.SlimSocket.Server
             public bool IsTagOverridable;
             public object TagValue;
         }
+
         private object _boundActorLock = new object();
         private Dictionary<int, BoundActorItem> _boundActorMap;
         private Dictionary<IActorRef, int> _boundActorInverseMap;
         private int _lastBoundActorId;
 
-        public ClientSession(ILog logger, Socket socket)
+        public ClientSession(ILog logger, Socket socket, TcpConnectionSettings connectionSettings,
+                             Func<IActorContext, Socket, Tuple<IActorRef, Type>> initialActorFactory)
         {
             _logger = logger;
-            _connection = new TcpConnection(logger);
             _socket = socket;
+            _connection = new TcpConnection(logger) { Settings = connectionSettings };
+            _initialActorFactory = initialActorFactory;
             _boundActorMap = new Dictionary<int, BoundActorItem>();
             _boundActorInverseMap = new Dictionary<IActorRef, int>();
-        }
-
-        private static PacketSerializer s_packetSerializer;
-
-        static PacketSerializer GetPacketSerializer()
-        {
-            if (s_packetSerializer == null)
-            {
-                var typeModel = TypeModel.Create();
-                AutoSurrogate.Register(typeModel);
-
-                s_packetSerializer = new PacketSerializer(
-                    new PacketSerializerBase.Data(
-                        new ProtoBufMessageSerializer(typeModel),
-                        new TypeAliasTable()));
-            }
-            return s_packetSerializer;
         }
 
         protected override void PreStart()
         {
             _self = Self;
-            BindActor(
-                Context.System.ActorOf(Props.Create<UserLoginActor>(
-                    _systemContext, Self, _socket?.RemoteEndPoint)),
-                typeof(IUserLogin));
 
-            // _systemContext.ClientGateway.OnSessionCreated(this);
+            var initialActor = _initialActorFactory(Context, _socket);
+            if (initialActor != null)
+                BindActor(initialActor.Item1, initialActor.Item2);
 
             _connection.Closed += OnConnectionClose;
             _connection.Received += OnConnectionReceive;
-            _connection.Settings = new TcpConnectionSettings
-            {
-                PacketSerializer = GetPacketSerializer()
-            };
 
             if (_socket != null)
                 _connection.Open(_socket);
@@ -81,16 +62,13 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         protected override void PostStop()
         {
-            if (_socket != null)
-                _connection.Close();
+            _connection.Close();
 
             lock (_boundActorLock)
             {
                 foreach (var boundActor in _boundActorMap)
                     boundActor.Value.Actor.Tell(new ClientSessionMessage.BoundSessionTerminated());
             }
-
-            // _systemContext.ClientGateway.OnSessionDestroyed(this);
         }
 
         protected override void OnReceive(object message)

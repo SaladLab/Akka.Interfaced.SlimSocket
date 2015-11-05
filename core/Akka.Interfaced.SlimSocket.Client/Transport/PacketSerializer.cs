@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Akka.Interfaced.SlimSocket.Base;
 
 namespace Akka.Interfaced.SlimSocket.Client

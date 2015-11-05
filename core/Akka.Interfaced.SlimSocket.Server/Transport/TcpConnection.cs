@@ -135,7 +135,9 @@ namespace Akka.Interfaced.SlimSocket.Server
             if (_logger != null)
                 _logger.Trace("Close connection");
 
-            _socket.Close();
+            if (_socket != null)
+                _socket.Close();
+
             if (_issueCountFlag.SetFlag())
                 ProcessClose();
         }
