@@ -1,27 +1,52 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading.Tasks;
+using System.Threading;
 using Akka.Interfaced.SlimSocket.Base;
 using Common.Logging;
 
 namespace Akka.Interfaced.SlimSocket.Client
 {
+    // TODO: 
+    // - Session management (Session ID issued by host. Rebind ression when reconnect)
+    // - Full-Ordered Request (1 Request a time)
+
     public class Communicator
     {
+        public enum StateType
+        {
+            None,
+            Offline,
+            Connecting,
+            Connected,
+            Paused,
+            Stopped,
+        }
+
+        public StateType State => _state;
+        public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
+
+        private volatile StateType _state;
         private readonly ILog _logger;
         private IPEndPoint _remoteEndPoint;
         private Func<Communicator, TcpConnection> _connectionFactory;
         private TcpConnection _tcpConnection;
+
         private int _lastRequestId = 0;
-        private List<Packet> _requestPackets = new List<Packet>();
-        private Dictionary<int, Action<ResponseMessage>> _requestResponseMap = new Dictionary<int, Action<ResponseMessage>>();
+        private readonly List<Packet> _requestPacketQueues = new List<Packet>();
+        private readonly ConcurrentDictionary<int, Action<ResponseMessage>> _requestResponseMap = 
+            new ConcurrentDictionary<int, Action<ResponseMessage>>();
 
-        // Durable Connection
-        // 
+        private int _lastObserverId;
+        private readonly List<Packet> _recvSimplePackets = new List<Packet>();
+        private readonly ConcurrentDictionary<int, ObserverEventDispatcher> _observerChannelMap =
+            new ConcurrentDictionary<int, ObserverEventDispatcher>();
 
-        public Communicator(ILog logger, IPEndPoint remoteEndPoint, Func<Communicator, TcpConnection> connectionFactory)
+        public Communicator(ILog logger, IPEndPoint remoteEndPoint, 
+                            Func<Communicator, TcpConnection> connectionFactory)
         {
+            _state = StateType.None;
             _logger = logger;
             _remoteEndPoint = remoteEndPoint;
             _connectionFactory = connectionFactory;
@@ -29,14 +54,16 @@ namespace Akka.Interfaced.SlimSocket.Client
 
         public void Start()
         {
-            _logger.Info("Start");
+            _logger.Info("Start.");
+            _state = StateType.Offline;
             CreateNewConnect();
         }
 
         public void Stop()
         {
-            _logger.Info("Stop");
-            _tcpConnection.Close();
+            _logger.Info("Stop.");
+            _state = StateType.Stopped;
+            _tcpConnection?.Close();
         }
 
         private void CreateNewConnect()
@@ -45,33 +72,81 @@ namespace Akka.Interfaced.SlimSocket.Client
             if (connection == null)
                 throw new InvalidOperationException("Null connection is not allowed");
 
+            _state = StateType.Connecting;
             _tcpConnection = connection;
-            _tcpConnection.Connected += OnConnection;
-            _tcpConnection.Received += OnRecvPacket;
+            _tcpConnection.Connected += OnConnect;
+            _tcpConnection.Received += OnReceive;
             _tcpConnection.Closed += OnClose;
             _tcpConnection.Connect(_remoteEndPoint);
         }
 
-        private void OnConnection(object sender)
+        public int IssueObserverId()
         {
-            _logger.Trace("Connection Connected.");
+            return ++_lastObserverId;
         }
 
-        private void OnRecvPacket(object sender, object packet)
+        public void AddObserver(int observerId, ObserverEventDispatcher observer)
+        {
+            _observerChannelMap.TryAdd(observerId, observer);
+        }
+
+        public void RemoveObserver(int observerId)
+        {
+            ObserverEventDispatcher observer;
+            _observerChannelMap.TryRemove(observerId, out observer);
+        }
+
+        public ObserverEventDispatcher GetObserver(int observerId)
+        {
+            ObserverEventDispatcher observer;
+            return _observerChannelMap.TryGetValue(observerId, out observer)
+                       ? observer
+                       : null;
+        }
+
+        // BEWARE: CALLED BY WORK THREAD
+        private void OnConnect(object sender)
+        {
+            _logger.Trace("Connected.");
+
+            lock (_requestPacketQueues)
+            {
+                if (_requestPacketQueues.Count > 0)
+                {
+                    foreach (var packet in _requestPacketQueues)
+                        _tcpConnection.SendPacket(packet);
+
+                    _requestPacketQueues.Clear();
+                }
+            }
+
+            _state = StateType.Connected;
+        }
+
+        // BEWARE: CALLED BY WORK THREAD
+        private void OnReceive(object sender, object packet)
         {
             var p = (Packet)packet;
             switch (p.Type)
             {
                 case PacketType.Notification:
-                    // lock (_recvSimplePackets)
-                    //    _recvSimplePackets.Add(p);
+                    var observer = GetObserver(p.ActorId);
+                    if (observer == null)
+                    {
+                        _logger.WarnFormat("Notification didn't find observer. (ObserverId={0}, Message={1})",
+                                           p.ActorId, p.Message.GetType().Name);
+                        break;
+                    }
+                    if (ObserverEventPoster != null)
+                        ObserverEventPoster(_ => observer.Invoke(p.RequestId, (IInvokable)p.Message));
+                    else
+                        observer.Invoke(p.RequestId, (IInvokable)p.Message);
                     break;
 
                 case PacketType.Response:
                     Action<ResponseMessage> handler;
-                    if (_requestResponseMap.TryGetValue(p.RequestId, out handler))
+                    if (_requestResponseMap.TryRemove(p.RequestId, out handler))
                     {
-                        _requestResponseMap.Remove(p.RequestId);
                         handler(new ResponseMessage
                         {
                             RequestId = p.RequestId,
@@ -83,9 +158,12 @@ namespace Akka.Interfaced.SlimSocket.Client
             }
         }
 
+        // BEWARE: CALLED BY WORK THREAD
         private void OnClose(object sender, int reason)
         {
-            _logger.Trace("OnClose reason=" + reason);
+            _logger.TraceFormat("Closed. (reason={0})", reason);
+
+            _state = StateType.Offline;
         }
 
         public void SendRequest(IActorRef target, RequestMessage requestMessage)
@@ -139,11 +217,19 @@ namespace Akka.Interfaced.SlimSocket.Client
             packet.RequestId = ++_lastRequestId;
 
             if (completionHandler != null)
-                _requestResponseMap.Add(packet.RequestId, completionHandler);
+                _requestResponseMap.TryAdd(packet.RequestId, completionHandler);
 
-            // TODO: Pending if not connected
-
-            _tcpConnection.SendPacket(packet);
+            if (_state == StateType.Connected)
+            {
+                _tcpConnection.SendPacket(packet);
+            }
+            else
+            {
+                lock (_requestPacketQueues)
+                {
+                    _requestPacketQueues.Add(packet);
+                }
+            }
         }
     }
 }

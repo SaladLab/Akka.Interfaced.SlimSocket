@@ -69,6 +69,9 @@
     <Compile Include="..\Interface\IHelloWorld.cs">
       <Link>IHelloWorld.cs</Link>
     </Compile>
+    <Compile Include="..\Interface\IHelloWorldEventObserver.cs">
+      <Link>IHelloWorldEventObserver.cs</Link>
+    </Compile>
     <Compile Include="Properties\Akka.Interfaced.CodeGen.Slim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

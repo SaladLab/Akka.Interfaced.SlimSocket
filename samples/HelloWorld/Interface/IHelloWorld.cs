@@ -7,5 +7,6 @@ namespace HelloWorld.Interface
     {
         Task<string> SayHello(string name);
         Task<int> GetHelloCount();
+        Task AddObserver(int observerId);
     }
 }

@@ -25,9 +25,23 @@ namespace HelloWorld.Interface
         {
             return new Type[,]
             {
+                {typeof(AddObserver_Invoke), null},
                 {typeof(GetHelloCount_Invoke), typeof(GetHelloCount_Return)},
                 {typeof(SayHello_Invoke), typeof(SayHello_Return)},
             };
+        }
+
+        [ProtoContract, TypeAlias]
+        public class AddObserver_Invoke : IInterfacedPayload, IAsyncInvokable
+        {
+            [ProtoMember(1)] public System.Int32 observerId;
+
+            public Type GetInterfaceType() { return typeof(IHelloWorld); }
+
+            public Task<IValueGetable> InvokeAsync(object target)
+            {
+                return null;
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -77,6 +91,7 @@ namespace HelloWorld.Interface
 
     public interface IHelloWorld_NoReply
     {
+        void AddObserver(System.Int32 observerId);
         void GetHelloCount();
         void SayHello(System.String name);
     }
@@ -103,6 +118,15 @@ namespace HelloWorld.Interface
             return new HelloWorldRef(Actor, RequestWaiter, timeout);
         }
 
+        public Task AddObserver(System.Int32 observerId)
+        {
+            var requestMessage = new RequestMessage
+            {
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observerId = observerId }
+            };
+            return SendRequestAndWait(requestMessage);
+        }
+
         public Task<System.Int32> GetHelloCount()
         {
             var requestMessage = new RequestMessage
@@ -121,6 +145,15 @@ namespace HelloWorld.Interface
             return SendRequestAndReceive<System.String>(requestMessage);
         }
 
+        void IHelloWorld_NoReply.AddObserver(System.Int32 observerId)
+        {
+            var requestMessage = new RequestMessage
+            {
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observerId = observerId }
+            };
+            SendRequest(requestMessage);
+        }
+
         void IHelloWorld_NoReply.GetHelloCount()
         {
             var requestMessage = new RequestMessage
@@ -137,6 +170,27 @@ namespace HelloWorld.Interface
                 InvokePayload = new IHelloWorld_PayloadTable.SayHello_Invoke { name = name }
             };
             SendRequest(requestMessage);
+        }
+    }
+}
+
+#endregion
+
+#region HelloWorld.Interface.IHelloWorldEventObserver
+
+namespace HelloWorld.Interface
+{
+    public static class IHelloWorldEventObserver_PayloadTable
+    {
+        [ProtoContract, TypeAlias]
+        public class SayHello_Invoke : IInvokable
+        {
+            [ProtoMember(1)] public System.String name;
+
+            public void Invoke(object target)
+            {
+                ((IHelloWorldEventObserver)target).SayHello(name);
+            }
         }
     }
 }
