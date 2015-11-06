@@ -31,6 +31,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Akka.Interfaced-Base, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Interfaced-Base.0.1.0.0-dev20151103\lib\net45\Akka.Interfaced-Base.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Akka.Interfaced-SlimClient, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Interfaced-SlimClient.0.1.0.0-dev20151103\lib\net45\Akka.Interfaced-SlimClient.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Common.Logging.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Common.Logging.Core.3.3.0\lib\net40\Common.Logging.Core.dll</HintPath>
       <Private>True</Private>
@@ -46,8 +54,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Session\ActorSessionClient.cs" />
+    <Compile Include="Session\Communicator.cs" />
+    <Compile Include="Session\ISlimTaskCompletionSource.cs" />
     <Compile Include="Session\ObserverChannel.cs" />
+    <Compile Include="Session\SlimActorRef.cs" />
+    <Compile Include="Session\SlimTaskRequestWaiter.cs" />
+    <Compile Include="Session\SlimTaskCompletionSource.cs" />
     <Compile Include="Transport\PacketSerializer.cs" />
     <Compile Include="Transport\TcpConnection.cs" />
   </ItemGroup>
@@ -58,7 +70,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

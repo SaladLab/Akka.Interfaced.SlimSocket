@@ -11,6 +11,9 @@ using System;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Interfaced;
+using ProtoBuf;
+using TypeAlias;
+using System.ComponentModel;
 
 #region HelloWorld.Interface.IHelloWorld
 
@@ -28,6 +31,7 @@ namespace HelloWorld.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class GetHelloCount_Invoke : IInterfacedPayload, IAsyncInvokable
         {
             public Type GetInterfaceType() { return typeof(IHelloWorld); }
@@ -39,18 +43,20 @@ namespace HelloWorld.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetHelloCount_Return : IInterfacedPayload, IValueGetable
         {
-            public System.Int32 v;
+            [ProtoMember(1)] public System.Int32 v;
 
             public Type GetInterfaceType() { return typeof(IHelloWorld); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class SayHello_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String name;
+            [ProtoMember(1)] public System.String name;
 
             public Type GetInterfaceType() { return typeof(IHelloWorld); }
 
@@ -61,9 +67,10 @@ namespace HelloWorld.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class SayHello_Return : IInterfacedPayload, IValueGetable
         {
-            public System.String v;
+            [ProtoMember(1)] public System.String v;
 
             public Type GetInterfaceType() { return typeof(IHelloWorld); }
 
@@ -77,8 +84,20 @@ namespace HelloWorld.Interface
         void SayHello(System.String name);
     }
 
+    [ProtoContract, TypeAlias]
     public class HelloWorldRef : InterfacedActorRef, IHelloWorld, IHelloWorld_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private HelloWorldRef()
+            : base(null)
+        {
+        }
+
         public HelloWorldRef(IActorRef actor)
             : base(actor)
         {

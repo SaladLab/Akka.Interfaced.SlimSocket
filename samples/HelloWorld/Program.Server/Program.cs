@@ -16,6 +16,9 @@ namespace HelloWorld.Program.Server
     {
         static void Main(string[] args)
         {
+            if (typeof(IHelloWorld) == null)
+                throw new Exception("Force interface module to be loaded");
+
             var system = ActorSystem.Create("MySystem");
             DeadRequestProcessingActor.Install(system);
 

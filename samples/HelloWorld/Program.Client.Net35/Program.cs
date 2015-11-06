@@ -29,7 +29,7 @@ namespace HelloWorld.Program.Client
             Thread.Sleep(1000);
             var requestWaiter = new SlimTaskRequestWaiter(communicator);
             var helloWorld = new HelloWorldRef(new SlimActorRef(1), requestWaiter, null);
-            
+
             // Make some noise
             Console.WriteLine(helloWorld.SayHello("World").Result);
             Console.WriteLine(helloWorld.SayHello("Dlrow").Result);
