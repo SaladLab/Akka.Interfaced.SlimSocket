@@ -45,6 +45,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityBasic.Interface.SlimCl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityBasic.Program.Server", "samples\UnityBasic\Program.Server\UnityBasic.Program.Server.csproj", "{C1914C04-D860-46EB-8EF0-A31EA5A3B08E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalChat.Interface", "samples\UniversalChat\Interface\UniversalChat.Interface.csproj", "{4F84BFE9-B2C0-4589-AB57-76BE3352AEED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalChat.Interface.SlimClient", "samples\UniversalChat\Interface.SlimClient\UniversalChat.Interface.SlimClient.csproj", "{E8280030-0AFD-4DF9-87FD-53F7CBA68705}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalChat.Interface.SlimClient.Net35", "samples\UniversalChat\Interface.SlimClient.Net35\UniversalChat.Interface.SlimClient.Net35.csproj", "{B443861F-D8A7-4E32-98DA-520B65232A9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalChat.Program.Server", "samples\UniversalChat\Program.Server\UniversalChat.Program.Server.csproj", "{5FC0EDBC-28C2-43A4-B0EF-3AE91A5F405E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalChat.Program.Client.Console", "samples\UniversalChat\Program.Client.Console\UniversalChat.Program.Client.Console.csproj", "{86769538-F049-4F59-94CE-B7CCCE8CF48F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -119,6 +129,26 @@ Global
 		{C1914C04-D860-46EB-8EF0-A31EA5A3B08E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1914C04-D860-46EB-8EF0-A31EA5A3B08E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1914C04-D860-46EB-8EF0-A31EA5A3B08E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F84BFE9-B2C0-4589-AB57-76BE3352AEED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F84BFE9-B2C0-4589-AB57-76BE3352AEED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F84BFE9-B2C0-4589-AB57-76BE3352AEED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F84BFE9-B2C0-4589-AB57-76BE3352AEED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8280030-0AFD-4DF9-87FD-53F7CBA68705}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8280030-0AFD-4DF9-87FD-53F7CBA68705}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8280030-0AFD-4DF9-87FD-53F7CBA68705}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8280030-0AFD-4DF9-87FD-53F7CBA68705}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B443861F-D8A7-4E32-98DA-520B65232A9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B443861F-D8A7-4E32-98DA-520B65232A9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B443861F-D8A7-4E32-98DA-520B65232A9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B443861F-D8A7-4E32-98DA-520B65232A9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FC0EDBC-28C2-43A4-B0EF-3AE91A5F405E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FC0EDBC-28C2-43A4-B0EF-3AE91A5F405E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FC0EDBC-28C2-43A4-B0EF-3AE91A5F405E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC0EDBC-28C2-43A4-B0EF-3AE91A5F405E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86769538-F049-4F59-94CE-B7CCCE8CF48F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86769538-F049-4F59-94CE-B7CCCE8CF48F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86769538-F049-4F59-94CE-B7CCCE8CF48F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86769538-F049-4F59-94CE-B7CCCE8CF48F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,5 +171,10 @@ Global
 		{7D8DAC2C-BAB5-444A-94FC-FECE9F8F2941} = {C4D23D1E-5F29-40A9-923C-18F44FF7A736}
 		{CF32DE48-0F2E-4F55-9DAD-71853A07FC81} = {C4D23D1E-5F29-40A9-923C-18F44FF7A736}
 		{C1914C04-D860-46EB-8EF0-A31EA5A3B08E} = {C4D23D1E-5F29-40A9-923C-18F44FF7A736}
+		{4F84BFE9-B2C0-4589-AB57-76BE3352AEED} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
+		{E8280030-0AFD-4DF9-87FD-53F7CBA68705} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
+		{B443861F-D8A7-4E32-98DA-520B65232A9B} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
+		{5FC0EDBC-28C2-43A4-B0EF-3AE91A5F405E} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
+		{86769538-F049-4F59-94CE-B7CCCE8CF48F} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
 	EndGlobalSection
 EndGlobal
