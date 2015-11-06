@@ -38,6 +38,7 @@ public class MainScene : MonoBehaviour
         yield return new WaitForSeconds(1);
 
         WriteLine("Start ProcessTest");
+        WriteLine("");
 
         yield return StartCoroutine(ProcessTestCounter());
         yield return StartCoroutine(ProcessTestCalculator());
@@ -61,6 +62,8 @@ public class MainScene : MonoBehaviour
         var t2 = counter.GetCounter();
         yield return t2.WaitHandle;
         ShowResult(t2, "GetCounter");
+
+        WriteLine("");
     }
 
     IEnumerator ProcessTestCalculator()
@@ -84,6 +87,8 @@ public class MainScene : MonoBehaviour
         var t4 = calculator.Concat("Hello", null);
         yield return t4.WaitHandle;
         ShowResult(t4, "Concat(Hello, null)");
+
+        WriteLine("");
     }
 
     IEnumerator ProcessTestPedantic()
@@ -115,6 +120,8 @@ public class MainScene : MonoBehaviour
         var t6 = pedantic.TestReturnClass(10, 5);
         yield return t6.WaitHandle;
         ShowResult(t6, "TestReturnClass");
+
+        WriteLine("");
     }
 
     void WriteLine(string text)

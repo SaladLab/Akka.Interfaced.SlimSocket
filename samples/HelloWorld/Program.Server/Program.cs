@@ -53,11 +53,12 @@ namespace HelloWorld.Program.Server
                 logger, socket, _tcpConnectionSettings, CreateInitialActor)));
         }
 
-        static Tuple<IActorRef, Type> CreateInitialActor(IActorContext context, Socket socket)
+        static Tuple<IActorRef, Type>[] CreateInitialActor(IActorContext context, Socket socket)
         {
-            return Tuple.Create(
-                context.ActorOf(Props.Create(() => new HelloWorldActor())),
-                typeof(IHelloWorld));
+            return new[]
+            {
+                Tuple.Create(context.ActorOf(Props.Create(() => new HelloWorldActor())),typeof(IHelloWorld))
+            };
         }
     }
 }

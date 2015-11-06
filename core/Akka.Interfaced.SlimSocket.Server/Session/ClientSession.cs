@@ -19,7 +19,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         private IActorRef _self;
         private TcpConnection _connection;
         private Socket _socket;
-        private Func<IActorContext, Socket, Tuple<IActorRef, Type>> _initialActorFactory;
+        private Func<IActorContext, Socket, Tuple<IActorRef, Type>[]> _initialActorFactory;
 
         private class BoundActorItem
         {
@@ -35,7 +35,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         private int _lastBoundActorId;
 
         public ClientSession(ILog logger, Socket socket, TcpConnectionSettings connectionSettings,
-                             Func<IActorContext, Socket, Tuple<IActorRef, Type>> initialActorFactory)
+                             Func<IActorContext, Socket, Tuple<IActorRef, Type>[]> initialActorFactory)
         {
             _logger = logger;
             _socket = socket;
@@ -49,9 +49,12 @@ namespace Akka.Interfaced.SlimSocket.Server
         {
             _self = Self;
 
-            var initialActor = _initialActorFactory(Context, _socket);
-            if (initialActor != null)
-                BindActor(initialActor.Item1, initialActor.Item2);
+            var actors = _initialActorFactory(Context, _socket);
+            if (actors != null)
+            {
+                foreach (var actor in actors)
+                    BindActor(actor.Item1, actor.Item2);
+            }
 
             _connection.Closed += OnConnectionClose;
             _connection.Received += OnConnectionReceive;

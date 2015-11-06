@@ -48,16 +48,19 @@ namespace UnityBasic.Program.Server
 
         private static IActorRef CreateSession(IActorContext context, Socket socket)
         {
-            var logger = LogManager.GetLogger($"Client({socket.RemoteEndPoint.ToString()})");
+            var logger = LogManager.GetLogger($"Client({socket.RemoteEndPoint})");
             return context.ActorOf(Props.Create(() => new ClientSession(
                                                           logger, socket, _tcpConnectionSettings, CreateInitialActor)));
         }
 
-        private static Tuple<IActorRef, Type> CreateInitialActor(IActorContext context, Socket socket)
+        private static Tuple<IActorRef, Type>[] CreateInitialActor(IActorContext context, Socket socket)
         {
-            return Tuple.Create(
-                context.ActorOf(Props.Create(() => new CounterActor())),
-                typeof(ICounter));
+            return new[]
+            {
+                Tuple.Create(context.ActorOf(Props.Create(() => new CounterActor())), typeof(ICounter)),
+                Tuple.Create(context.ActorOf(Props.Create(() => new CalculatorActor())), typeof(ICalculator)),
+                Tuple.Create(context.ActorOf(Props.Create(() => new PedanticActor())), typeof(IPedantic))
+            };
         }
     }
 }
