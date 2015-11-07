@@ -14,6 +14,8 @@ namespace HelloWorld.Program.Server
 {
     class Program
     {
+        static TcpConnectionSettings _tcpConnectionSettings;
+
         static void Main(string[] args)
         {
             if (typeof(IHelloWorld) == null)
@@ -27,8 +29,6 @@ namespace HelloWorld.Program.Server
             Console.WriteLine("Please enter key to quit.");
             Console.ReadLine();
         }
-
-        static TcpConnectionSettings _tcpConnectionSettings;
 
         static void StartListen(ActorSystem system, int port)
         {
@@ -57,7 +57,8 @@ namespace HelloWorld.Program.Server
         {
             return new[]
             {
-                Tuple.Create(context.ActorOf(Props.Create(() => new HelloWorldActor())),typeof(IHelloWorld))
+                Tuple.Create(context.ActorOf(Props.Create(() => new HelloWorldActor())),
+                             typeof(IHelloWorld))
             };
         }
     }
