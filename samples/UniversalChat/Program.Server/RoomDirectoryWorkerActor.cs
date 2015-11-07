@@ -5,71 +5,32 @@ using UniversalChat.Interface;
 using Akka.Actor;
 using System.Collections.Generic;
 using Common.Logging;
+using Akka.Cluster.Utility;
 
 namespace UniversalChat.Program.Server
 {
     public class RoomDirectoryWorkerActor : InterfacedActor<RoomDirectoryWorkerActor>, IRoomDirectoryWorker
     {
         private ILog _logger = LogManager.GetLogger("RoomDirectoryWorker");
-        private ClusterNodeContext _context;
+        private readonly ClusterNodeContext _clusterContext;
         private RoomDirectoryRef _roomDirectory;
         private Dictionary<string, IRoom> _roomTable;
         private int _roomActorCount;
         private bool _isStopped;
 
-        public RoomDirectoryWorkerActor(ClusterNodeContext context)
+        public RoomDirectoryWorkerActor(ClusterNodeContext clusterContext)
         {
-            _context = context;
+            _clusterContext = clusterContext;
 
-            _context.ClusterNodeActor.Tell(
-                new ActorDiscoveryMessage.ActorUp { Actor = Self, Type = typeof(IRoomDirectoryWorker) },
-                Self);
-            _context.ClusterNodeActor.Tell(
-                new ActorDiscoveryMessage.WatchActor { Type = typeof(IRoomDirectory) },
+            _clusterContext.ClusterActorDiscovery.Tell(
+                new ClusterActorDiscoveryMessages.RegisterActor(Self, nameof(IRoomDirectoryWorker)),
                 Self);
 
             _roomTable = new Dictionary<string, IRoom>();
         }
 
-        protected override void OnReceiveUnhandled(object message)
-        {
-            var actorUp = message as ActorDiscoveryMessage.ActorUp;
-            if (actorUp != null)
-            {
-                _roomDirectory = new RoomDirectoryRef(actorUp.Actor, this, null);
-                Console.WriteLine("<><> RoomDirectoryWorkerActor GOT RoomDirectory {0} <><>", actorUp.Actor.Path);
-                return;
-            }
-
-            var actorDown = message as ActorDiscoveryMessage.ActorDown;
-            if (actorDown != null)
-            {
-                if (_roomDirectory != null && _roomDirectory.Actor == actorDown.Actor)
-                {
-                    _roomDirectory = null;
-                    Console.WriteLine("<><> RoomDirectoryWorkerActor LOST RoomDirectory {0} <><>", actorDown.Actor.Path);
-                }
-                return;
-            }
-
-            var shutdownMessage = message as ShutdownMessage;
-            if (shutdownMessage != null)
-            {
-                Handle(shutdownMessage);
-                return;
-            }
-
-            var terminated = message as Terminated;
-            if (terminated != null)
-            {
-                Handle(terminated);
-                return;
-            }
-
-            base.OnReceiveUnhandled(message);
-        }
-
-        private void Handle(ShutdownMessage m)
+        [MessageHandler]
+        private void OnMessage(ShutdownMessage message)
         {
             if (_isStopped)
                 return;
@@ -89,7 +50,8 @@ namespace UniversalChat.Program.Server
             }
         }
 
-        private void Handle(Terminated m)
+        [MessageHandler]
+        private void OnMessage(Terminated message)
         {
             _roomActorCount -= 1;
             if (_isStopped && _roomActorCount == 0)
@@ -103,7 +65,7 @@ namespace UniversalChat.Program.Server
             IActorRef roomActor = null;
             try
             {
-                roomActor = Context.ActorOf(Props.Create<RoomActor>(_context, name));
+                roomActor = Context.ActorOf(Props.Create<RoomActor>(_clusterContext, name));
                 Context.Watch(roomActor);
                 _roomActorCount += 1;
             }

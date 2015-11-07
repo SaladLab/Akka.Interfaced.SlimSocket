@@ -132,6 +132,7 @@
     <Compile Include="ChatBotCommanderActor.cs" />
     <Compile Include="ChatBotPattern.cs" />
     <Compile Include="ClusterNodeContext.cs" />
+    <Compile Include="ClusterNodeContextUpdater.cs" />
     <Compile Include="LogFilter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

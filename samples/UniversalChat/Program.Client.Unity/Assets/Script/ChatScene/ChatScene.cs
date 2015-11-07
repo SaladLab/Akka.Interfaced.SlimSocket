@@ -60,7 +60,9 @@ public class ChatScene : MonoBehaviour, IUserEventObserver
             {
                 var result = (Tuple<string, int>)loginDialog.ReturnValue;
                 ControlPanel.SetUserName(result.Item1);
-                G.Comm.AddObserver(result.Item2, this);
+
+                var observer = new ObserverEventDispatcher(this);
+                G.Comm.AddObserver(result.Item2, observer);
                 yield return StartCoroutine(ProcessEnterRoom(G.User, "#general"));
             }
         }
@@ -163,7 +165,8 @@ public class ChatScene : MonoBehaviour, IUserEventObserver
         };
         _roomItemMap.Add(roomName, item);
         ControlPanel.AddRoomItem(roomName);
-        G.Comm.AddObserver(observerId, chatPanel);
+        var observer = new ObserverEventDispatcher(chatPanel);
+        G.Comm.AddObserver(observerId, observer);
 
         // Select
 

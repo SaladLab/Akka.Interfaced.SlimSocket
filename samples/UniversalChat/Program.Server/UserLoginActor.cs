@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Interfaced;
 using UniversalChat.Interface;
 using Common.Logging;
 using System.Net;
+using Akka.Interfaced.SlimSocket.Server;
 
 namespace UniversalChat.Program.Server
 {
@@ -28,16 +23,10 @@ namespace UniversalChat.Program.Server
             _clientSession = clientSession;
         }
 
-        protected override void OnReceiveUnhandled(object message)
+        [MessageHandler]
+        private void OnMessage(ClientSessionMessage.BoundSessionTerminated message)
         {
-            if (message is ClientSession.BoundSessionTerminatedMessage)
-            {
-                Context.Stop(Self);
-            }
-            else
-            {
-                base.OnReceiveUnhandled(message);
-            }
+            Context.Stop(Self);
         }
 
         async Task<int> IUserLogin.Login(string id, string password, int observerId)
@@ -91,8 +80,8 @@ namespace UniversalChat.Program.Server
 
             // Bind user actor with client session, which makes client to communicate with this actor.
 
-            var reply = await _clientSession.Ask<ClientSession.BindActorResponseMessage>(
-                new ClientSession.BindActorRequestMessage { Actor = user, InterfaceType = typeof(IUser) });
+            var reply = await _clientSession.Ask<ClientSessionMessage.BindActorResponse>(
+                new ClientSessionMessage.BindActorRequest { Actor = user, InterfaceType = typeof(IUser) });
 
             return reply.ActorId;
         }

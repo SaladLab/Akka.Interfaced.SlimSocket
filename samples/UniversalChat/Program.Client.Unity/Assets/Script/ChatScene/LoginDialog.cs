@@ -7,6 +7,8 @@ using System.Net;
 using System.Globalization;
 using UniversalChat.Interface;
 using Akka.Interfaced.SlimSocket.Client;
+using Akka.Interfaced.SlimSocket.Base;
+using TypeAlias;
 
 public class LoginDialog : UiDialog
 {
@@ -15,10 +17,16 @@ public class LoginDialog : UiDialog
     public InputField PasswordInput;
     public Text MessageText;
 
+    private PacketSerializer _packetSerializer;
     private bool _isLoginBusy;
 
     public void Start()
     {
+        _packetSerializer = new PacketSerializer(
+            new PacketSerializerBase.Data(
+                new ProtoBufMessageSerializer(new InterfaceProtobufSerializer()),
+                new TypeAliasTable()));
+
         var loginServer = PlayerPrefs.GetString("LoginServer", "127.0.0.1:9001");
         var loginId = PlayerPrefs.GetString("LoginId", "test");
         var loginPassword = PlayerPrefs.GetString("LoginPassword", "1234");
@@ -60,13 +68,13 @@ public class LoginDialog : UiDialog
                 yield break;
             }
 
-            G.Comm = new Communicator(G.Logger, ApplicationComponent.Instance);
-            G.Comm.ServerEndPoint = serverEndPoint;
+            G.Comm = new Communicator(G.Logger, serverEndPoint,
+                _ => new TcpConnection(_packetSerializer, LogManager.GetLogger("Connection")));
             G.Comm.Start();
 
             // Try Login
 
-            var userLogin = new UserLoginRef(new SlimActorRef(1), new SlimRequestWaiter(G.Comm, this), null);
+            var userLogin = new UserLoginRef(new SlimActorRef(1), G.SlimRequestWaiter, null);
 
             var observerId = G.Comm.IssueObserverId();
             var t1 = userLogin.Login(id, password, observerId);
@@ -85,7 +93,7 @@ public class LoginDialog : UiDialog
                 yield break;
             }
 
-            G.User = new UserRef(new SlimActorRef(t1.Result), new SlimRequestWaiter(G.Comm, this), null);
+            G.User = new UserRef(new SlimActorRef(t1.Result), G.SlimRequestWaiter, null);
             G.UserId = id;
             Hide(Tuple.Create(id, observerId));
         }

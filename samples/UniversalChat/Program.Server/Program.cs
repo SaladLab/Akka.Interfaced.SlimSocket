@@ -6,6 +6,14 @@ using Akka.Configuration;
 using Akka.Interfaced;
 using UniversalChat.Interface;
 using System.Net;
+using Akka.Cluster.Utility;
+using Akka.Interfaced.SlimSocket.Server;
+using Akka.Cluster;
+using Common.Logging;
+using System.Net.Sockets;
+using Akka.Interfaced.SlimSocket.Base;
+using ProtoBuf.Meta;
+using TypeAlias;
 
 namespace UniversalChat.Program.Server
 {
@@ -114,11 +122,15 @@ namespace UniversalChat.Program.Server
 
         private static List<IActorRef> InitClusterNode(ActorSystem system, int clientPort, params string[] roles)
         {
-            var context = new ClusterNodeContext { System = system };
             DeadRequestProcessingActor.Install(system);
-            context.ClusterNodeActor = system.ActorOf(
-                Props.Create<ClusterNodeActor>(context),
-                "cluster");
+
+            var cluster = Cluster.Get(system);
+            var context = new ClusterNodeContext { System = system };
+
+            context.ClusterActorDiscovery =
+                system.ActorOf(Props.Create(() => new ClusterActorDiscovery(cluster)), "ClusterActorDiscovery");
+            context.ClusterNodeContextUpdater =
+                system.ActorOf(Props.Create(() => new ClusterNodeContextUpdater(context)), "ClusterNodeContextUpdater");
 
             var rootActors = new List<IActorRef>();
             foreach (var role in roles)
@@ -127,24 +139,24 @@ namespace UniversalChat.Program.Server
                 switch (role)
                 {
                     case "room-directory":
-                        rootActor = system.ActorOf(Props.Create<RoomDirectoryActor>(context), "room_directory");
+                        rootActor = system.ActorOf(Props.Create(() => new RoomDirectoryActor(context)), "room_directory");
                         break;
 
                     case "user-directory":
-                        rootActor = system.ActorOf(Props.Create<UserDirectoryActor>(context), "user_directory");
+                        rootActor = system.ActorOf(Props.Create(() => new UserDirectoryActor(context)), "user_directory");
                         break;
 
                     case "room":
-                        rootActor = system.ActorOf(Props.Create<RoomDirectoryWorkerActor>(context), "room_directory_worker");
+                        rootActor = system.ActorOf(Props.Create(() => new RoomDirectoryWorkerActor(context)), "room_directory_worker");
                         break;
 
                     case "user":
-                        rootActor = system.ActorOf(Props.Create<ClientGateway>(context), "client_gateway");
-                        rootActor.Tell(new ClientGatewayMessage.Start { ServiceEndPoint = new IPEndPoint(0, clientPort) });
+                        var userSystem = new UserClusterSystem(context);
+                        rootActor = userSystem.Start(clientPort);
                         break;
 
                     case "bot":
-                        rootActor = system.ActorOf(Props.Create<ChatBotCommanderActor>(context), "chatbot_commander");
+                        rootActor = system.ActorOf(Props.Create(() => new ChatBotCommanderActor(context)), "chatbot_commander");
                         rootActor.Tell(new ChatBotCommanderMessage.Start());
                         break;
 
@@ -155,5 +167,49 @@ namespace UniversalChat.Program.Server
             }
             return rootActors;
         }
+
+        private class UserClusterSystem
+        {
+            private ClusterNodeContext _clusterContext;
+            private TcpConnectionSettings _tcpConnectionSettings;
+
+            public UserClusterSystem(ClusterNodeContext clusterContext)
+            {
+                _clusterContext = clusterContext;
+            }
+
+            public IActorRef Start(int port)
+            {
+                var logger = LogManager.GetLogger("ClientGateway");
+
+                _tcpConnectionSettings = new TcpConnectionSettings
+                {
+                    PacketSerializer = new PacketSerializer(
+                        new PacketSerializerBase.Data(
+                            new ProtoBufMessageSerializer(TypeModel.Create()),
+                            new TypeAliasTable()))
+                };
+
+                var clientGateway = _clusterContext.System.ActorOf(Props.Create(() => new ClientGateway(logger, CreateSession)));
+                clientGateway.Tell(new ClientGatewayMessage.Start(new IPEndPoint(IPAddress.Any, port)));
+                return clientGateway;
+            }
+
+            private IActorRef CreateSession(IActorContext context, Socket socket)
+            {
+                var logger = LogManager.GetLogger($"Client({socket.RemoteEndPoint.ToString()})");
+                return context.ActorOf(Props.Create(() => new ClientSession(
+                    logger, socket, _tcpConnectionSettings, CreateInitialActor)));
+            }
+
+            private Tuple<IActorRef, Type>[] CreateInitialActor(IActorContext context, Socket socket)
+            {
+                return new[]
+                {
+                    Tuple.Create(context.ActorOf(Props.Create(() => new UserLoginActor(_clusterContext, context.Self, socket.RemoteEndPoint))),
+                                 typeof(IUserLogin))
+                };
+            }
+        };
     }
 }

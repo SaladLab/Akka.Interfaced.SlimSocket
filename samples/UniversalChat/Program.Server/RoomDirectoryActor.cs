@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Interfaced;
 using UniversalChat.Interface;
+using Akka.Cluster.Utility;
+using Common.Logging;
 
 namespace UniversalChat.Program.Server
 {
     public class RoomDirectoryActor : InterfacedActor<RoomDirectoryActor>, IRoomDirectory
     {
+        private ILog _logger = LogManager.GetLogger("RoomDirectory");
         private ClusterNodeContext _clusterContext;
         private List<RoomDirectoryWorkerRef> _workers;
         private int _lastWorkIndex = -1;
@@ -21,43 +24,35 @@ namespace UniversalChat.Program.Server
         {
             _clusterContext = clusterContext;
 
-            _clusterContext.ClusterNodeActor.Tell(
-                new ActorDiscoveryMessage.ActorUp { Actor = Self, Type = typeof(IRoomDirectory) },
+            _clusterContext.ClusterActorDiscovery.Tell(
+                new ClusterActorDiscoveryMessages.RegisterActor(Self, nameof(IRoomDirectory)),
                 Self);
-            _clusterContext.ClusterNodeActor.Tell(
-                new ActorDiscoveryMessage.WatchActor { Type = typeof(IRoomDirectoryWorker) },
+            _clusterContext.ClusterActorDiscovery.Tell(
+                new ClusterActorDiscoveryMessages.MonitorActor(nameof(IRoomDirectoryWorker)),
                 Self);
 
             _workers = new List<RoomDirectoryWorkerRef>();
             _roomTable = new Dictionary<string, Tuple<RoomDirectoryWorkerRef, IRoom>>();
         }
 
-        protected override void OnReceiveUnhandled(object message)
+        [MessageHandler]
+        private void OnMessage(ClusterActorDiscoveryMessages.ActorUp message)
         {
-            var actorUp = message as ActorDiscoveryMessage.ActorUp;
-            if (actorUp != null)
-            {
-                _workers.Add(new RoomDirectoryWorkerRef(actorUp.Actor, this, null));
-                Console.WriteLine("<><> RoomDirectoryActor GOT Worker {0} <><>", actorUp.Actor.Path);
-                return;
-            }
+            _workers.Add(new RoomDirectoryWorkerRef(message.Actor, this, null));
+            _logger.InfoFormat("Registered Actor({0})", message.Actor.Path);
+        }
 
-            var actorDown = message as ActorDiscoveryMessage.ActorDown;
-            if (actorDown != null)
-            {
-                _workers.RemoveAll(w => w.Actor == actorDown.Actor);
-                Console.WriteLine("<><> RoomDirectoryWorkerActor LOST RoomDirectory {0} <><>", actorDown.Actor.Path);
-                return;
-            }
+        [MessageHandler]
+        private void OnMessage(ClusterActorDiscoveryMessages.ActorDown message)
+        {
+            _workers.RemoveAll(w => w.Actor.Equals(message.Actor));
+            _logger.InfoFormat("Unregistered Actor({0})", message.Actor.Path);
+        }
 
-            var shutdownMessage = message as ShutdownMessage;
-            if (shutdownMessage != null)
-            {
-                Context.Stop(Self);
-                return;
-            }
-
-            base.OnReceiveUnhandled(message);
+        [MessageHandler]
+        private void OnMessage(ShutdownMessage message)
+        {
+            Context.Stop(Self);
         }
 
         async Task<IRoom> IRoomDirectory.GetOrCreateRoom(string name)

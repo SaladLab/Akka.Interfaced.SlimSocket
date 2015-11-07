@@ -5,6 +5,7 @@ using Akka.Actor;
 using Akka.Interfaced;
 using UniversalChat.Interface;
 using Common.Logging;
+using Akka.Interfaced.SlimSocket.Server;
 
 namespace UniversalChat.Program.Server
 {
@@ -28,17 +29,11 @@ namespace UniversalChat.Program.Server
             _enteredRoomMap = new Dictionary<string, RoomRef>();
         }
 
-        protected override void OnReceiveUnhandled(object message)
+        [MessageHandler]
+        private void OnMessage(ClientSessionMessage.BoundSessionTerminated message)
         {
-            if (message is ClientSession.BoundSessionTerminatedMessage)
-            {
-                UnlinkAll();
-                Context.Stop(Self);
-            }
-            else
-            {
-                base.OnReceiveUnhandled(message);
-            }
+            UnlinkAll();
+            Context.Stop(Self);
         }
 
         private void UnlinkAll()
@@ -81,8 +76,8 @@ namespace UniversalChat.Program.Server
 
             // Bind an occupant actor with client session
 
-            var reply = await _clientSession.Ask<ClientSession.BindActorResponseMessage>(
-                new ClientSession.BindActorRequestMessage
+            var reply = await _clientSession.Ask<ClientSessionMessage.BindActorResponse>(
+                new ClientSessionMessage.BindActorRequest
                 {
                     Actor = room.Actor,
                     InterfaceType = typeof(IOccupant),
@@ -106,7 +101,7 @@ namespace UniversalChat.Program.Server
             // Unbind an occupant actor with client session
 
             _clientSession.Tell(
-                new ClientSession.UnbindActorRequestMessage { Actor = room.Actor });
+                new ClientSessionMessage.UnbindActorRequest { Actor = room.Actor });
 
             _enteredRoomMap.Remove(name);
         }

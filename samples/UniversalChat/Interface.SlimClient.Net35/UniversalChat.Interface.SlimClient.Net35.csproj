@@ -12,6 +12,7 @@
     <AssemblyName>UniversalChat.Interface.SlimClient.Net35</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AkkaInterfacedProtobuf>1</AkkaInterfacedProtobuf>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>

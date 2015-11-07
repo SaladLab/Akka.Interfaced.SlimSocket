@@ -46,9 +46,9 @@ namespace UniversalChat.Program.Server
             {
                 RunTask(() => Handle((ChatBotMessage.Start)message), true);
             }
-            else if (message is ClientSession.BindActorRequestMessage)
+            else if (message is ClientSessionMessage.BindActorRequest)
             {
-                Handle((ClientSession.BindActorRequestMessage)message);
+                Handle((ClientSessionMessage.BindActorRequest)message);
             }
             else
             {
@@ -84,19 +84,19 @@ namespace UniversalChat.Program.Server
             }
         }
 
-        private void Handle(ClientSession.BindActorRequestMessage m)
+        private void Handle(ClientSessionMessage.BindActorRequest m)
         {
             if (m.InterfaceType == typeof(IUser))
             {
                 _user = new UserRef(m.Actor);
-                Sender.Tell(new ClientSession.BindActorResponseMessage());
+                Sender.Tell(new ClientSessionMessage.BindActorResponse());
                 return;
             }
 
             if (m.InterfaceType == typeof(IOccupant))
             {
                 _occupant = new OccupantRef(m.Actor);
-                Sender.Tell(new ClientSession.BindActorResponseMessage());
+                Sender.Tell(new ClientSessionMessage.BindActorResponse());
                 return;
             }
 

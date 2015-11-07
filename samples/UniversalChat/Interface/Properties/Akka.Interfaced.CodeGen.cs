@@ -11,6 +11,9 @@ using System;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Interfaced;
+using ProtoBuf;
+using TypeAlias;
+using System.ComponentModel;
 
 #region UniversalChat.Interface.IOccupant
 
@@ -29,6 +32,7 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class GetHistory_Invoke : IInterfacedPayload, ITagOverridable, IAsyncInvokable
         {
             public Type GetInterfaceType() { return typeof(IOccupant); }
@@ -42,19 +46,21 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetHistory_Return : IInterfacedPayload, IValueGetable
         {
-            public System.Collections.Generic.List<UniversalChat.Interface.ChatItem> v;
+            [ProtoMember(1)] public System.Collections.Generic.List<UniversalChat.Interface.ChatItem> v;
 
             public Type GetInterfaceType() { return typeof(IOccupant); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class Invite_Invoke : IInterfacedPayload, ITagOverridable, IAsyncInvokable
         {
-            public System.String targetUserId;
-            public System.String senderUserId;
+            [ProtoMember(1)] public System.String targetUserId;
+            [ProtoMember(2)] public System.String senderUserId;
 
             public Type GetInterfaceType() { return typeof(IOccupant); }
 
@@ -67,10 +73,11 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class Say_Invoke : IInterfacedPayload, ITagOverridable, IAsyncInvokable
         {
-            public System.String msg;
-            public System.String senderUserId;
+            [ProtoMember(1)] public System.String msg;
+            [ProtoMember(2)] public System.String senderUserId;
 
             public Type GetInterfaceType() { return typeof(IOccupant); }
 
@@ -91,8 +98,20 @@ namespace UniversalChat.Interface
         void Say(System.String msg, System.String senderUserId = null);
     }
 
+    [ProtoContract, TypeAlias]
     public class OccupantRef : InterfacedActorRef, IOccupant, IOccupant_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private OccupantRef()
+            : base(null)
+        {
+        }
+
         public OccupantRef(IActorRef actor)
             : base(actor)
         {
@@ -192,10 +211,11 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class Enter_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String userId;
-            public UniversalChat.Interface.RoomObserver observer;
+            [ProtoMember(1)] public System.String userId;
+            [ProtoMember(2)] public UniversalChat.Interface.RoomObserver observer;
 
             public Type GetInterfaceType() { return typeof(IRoom); }
 
@@ -206,18 +226,20 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class Enter_Return : IInterfacedPayload, IValueGetable
         {
-            public UniversalChat.Interface.RoomInfo v;
+            [ProtoMember(1)] public UniversalChat.Interface.RoomInfo v;
 
             public Type GetInterfaceType() { return typeof(IRoom); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class Exit_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String userId;
+            [ProtoMember(1)] public System.String userId;
 
             public Type GetInterfaceType() { return typeof(IRoom); }
 
@@ -235,8 +257,20 @@ namespace UniversalChat.Interface
         void Exit(System.String userId);
     }
 
+    [ProtoContract, TypeAlias]
     public class RoomRef : InterfacedActorRef, IRoom, IRoom_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private RoomRef()
+            : base(null)
+        {
+        }
+
         public RoomRef(IActorRef actor)
             : base(actor)
         {
@@ -319,9 +353,10 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class GetOrCreateRoom_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String name;
+            [ProtoMember(1)] public System.String name;
 
             public Type GetInterfaceType() { return typeof(IRoomDirectory); }
 
@@ -332,15 +367,17 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetOrCreateRoom_Return : IInterfacedPayload, IValueGetable
         {
-            public UniversalChat.Interface.RoomRef v;
+            [ProtoMember(1)] public UniversalChat.Interface.RoomRef v;
 
             public Type GetInterfaceType() { return typeof(IRoomDirectory); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetRoomList_Invoke : IInterfacedPayload, IAsyncInvokable
         {
             public Type GetInterfaceType() { return typeof(IRoomDirectory); }
@@ -352,18 +389,20 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetRoomList_Return : IInterfacedPayload, IValueGetable
         {
-            public System.Collections.Generic.List<System.String> v;
+            [ProtoMember(1)] public System.Collections.Generic.List<System.String> v;
 
             public Type GetInterfaceType() { return typeof(IRoomDirectory); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class RemoveRoom_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String name;
+            [ProtoMember(1)] public System.String name;
 
             public Type GetInterfaceType() { return typeof(IRoomDirectory); }
 
@@ -382,8 +421,20 @@ namespace UniversalChat.Interface
         void RemoveRoom(System.String name);
     }
 
+    [ProtoContract, TypeAlias]
     public class RoomDirectoryRef : InterfacedActorRef, IRoomDirectory, IRoomDirectory_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private RoomDirectoryRef()
+            : base(null)
+        {
+        }
+
         public RoomDirectoryRef(IActorRef actor)
             : base(actor)
         {
@@ -483,9 +534,10 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class CreateRoom_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String name;
+            [ProtoMember(1)] public System.String name;
 
             public Type GetInterfaceType() { return typeof(IRoomDirectoryWorker); }
 
@@ -496,18 +548,20 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class CreateRoom_Return : IInterfacedPayload, IValueGetable
         {
-            public UniversalChat.Interface.RoomRef v;
+            [ProtoMember(1)] public UniversalChat.Interface.RoomRef v;
 
             public Type GetInterfaceType() { return typeof(IRoomDirectoryWorker); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class RemoveRoom_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String name;
+            [ProtoMember(1)] public System.String name;
 
             public Type GetInterfaceType() { return typeof(IRoomDirectoryWorker); }
 
@@ -525,8 +579,20 @@ namespace UniversalChat.Interface
         void RemoveRoom(System.String name);
     }
 
+    [ProtoContract, TypeAlias]
     public class RoomDirectoryWorkerRef : InterfacedActorRef, IRoomDirectoryWorker, IRoomDirectoryWorker_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private RoomDirectoryWorkerRef()
+            : base(null)
+        {
+        }
+
         public RoomDirectoryWorkerRef(IActorRef actor)
             : base(actor)
         {
@@ -611,10 +677,11 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class EnterRoom_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String name;
-            public System.Int32 observerId;
+            [ProtoMember(1)] public System.String name;
+            [ProtoMember(2)] public System.Int32 observerId;
 
             public Type GetInterfaceType() { return typeof(IUser); }
 
@@ -625,18 +692,20 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class EnterRoom_Return : IInterfacedPayload, IValueGetable
         {
-            public System.Tuple<System.Int32, UniversalChat.Interface.RoomInfo> v;
+            [ProtoMember(1)] public System.Tuple<System.Int32, UniversalChat.Interface.RoomInfo> v;
 
             public Type GetInterfaceType() { return typeof(IUser); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class ExitFromRoom_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String name;
+            [ProtoMember(1)] public System.String name;
 
             public Type GetInterfaceType() { return typeof(IUser); }
 
@@ -647,6 +716,7 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetId_Invoke : IInterfacedPayload, IAsyncInvokable
         {
             public Type GetInterfaceType() { return typeof(IUser); }
@@ -658,15 +728,17 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetId_Return : IInterfacedPayload, IValueGetable
         {
-            public System.String v;
+            [ProtoMember(1)] public System.String v;
 
             public Type GetInterfaceType() { return typeof(IUser); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetRoomList_Invoke : IInterfacedPayload, IAsyncInvokable
         {
             public Type GetInterfaceType() { return typeof(IUser); }
@@ -678,19 +750,21 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetRoomList_Return : IInterfacedPayload, IValueGetable
         {
-            public System.Collections.Generic.List<System.String> v;
+            [ProtoMember(1)] public System.Collections.Generic.List<System.String> v;
 
             public Type GetInterfaceType() { return typeof(IUser); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class Whisper_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String targetUserId;
-            public System.String message;
+            [ProtoMember(1)] public System.String targetUserId;
+            [ProtoMember(2)] public System.String message;
 
             public Type GetInterfaceType() { return typeof(IUser); }
 
@@ -711,8 +785,20 @@ namespace UniversalChat.Interface
         void Whisper(System.String targetUserId, System.String message);
     }
 
+    [ProtoContract, TypeAlias]
     public class UserRef : InterfacedActorRef, IUser, IUser_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private UserRef()
+            : base(null)
+        {
+        }
+
         public UserRef(IActorRef actor)
             : base(actor)
         {
@@ -849,9 +935,10 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class GetUser_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String userId;
+            [ProtoMember(1)] public System.String userId;
 
             public Type GetInterfaceType() { return typeof(IUserDirectory); }
 
@@ -862,19 +949,21 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class GetUser_Return : IInterfacedPayload, IValueGetable
         {
-            public UniversalChat.Interface.UserRef v;
+            [ProtoMember(1)] public UniversalChat.Interface.UserRef v;
 
             public Type GetInterfaceType() { return typeof(IUserDirectory); }
 
             public object Value { get { return v; } }
         }
 
+        [ProtoContract, TypeAlias]
         public class RegisterUser_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String userId;
-            public UniversalChat.Interface.UserRef user;
+            [ProtoMember(1)] public System.String userId;
+            [ProtoMember(2)] public UniversalChat.Interface.UserRef user;
 
             public Type GetInterfaceType() { return typeof(IUserDirectory); }
 
@@ -885,9 +974,10 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class UnregisterUser_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String userId;
+            [ProtoMember(1)] public System.String userId;
 
             public Type GetInterfaceType() { return typeof(IUserDirectory); }
 
@@ -906,8 +996,20 @@ namespace UniversalChat.Interface
         void UnregisterUser(System.String userId);
     }
 
+    [ProtoContract, TypeAlias]
     public class UserDirectoryRef : InterfacedActorRef, IUserDirectory, IUserDirectory_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private UserDirectoryRef()
+            : base(null)
+        {
+        }
+
         public UserDirectoryRef(IActorRef actor)
             : base(actor)
         {
@@ -1006,11 +1108,12 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class Login_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String id;
-            public System.String password;
-            public System.Int32 observerId;
+            [ProtoMember(1)] public System.String id;
+            [ProtoMember(2)] public System.String password;
+            [ProtoMember(3)] public System.Int32 observerId;
 
             public Type GetInterfaceType() { return typeof(IUserLogin); }
 
@@ -1021,9 +1124,10 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class Login_Return : IInterfacedPayload, IValueGetable
         {
-            public System.Int32 v;
+            [ProtoMember(1)] public System.Int32 v;
 
             public Type GetInterfaceType() { return typeof(IUserLogin); }
 
@@ -1036,8 +1140,20 @@ namespace UniversalChat.Interface
         void Login(System.String id, System.String password, System.Int32 observerId);
     }
 
+    [ProtoContract, TypeAlias]
     public class UserLoginRef : InterfacedActorRef, IUserLogin, IUserLogin_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private UserLoginRef()
+            : base(null)
+        {
+        }
+
         public UserLoginRef(IActorRef actor)
             : base(actor)
         {
@@ -1101,10 +1217,11 @@ namespace UniversalChat.Interface
             };
         }
 
+        [ProtoContract, TypeAlias]
         public class Invite_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public System.String invitorUserId;
-            public System.String roomName;
+            [ProtoMember(1)] public System.String invitorUserId;
+            [ProtoMember(2)] public System.String roomName;
 
             public Type GetInterfaceType() { return typeof(IUserMessasing); }
 
@@ -1115,9 +1232,10 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class Whisper_Invoke : IInterfacedPayload, IAsyncInvokable
         {
-            public UniversalChat.Interface.ChatItem chatItem;
+            [ProtoMember(1)] public UniversalChat.Interface.ChatItem chatItem;
 
             public Type GetInterfaceType() { return typeof(IUserMessasing); }
 
@@ -1135,8 +1253,20 @@ namespace UniversalChat.Interface
         void Whisper(UniversalChat.Interface.ChatItem chatItem);
     }
 
+    [ProtoContract, TypeAlias]
     public class UserMessasingRef : InterfacedActorRef, IUserMessasing, IUserMessasing_NoReply
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return (ActorRefBase)Actor; }
+            set { Actor = value; }
+        }
+
+        private UserMessasingRef()
+            : base(null)
+        {
+        }
+
         public UserMessasingRef(IActorRef actor)
             : base(actor)
         {
@@ -1208,9 +1338,10 @@ namespace UniversalChat.Interface
 {
     public static class IRoomObserver_PayloadTable
     {
+        [ProtoContract, TypeAlias]
         public class Enter_Invoke : IInvokable
         {
-            public System.String userId;
+            [ProtoMember(1)] public System.String userId;
 
             public void Invoke(object target)
             {
@@ -1218,9 +1349,10 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class Exit_Invoke : IInvokable
         {
-            public System.String userId;
+            [ProtoMember(1)] public System.String userId;
 
             public void Invoke(object target)
             {
@@ -1228,9 +1360,10 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class Say_Invoke : IInvokable
         {
-            public UniversalChat.Interface.ChatItem chatItem;
+            [ProtoMember(1)] public UniversalChat.Interface.ChatItem chatItem;
 
             public void Invoke(object target)
             {
@@ -1239,8 +1372,26 @@ namespace UniversalChat.Interface
         }
     }
 
+    [ProtoContract, TypeAlias]
     public class RoomObserver : InterfacedObserver, IRoomObserver
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return Channel != null ? (ActorRefBase)(((ActorNotificationChannel)Channel).Actor) : null; }
+            set { Channel = new ActorNotificationChannel(value); }
+        }
+
+        [ProtoMember(2)] private int _observerId
+        {
+            get { return ObserverId; }
+            set { ObserverId = value; }
+        }
+
+        private RoomObserver()
+            : base(null, 0)
+        {
+        }
+
         public RoomObserver(IActorRef target, int observerId)
             : base(new ActorNotificationChannel(target), observerId)
         {
@@ -1279,9 +1430,10 @@ namespace UniversalChat.Interface
 {
     public static class IUserEventObserver_PayloadTable
     {
+        [ProtoContract, TypeAlias]
         public class Whisper_Invoke : IInvokable
         {
-            public UniversalChat.Interface.ChatItem chatItem;
+            [ProtoMember(1)] public UniversalChat.Interface.ChatItem chatItem;
 
             public void Invoke(object target)
             {
@@ -1289,10 +1441,11 @@ namespace UniversalChat.Interface
             }
         }
 
+        [ProtoContract, TypeAlias]
         public class Invite_Invoke : IInvokable
         {
-            public System.String invitorUserId;
-            public System.String roomName;
+            [ProtoMember(1)] public System.String invitorUserId;
+            [ProtoMember(2)] public System.String roomName;
 
             public void Invoke(object target)
             {
@@ -1301,8 +1454,26 @@ namespace UniversalChat.Interface
         }
     }
 
+    [ProtoContract, TypeAlias]
     public class UserEventObserver : InterfacedObserver, IUserEventObserver
     {
+        [ProtoMember(1)] private ActorRefBase _actor
+        {
+            get { return Channel != null ? (ActorRefBase)(((ActorNotificationChannel)Channel).Actor) : null; }
+            set { Channel = new ActorNotificationChannel(value); }
+        }
+
+        [ProtoMember(2)] private int _observerId
+        {
+            get { return ObserverId; }
+            set { ObserverId = value; }
+        }
+
+        private UserEventObserver()
+            : base(null, 0)
+        {
+        }
+
         public UserEventObserver(IActorRef target, int observerId)
             : base(new ActorNotificationChannel(target), observerId)
         {
