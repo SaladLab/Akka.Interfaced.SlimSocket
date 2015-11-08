@@ -7,8 +7,8 @@
     <ProjectGuid>{A1A28538-15BF-4202-91A1-D56525B1E274}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Akka.Interfaced.SlimSocket.Base.Net35</RootNamespace>
-    <AssemblyName>Akka.Interfaced.SlimSocket.Base.Net35</AssemblyName>
+    <RootNamespace>Akka.Interfaced.SlimSocket.Base</RootNamespace>
+    <AssemblyName>Akka.Interfaced.SlimSocket.Base</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -69,6 +69,12 @@
     <Compile Include="..\Akka.Interfaced.SlimSocket.Base\PacketSerializerBase.cs">
       <Link>PacketSerializerBase.cs</Link>
     </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Base\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Base\Properties\AssemblyInfoGenerated.cs">
+      <Link>Properties\AssemblyInfoGenerated.cs</Link>
+    </Compile>
     <Compile Include="..\Akka.Interfaced.SlimSocket.Base\ProtoBufMessageSerializer.cs">
       <Link>ProtoBufMessageSerializer.cs</Link>
     </Compile>
@@ -78,11 +84,11 @@
     <Compile Include="..\Akka.Interfaced.SlimSocket.Base\StreamLengthMarker.cs">
       <Link>StreamLengthMarker.cs</Link>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

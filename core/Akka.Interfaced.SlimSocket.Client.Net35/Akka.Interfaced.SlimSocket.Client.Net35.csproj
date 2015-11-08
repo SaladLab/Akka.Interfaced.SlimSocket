@@ -7,8 +7,8 @@
     <ProjectGuid>{C4008395-CE4C-430B-8F78-623B6BE83989}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Akka.Interfaced.SlimSocket.Client.Net35</RootNamespace>
-    <AssemblyName>Akka.Interfaced.SlimSocket.Client.Net35</AssemblyName>
+    <RootNamespace>Akka.Interfaced.SlimSocket.Client</RootNamespace>
+    <AssemblyName>Akka.Interfaced.SlimSocket.Client</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -62,6 +62,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Properties\AssemblyInfoGenerated.cs">
+      <Link>Properties\AssemblyInfoGenerated.cs</Link>
+    </Compile>
     <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Session\Communicator.cs">
       <Link>Session\Communicator.cs</Link>
     </Compile>
@@ -80,7 +86,6 @@
     <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Transport\TcpConnection.cs">
       <Link>Transport\TcpConnection.cs</Link>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Akka.Interfaced.SlimSocket.Base.Net35\Akka.Interfaced.SlimSocket.Base.Net35.csproj">
@@ -91,6 +96,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
