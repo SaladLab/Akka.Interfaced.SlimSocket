@@ -45,7 +45,7 @@ let projects = ([
         Name="Akka.Interfaced.SlimSocket.Client";
         Folder="./core/Akka.Interfaced.SlimSocket.Client";
         Dependencies=[("Akka.Interfaced.SlimSocket.Base", "");
-                      ("Akka.Interfaced-SlimClient", "0.2.0-build0026");
+                      ("Akka.Interfaced-SlimClient", "0.2.0-build0029");
                       ("Common.Logging.Core", "3.3.0");
                       ("NetLegacySupport.Tuple", "1.0.2")];
     };
@@ -53,7 +53,7 @@ let projects = ([
         Name="Akka.Interfaced.SlimSocket.Server";
         Folder="./core/Akka.Interfaced.SlimSocket.Server";
         Dependencies=[("Akka.Interfaced.SlimSocket.Base", "");
-                      ("Akka.Interfaced", "0.2.0-build0026");
+                      ("Akka.Interfaced", "0.2.0-build0029");
                       ("Common.Logging.Core", "3.3.0")];
     }]
     |> List.map (fun p -> 
