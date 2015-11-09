@@ -35,12 +35,12 @@
       <HintPath>..\..\packages\Akka.1.0.4\lib\net45\Akka.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Akka.Interfaced, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Akka.Interfaced.0.1.0.0-dev20151103\lib\net45\Akka.Interfaced.dll</HintPath>
+    <Reference Include="Akka.Interfaced, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Interfaced.0.2.0-build0026\lib\net45\Akka.Interfaced.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Akka.Interfaced-Base, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Akka.Interfaced-Base.0.1.0.0-dev20151103\lib\net45\Akka.Interfaced-Base.dll</HintPath>
+    <Reference Include="Akka.Interfaced-Base, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Interfaced-Base.0.2.0-build0026\lib\net45\Akka.Interfaced-Base.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Common.Logging.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
