@@ -52,7 +52,7 @@ namespace UniversalChat.Program.Server
                   actor {
                     provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
                     serializers {
-                      proto = ""Akka.Interfaced.ProtobufSerializer.ProtobufSerializer, Akka.Interfaced-ProtobufSerializer""
+                      proto = ""Akka.Interfaced.ProtobufSerializer.ProtobufSerializer, Akka.Interfaced.ProtobufSerializer""
                     }
                     serialization-bindings {
                       ""Akka.Interfaced.NotificationMessage, Akka.Interfaced"" = proto
