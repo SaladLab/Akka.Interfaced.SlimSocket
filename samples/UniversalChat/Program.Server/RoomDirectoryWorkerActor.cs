@@ -6,14 +6,15 @@ using Akka.Actor;
 using System.Collections.Generic;
 using Common.Logging;
 using Akka.Cluster.Utility;
+using Akka.Interfaced.LogFilter;
 
 namespace UniversalChat.Program.Server
 {
+    [Log]
     public class RoomDirectoryWorkerActor : InterfacedActor<RoomDirectoryWorkerActor>, IRoomDirectoryWorker
     {
         private ILog _logger = LogManager.GetLogger("RoomDirectoryWorker");
         private readonly ClusterNodeContext _clusterContext;
-        private RoomDirectoryRef _roomDirectory;
         private Dictionary<string, IRoom> _roomTable;
         private int _roomActorCount;
         private bool _isStopped;

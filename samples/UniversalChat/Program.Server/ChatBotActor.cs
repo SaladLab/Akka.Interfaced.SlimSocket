@@ -29,7 +29,6 @@ namespace UniversalChat.Program.Server
 
     public class ChatBotActor : InterfacedActor<ChatBotActor>
     {
-        private ILog _logger;
         private ClusterNodeContext _clusterContext;
         private string _userId;
         private UserRef _user;

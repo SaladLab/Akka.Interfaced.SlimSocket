@@ -2,12 +2,16 @@
 using System.Threading.Tasks;
 using Akka.Cluster.Utility;
 using Akka.Interfaced;
+using Akka.Interfaced.LogFilter;
+using Common.Logging;
 using UniversalChat.Interface;
 
 namespace UniversalChat.Program.Server
 {
+    [Log]
     public class UserDirectoryActor : InterfacedActor<UserDirectoryActor>, IUserDirectory
     {
+        private ILog _logger = LogManager.GetLogger("UserDirectoryActor");
         private ClusterNodeContext _clusterContext;
         private Dictionary<string, IUser> _userTable;
 

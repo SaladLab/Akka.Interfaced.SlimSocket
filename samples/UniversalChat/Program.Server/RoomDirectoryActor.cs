@@ -8,10 +8,12 @@ using Akka.Actor;
 using Akka.Interfaced;
 using UniversalChat.Interface;
 using Akka.Cluster.Utility;
+using Akka.Interfaced.LogFilter;
 using Common.Logging;
 
 namespace UniversalChat.Program.Server
 {
+    [Log]
     public class RoomDirectoryActor : InterfacedActor<RoomDirectoryActor>, IRoomDirectory
     {
         private ILog _logger = LogManager.GetLogger("RoomDirectory");

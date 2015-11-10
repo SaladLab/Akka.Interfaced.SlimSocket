@@ -5,6 +5,7 @@ using Akka.Interfaced;
 using UniversalChat.Interface;
 using Common.Logging;
 using System.Net;
+using Akka.Interfaced.LogFilter;
 using Akka.Interfaced.SlimSocket.Server;
 
 namespace UniversalChat.Program.Server
