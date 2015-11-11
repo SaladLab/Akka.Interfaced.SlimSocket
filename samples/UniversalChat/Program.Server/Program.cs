@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Akka;
 using Akka.Actor;
 using Akka.Configuration;
@@ -74,12 +75,12 @@ namespace UniversalChat.Program.Server
             var standAlone = args.Length > 0 && args[0] == "standalone";
             if (standAlone)
             {
-                LaunchClusterNode(commonConfig, 3001, 9001, "room-directory", "user-directory", "room", "user", "bot");
+                LaunchClusterNode(commonConfig, 3001, 9001, "room-center", "user-center", "room", "user", "bot");
             }
             else
             {
-                LaunchClusterNode(commonConfig, 3001, 0, "room-directory");
-                LaunchClusterNode(commonConfig, 3002, 0, "user-directory");
+                LaunchClusterNode(commonConfig, 3001, 0, "room-center");
+                LaunchClusterNode(commonConfig, 3002, 0, "user-center");
                 LaunchClusterNode(commonConfig, 3011, 0, "room");
                 LaunchClusterNode(commonConfig, 3012, 0, "room");
                 LaunchClusterNode(commonConfig, 3021, 9001, "user");
@@ -135,35 +136,48 @@ namespace UniversalChat.Program.Server
             var rootActors = new List<IActorRef>();
             foreach (var role in roles)
             {
-                IActorRef rootActor = null;
                 switch (role)
                 {
-                    case "room-directory":
-                        rootActor = system.ActorOf(Props.Create(() => new RoomDirectoryActor(context)), "room_directory");
-                        break;
-
-                    case "user-directory":
-                        rootActor = system.ActorOf(Props.Create(() => new UserDirectoryActor(context)), "user_directory");
-                        break;
-
-                    case "room":
-                        rootActor = system.ActorOf(Props.Create(() => new RoomDirectoryWorkerActor(context)), "room_directory_worker");
+                    case "user-center":
+                        rootActors.Add(system.ActorOf(
+                            Props.Create(() => new DistributedActorDictionaryCenter(
+                                                   "User", context.ClusterActorDiscovery, null, null)),
+                            "UserCenter"));
                         break;
 
                     case "user":
+                        rootActors.Add(system.ActorOf(
+                            Props.Create(() => new DistributedActorDictionary(
+                                                   "User", context.ClusterActorDiscovery, null, null)),
+                            "User"));
                         var userSystem = new UserClusterSystem(context);
-                        rootActor = userSystem.Start(clientPort);
+                        rootActors.Add(userSystem.Start(clientPort));
+                        break;
+
+                    case "room-center":
+                        rootActors.Add(system.ActorOf(
+                            Props.Create(() => new DistributedActorDictionaryCenter(
+                                                   "Room", context.ClusterActorDiscovery, null, null)),
+                            "RoomCenter"));
+                        break;
+
+                    case "room":
+                        rootActors.Add(system.ActorOf(
+                            Props.Create(() => new DistributedActorDictionary(
+                                                   "Room", context.ClusterActorDiscovery,
+                                                   typeof(RoomActorFactory), new object[] { context })),
+                            "Room"));
                         break;
 
                     case "bot":
-                        rootActor = system.ActorOf(Props.Create(() => new ChatBotCommanderActor(context)), "chatbot_commander");
-                        rootActor.Tell(new ChatBotCommanderMessage.Start());
+                        rootActors.Add(system.ActorOf(
+                            Props.Create(() => new ChatBotCommanderActor(context)), "chatbot_commander"));
+                        rootActors.Last().Tell(new ChatBotCommanderMessage.Start());
                         break;
 
                     default:
                         throw new InvalidOperationException("Invalid role: " + role);
                 }
-                rootActors.Add(rootActor);
             }
             return rootActors;
         }
@@ -206,10 +220,27 @@ namespace UniversalChat.Program.Server
             {
                 return new[]
                 {
-                    Tuple.Create(context.ActorOf(Props.Create(() => new UserLoginActor(_clusterContext, context.Self, socket.RemoteEndPoint))),
-                                 typeof(IUserLogin))
+                    Tuple.Create(
+                        context.ActorOf(Props.Create(
+                            () => new UserLoginActor(_clusterContext, context.Self, socket.RemoteEndPoint))),
+                        typeof(IUserLogin))
                 };
             }
         };
+
+        private class RoomActorFactory : IActorFactory
+        {
+            private ClusterNodeContext _clusterContext;
+
+            public void Initialize(object[] args)
+            {
+                _clusterContext = (ClusterNodeContext)args[0];
+            }
+
+            public IActorRef CreateActor(IActorRefFactory actorRefFactory, object id, object[] args)
+            {
+                return actorRefFactory.ActorOf(Props.Create(() => new RoomActor(_clusterContext, (string)id)));
+            }
+        }
     }
 }

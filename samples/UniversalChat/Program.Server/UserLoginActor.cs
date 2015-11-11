@@ -5,6 +5,7 @@ using Akka.Interfaced;
 using UniversalChat.Interface;
 using Common.Logging;
 using System.Net;
+using Akka.Cluster.Utility;
 using Akka.Interfaced.LogFilter;
 using Akka.Interfaced.SlimSocket.Server;
 
@@ -42,7 +43,7 @@ namespace UniversalChat.Program.Server
 
             // Make UserActor
 
-            IActorRef user = null;
+            IActorRef user;
             try
             {
                 user = Context.System.ActorOf(
@@ -60,17 +61,13 @@ namespace UniversalChat.Program.Server
             var registered = false;
             for (int i=0; i<10; i++)
             {
-                try
+                var reply = await _clusterContext.UserDirectory.Ask<DistributedActorDictionaryMessage.AddReply>(
+                    new DistributedActorDictionaryMessage.Add(id, user));
+                if (reply.Added)
                 {
-                    await _clusterContext.UserDirectory.RegisterUser(id, (IUser)userRef);
                     registered = true;
                     break;
                 }
-                catch (Exception)
-                {
-                    // TODO: Send Disconnect Message To Already Registered User.
-                }
-
                 await Task.Delay(200);
             }
             if (registered == false)
@@ -81,10 +78,10 @@ namespace UniversalChat.Program.Server
 
             // Bind user actor with client session, which makes client to communicate with this actor.
 
-            var reply = await _clientSession.Ask<ClientSessionMessage.BindActorResponse>(
+            var reply2 = await _clientSession.Ask<ClientSessionMessage.BindActorResponse>(
                 new ClientSessionMessage.BindActorRequest { Actor = user, InterfaceType = typeof(IUser) });
 
-            return reply.ActorId;
+            return reply2.ActorId;
         }
     }
 }

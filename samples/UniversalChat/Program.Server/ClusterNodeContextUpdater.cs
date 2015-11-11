@@ -16,10 +16,10 @@ namespace UniversalChat.Program.Server
         protected override void PreStart()
         {
             _clusterContext.ClusterActorDiscovery.Tell(
-                new ClusterActorDiscoveryMessage.MonitorActor(nameof(IUserDirectory)), Self);
+                new ClusterActorDiscoveryMessage.MonitorActor("User"), Self);
 
             _clusterContext.ClusterActorDiscovery.Tell(
-                new ClusterActorDiscoveryMessage.MonitorActor(nameof(IRoomDirectory)), Self);
+                new ClusterActorDiscoveryMessage.MonitorActor("User"), Self);
         }
 
         [MessageHandler]
@@ -27,12 +27,12 @@ namespace UniversalChat.Program.Server
         {
             switch (m.Tag)
             {
-                case nameof(IUserDirectory):
-                    _clusterContext.UserDirectory = new UserDirectoryRef(m.Actor);
+                case "User":
+                    _clusterContext.UserDirectory = m.Actor;
                     break;
 
-                case nameof(IRoomDirectory):
-                    _clusterContext.RoomDirectory = new RoomDirectoryRef(m.Actor);
+                case "Room":
+                    _clusterContext.RoomDirectory = m.Actor;
                     break;
             }
         }
@@ -42,13 +42,13 @@ namespace UniversalChat.Program.Server
         {
             switch (m.Tag)
             {
-                case nameof(IUserDirectory):
+                case "User":
                     _clusterContext.UserDirectory = null;
-                    break;
+                break;
 
-                case nameof(IRoomDirectory):
+                case "Room":
                     _clusterContext.RoomDirectory = null;
-                    break;
+                break;
             }
         }
     }

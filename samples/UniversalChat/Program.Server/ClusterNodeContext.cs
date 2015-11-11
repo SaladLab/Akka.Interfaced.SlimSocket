@@ -11,7 +11,7 @@ namespace UniversalChat.Program.Server
 
         // quick access point for actors. but these are shared variables.
         // if there is a neat way to avoid this dirty hack, please improve it.
-        public UserDirectoryRef UserDirectory;
-        public RoomDirectoryRef RoomDirectory;
+        public IActorRef UserDirectory;
+        public IActorRef RoomDirectory;
     }
 }

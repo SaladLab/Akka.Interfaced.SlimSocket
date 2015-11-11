@@ -78,10 +78,8 @@
     <Compile Include="ChatItem.cs" />
     <Compile Include="IOccupant.cs" />
     <Compile Include="IRoom.cs" />
-    <Compile Include="IRoomDirectory.cs" />
     <Compile Include="IRoomObserver.cs" />
     <Compile Include="IUser.cs" />
-    <Compile Include="IUserDirectory.cs" />
     <Compile Include="IUserEventObserver.cs" />
     <Compile Include="IUserLogin.cs" />
     <Compile Include="Properties\Akka.Interfaced.CodeGen.cs" />

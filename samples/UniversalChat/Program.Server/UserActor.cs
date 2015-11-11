@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Cluster.Utility;
 using Akka.Interfaced;
 using Akka.Interfaced.LogFilter;
 using UniversalChat.Interface;
@@ -43,7 +45,7 @@ namespace UniversalChat.Program.Server
                 room.WithNoReply().Exit(_id);
             _enteredRoomMap.Clear();
 
-            _clusterContext.UserDirectory.WithNoReply().UnregisterUser(_id);
+            _clusterContext.UserDirectory.Tell(new DistributedActorDictionaryMessage.Remove(_id));
         }
 
         Task<string> IUser.GetId()
@@ -53,8 +55,9 @@ namespace UniversalChat.Program.Server
 
         async Task<List<string>> IUser.GetRoomList()
         {
-            var roomList = await _clusterContext.RoomDirectory.GetRoomList();
-            return roomList;
+            var reply = await _clusterContext.RoomDirectory.Ask<DistributedActorDictionaryMessage.GetIdsReply>(
+                new DistributedActorDictionaryMessage.GetIds());
+            return reply.Ids?.Select(x => (string)x).ToList();
         }
 
         async Task<Tuple<int, RoomInfo>> IUser.EnterRoom(string name, int observerId)
@@ -64,7 +67,10 @@ namespace UniversalChat.Program.Server
 
             // Try to get room ref
 
-            var roomRaw = await _clusterContext.RoomDirectory.GetOrCreateRoom(name);
+            var reply = await _clusterContext.RoomDirectory.Ask<DistributedActorDictionaryMessage.GetOrCreateReply>(
+                new DistributedActorDictionaryMessage.GetOrCreate(name, null));
+
+            var roomRaw = reply.Actor;
             if (roomRaw == null)
                 throw new ResultException(ResultCodeType.RoomRemoved);
 
@@ -77,7 +83,7 @@ namespace UniversalChat.Program.Server
 
             // Bind an occupant actor with client session
 
-            var reply = await _clientSession.Ask<ClientSessionMessage.BindActorResponse>(
+            var reply2 = await _clientSession.Ask<ClientSessionMessage.BindActorResponse>(
                 new ClientSessionMessage.BindActorRequest
                 {
                     Actor = room.Actor,
@@ -86,7 +92,7 @@ namespace UniversalChat.Program.Server
                 });
 
             _enteredRoomMap[name] = room;
-            return Tuple.Create(reply.ActorId, info);
+            return Tuple.Create(reply2.ActorId, info);
         }
 
         async Task IUser.ExitFromRoom(string name)
@@ -112,7 +118,9 @@ namespace UniversalChat.Program.Server
             if (targetUserId == _id)
                 throw new ResultException(ResultCodeType.UserNotMyself);
 
-            var targetUser = await _clusterContext.UserDirectory.GetUser(targetUserId);
+            var reply = await _clusterContext.UserDirectory.Ask<DistributedActorDictionaryMessage.GetReply>(
+                new DistributedActorDictionaryMessage.Get(targetUserId));
+            var targetUser = reply.Actor;
             if (targetUser == null)
                 throw new ResultException(ResultCodeType.UserNotOnline);
 

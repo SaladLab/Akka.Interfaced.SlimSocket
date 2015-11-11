@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Akka.Actor;
+using Akka.Cluster.Utility;
 using Akka.Interfaced;
 using Akka.Interfaced.LogFilter;
 using UniversalChat.Interface;
@@ -127,7 +129,7 @@ namespace UniversalChat.Program.Server
 
                 _removed = true;
 
-                _clusterContext.RoomDirectory.WithNoReply().RemoveRoom(_name);
+                _clusterContext.RoomDirectory.Tell(new DistributedActorDictionaryMessage.Remove(_name));
             }
         }
 
@@ -157,7 +159,9 @@ namespace UniversalChat.Program.Server
             if (_userMap.ContainsKey(targetUserId))
                 throw new ResultException(ResultCodeType.UserAlreadyHere);
 
-            var targetUser = await _clusterContext.UserDirectory.GetUser(targetUserId);
+            var reply = await _clusterContext.UserDirectory.Ask<DistributedActorDictionaryMessage.GetReply>(
+                new DistributedActorDictionaryMessage.Get(targetUserId));
+            var targetUser = reply.Actor;
             if (targetUser == null)
                 throw new ResultException(ResultCodeType.UserNotOnline);
 
