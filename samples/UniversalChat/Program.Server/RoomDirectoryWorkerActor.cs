@@ -24,7 +24,7 @@ namespace UniversalChat.Program.Server
             _clusterContext = clusterContext;
 
             _clusterContext.ClusterActorDiscovery.Tell(
-                new ClusterActorDiscoveryMessages.RegisterActor(Self, nameof(IRoomDirectoryWorker)),
+                new ClusterActorDiscoveryMessage.RegisterActor(Self, nameof(IRoomDirectoryWorker)),
                 Self);
 
             _roomTable = new Dictionary<string, IRoom>();

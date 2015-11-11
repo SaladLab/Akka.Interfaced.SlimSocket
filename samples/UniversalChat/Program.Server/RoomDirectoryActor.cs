@@ -27,10 +27,10 @@ namespace UniversalChat.Program.Server
             _clusterContext = clusterContext;
 
             _clusterContext.ClusterActorDiscovery.Tell(
-                new ClusterActorDiscoveryMessages.RegisterActor(Self, nameof(IRoomDirectory)),
+                new ClusterActorDiscoveryMessage.RegisterActor(Self, nameof(IRoomDirectory)),
                 Self);
             _clusterContext.ClusterActorDiscovery.Tell(
-                new ClusterActorDiscoveryMessages.MonitorActor(nameof(IRoomDirectoryWorker)),
+                new ClusterActorDiscoveryMessage.MonitorActor(nameof(IRoomDirectoryWorker)),
                 Self);
 
             _workers = new List<RoomDirectoryWorkerRef>();
@@ -38,14 +38,14 @@ namespace UniversalChat.Program.Server
         }
 
         [MessageHandler]
-        private void OnMessage(ClusterActorDiscoveryMessages.ActorUp message)
+        private void OnMessage(ClusterActorDiscoveryMessage.ActorUp message)
         {
             _workers.Add(new RoomDirectoryWorkerRef(message.Actor, this, null));
             _logger.InfoFormat("Registered Actor({0})", message.Actor.Path);
         }
 
         [MessageHandler]
-        private void OnMessage(ClusterActorDiscoveryMessages.ActorDown message)
+        private void OnMessage(ClusterActorDiscoveryMessage.ActorDown message)
         {
             _workers.RemoveAll(w => w.Actor.Equals(message.Actor));
             _logger.InfoFormat("Unregistered Actor({0})", message.Actor.Path);
