@@ -33,8 +33,8 @@ namespace UniversalChat.Program.Server
 
         private void Handle(ChatBotCommanderMessage.Start m)
         {
-            if (_clusterContext.UserDirectory == null ||
-                _clusterContext.RoomDirectory == null)
+            if (_clusterContext.UserTable == null ||
+                _clusterContext.RoomTable == null)
             {
                 Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(1), Self, m, Self);
                 return;

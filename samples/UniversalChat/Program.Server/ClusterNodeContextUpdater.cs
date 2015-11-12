@@ -28,11 +28,11 @@ namespace UniversalChat.Program.Server
             switch (m.Tag)
             {
                 case "User":
-                    _clusterContext.UserDirectory = m.Actor;
+                    _clusterContext.UserTable = m.Actor;
                     break;
 
                 case "Room":
-                    _clusterContext.RoomDirectory = m.Actor;
+                    _clusterContext.RoomTable = m.Actor;
                     break;
             }
         }
@@ -43,11 +43,11 @@ namespace UniversalChat.Program.Server
             switch (m.Tag)
             {
                 case "User":
-                    _clusterContext.UserDirectory = null;
+                    _clusterContext.UserTable = null;
                 break;
 
                 case "Room":
-                    _clusterContext.RoomDirectory = null;
+                    _clusterContext.RoomTable = null;
                 break;
             }
         }

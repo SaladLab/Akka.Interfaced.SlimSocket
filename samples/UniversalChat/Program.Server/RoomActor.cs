@@ -129,7 +129,7 @@ namespace UniversalChat.Program.Server
 
                 _removed = true;
 
-                _clusterContext.RoomDirectory.Tell(new DistributedActorDictionaryMessage.Remove(_name));
+                _clusterContext.RoomTable.Tell(new DistributedActorTableMessage<string>.Remove(_name));
             }
         }
 
@@ -159,8 +159,8 @@ namespace UniversalChat.Program.Server
             if (_userMap.ContainsKey(targetUserId))
                 throw new ResultException(ResultCodeType.UserAlreadyHere);
 
-            var reply = await _clusterContext.UserDirectory.Ask<DistributedActorDictionaryMessage.GetReply>(
-                new DistributedActorDictionaryMessage.Get(targetUserId));
+            var reply = await _clusterContext.UserTable.Ask<DistributedActorTableMessage<string>.GetReply>(
+                new DistributedActorTableMessage<string>.Get(targetUserId));
             var targetUser = reply.Actor;
             if (targetUser == null)
                 throw new ResultException(ResultCodeType.UserNotOnline);

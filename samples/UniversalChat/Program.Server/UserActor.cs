@@ -24,7 +24,7 @@ namespace UniversalChat.Program.Server
 
         public UserActor(ClusterNodeContext clusterContext, IActorRef clientSession, string id, int observerId)
         {
-            _logger = LogManager.GetLogger(string.Format("UserActor({0})", id));
+            _logger = LogManager.GetLogger($"UserActor({id})");
             _clusterContext = clusterContext;
             _clientSession = clientSession;
             _id = id;
@@ -44,8 +44,6 @@ namespace UniversalChat.Program.Server
             foreach (var room in _enteredRoomMap.Values)
                 room.WithNoReply().Exit(_id);
             _enteredRoomMap.Clear();
-
-            _clusterContext.UserDirectory.Tell(new DistributedActorDictionaryMessage.Remove(_id));
         }
 
         Task<string> IUser.GetId()
@@ -55,8 +53,8 @@ namespace UniversalChat.Program.Server
 
         async Task<List<string>> IUser.GetRoomList()
         {
-            var reply = await _clusterContext.RoomDirectory.Ask<DistributedActorDictionaryMessage.GetIdsReply>(
-                new DistributedActorDictionaryMessage.GetIds());
+            var reply = await _clusterContext.RoomTable.Ask<DistributedActorTableMessage<string>.GetIdsReply>(
+                new DistributedActorTableMessage<string>.GetIds());
             return reply.Ids?.Select(x => (string)x).ToList();
         }
 
@@ -67,8 +65,8 @@ namespace UniversalChat.Program.Server
 
             // Try to get room ref
 
-            var reply = await _clusterContext.RoomDirectory.Ask<DistributedActorDictionaryMessage.GetOrCreateReply>(
-                new DistributedActorDictionaryMessage.GetOrCreate(name, null));
+            var reply = await _clusterContext.RoomTable.Ask<DistributedActorTableMessage<string>.GetOrCreateReply>(
+                new DistributedActorTableMessage<string>.GetOrCreate(name, null));
 
             var roomRaw = reply.Actor;
             if (roomRaw == null)
@@ -118,8 +116,8 @@ namespace UniversalChat.Program.Server
             if (targetUserId == _id)
                 throw new ResultException(ResultCodeType.UserNotMyself);
 
-            var reply = await _clusterContext.UserDirectory.Ask<DistributedActorDictionaryMessage.GetReply>(
-                new DistributedActorDictionaryMessage.Get(targetUserId));
+            var reply = await _clusterContext.UserTable.Ask<DistributedActorTableMessage<string>.GetReply>(
+                new DistributedActorTableMessage<string>.Get(targetUserId));
             var targetUser = reply.Actor;
             if (targetUser == null)
                 throw new ResultException(ResultCodeType.UserNotOnline);
@@ -131,8 +129,7 @@ namespace UniversalChat.Program.Server
                 Message = message
             };
 
-            // TODO: not a good way.. is there a type-safe way?
-            var targetUserMessaging = new UserMessasingRef(((UserRef)targetUser).Actor, null, null);
+            var targetUserMessaging = new UserMessasingRef(targetUser, null, null);
             targetUserMessaging.WithNoReply().Whisper(chatItem);
         }
 

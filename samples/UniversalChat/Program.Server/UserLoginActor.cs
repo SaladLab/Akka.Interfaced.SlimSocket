@@ -1,28 +1,32 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Akka.Actor;
-using Akka.Interfaced;
-using UniversalChat.Interface;
-using Common.Logging;
-using System.Net;
 using Akka.Cluster.Utility;
+using Akka.Interfaced;
 using Akka.Interfaced.LogFilter;
 using Akka.Interfaced.SlimSocket.Server;
+using Common.Logging;
+using UniversalChat.Interface;
 
 namespace UniversalChat.Program.Server
 {
     [Log]
     public class UserLoginActor : InterfacedActor<UserLoginActor>, IUserLogin
     {
-        private ILog _logger;
-        private ClusterNodeContext _clusterContext;
-        private IActorRef _clientSession;
+        private readonly ILog _logger;
+        private readonly ClusterNodeContext _clusterContext;
+        private readonly IActorRef _clientSession;
+        private readonly IActorRef _userTableContainer;
 
-        public UserLoginActor(ClusterNodeContext clusterContext, IActorRef clientSession, EndPoint clientRemoteEndPoint)
+        public UserLoginActor(ClusterNodeContext clusterContext,
+                              IActorRef clientSession, EndPoint clientRemoteEndPoint,
+                              IActorRef userTableContainer)
         {
-            _logger = LogManager.GetLogger(string.Format("UserLoginActor({0})", clientRemoteEndPoint));
+            _logger = LogManager.GetLogger($"UserLoginActor({clientRemoteEndPoint})");
             _clusterContext = clusterContext;
             _clientSession = clientSession;
+            _userTableContainer = userTableContainer;
         }
 
         [MessageHandler]
@@ -59,10 +63,10 @@ namespace UniversalChat.Program.Server
 
             var userRef = new UserRef(user);
             var registered = false;
-            for (int i=0; i<10; i++)
+            for (int i = 0; i < 10; i++)
             {
-                var reply = await _clusterContext.UserDirectory.Ask<DistributedActorDictionaryMessage.AddReply>(
-                    new DistributedActorDictionaryMessage.Add(id, user));
+                var reply = await _userTableContainer.Ask<DistributedActorTableMessage<string>.AddReply>(
+                    new DistributedActorTableMessage<string>.Add(id, user));
                 if (reply.Added)
                 {
                     registered = true;
