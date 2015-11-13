@@ -4,9 +4,9 @@ using UniversalChat.Interface;
 
 namespace UniversalChat.Program.Server
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // force interface assembly to be loaded before creating ProtobufSerializer
 

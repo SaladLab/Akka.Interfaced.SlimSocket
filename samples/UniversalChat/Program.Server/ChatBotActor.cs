@@ -1,20 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
-using Akka;
 using Akka.Actor;
 using Akka.Interfaced;
-using Akka.Interfaced.ProtobufSerializer;
-using Akka.Interfaced.SlimSocket.Base;
 using Akka.Interfaced.SlimSocket.Server;
-using TypeAlias;
 using UniversalChat.Interface;
-using System.Reflection;
-using Common.Logging;
 
 namespace UniversalChat.Program.Server
 {
@@ -69,7 +59,8 @@ namespace UniversalChat.Program.Server
             // start login
 
             var userLoginActor = Context.ActorOf(Props.Create(
-                () => new UserLoginActor(_clusterContext, Self, new IPEndPoint(IPAddress.Loopback, 0), _userTableContainer)));
+                () => new UserLoginActor(_clusterContext, Self, new IPEndPoint(IPAddress.Loopback, 0),
+                                         _userTableContainer)));
             var userLogin = new UserLoginRef(userLoginActor, this, null);
             await userLogin.Login(_userId, "bot", 1);
 
@@ -79,7 +70,7 @@ namespace UniversalChat.Program.Server
 
             // chat !
 
-            for (int i=0; i<10000; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 await _occupant.Say(DateTime.Now.ToString(), _userId);
                 await Task.Delay(1000);

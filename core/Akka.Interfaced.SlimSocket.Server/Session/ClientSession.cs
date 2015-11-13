@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using Akka;
-using Akka.Actor;
 using System.Reflection;
+using Akka.Actor;
 using Akka.Interfaced.SlimSocket.Base;
 using Common.Logging;
 
@@ -188,7 +187,8 @@ namespace Akka.Interfaced.SlimSocket.Server
                 {
                     Actor = actor,
                     InterfaceType = interfaceType,
-                    IsTagOverridable = interfaceType != null && (interfaceType.GetCustomAttribute<TagOverridableAttribute>() != null),
+                    IsTagOverridable = interfaceType != null &&
+                                       interfaceType.GetCustomAttribute<TagOverridableAttribute>() != null,
                     TagValue = tagValue
                 };
                 _boundActorInverseMap[actor] = actorId;

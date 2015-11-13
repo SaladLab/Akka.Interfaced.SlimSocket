@@ -5,7 +5,11 @@ namespace UniversalChat.Program.Server
     public class RedisStorage
     {
         public static RedisStorage Instance { get; set; }
-        public static IDatabase Db { get { return Instance.GetDatabase(); } }
+
+        public static IDatabase Db
+        {
+            get { return Instance.GetDatabase(); }
+        }
 
         private ConnectionMultiplexer _connection;
 

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using Akka.Interfaced;
 using TypeAlias;
 
 namespace Akka.Interfaced.SlimSocket.Base

@@ -6,9 +6,9 @@ using Akka.Actor;
 using Akka.Cluster.Utility;
 using Akka.Interfaced;
 using Akka.Interfaced.LogFilter;
-using UniversalChat.Interface;
 using Common.Logging;
 using Newtonsoft.Json;
+using UniversalChat.Interface;
 
 namespace UniversalChat.Program.Server
 {

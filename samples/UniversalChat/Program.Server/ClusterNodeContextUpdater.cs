@@ -1,6 +1,5 @@
 ﻿using Akka.Cluster.Utility;
 using Akka.Interfaced;
-using UniversalChat.Interface;
 
 namespace UniversalChat.Program.Server
 {
@@ -44,11 +43,11 @@ namespace UniversalChat.Program.Server
             {
                 case "User":
                     _clusterContext.UserTable = null;
-                break;
+                    break;
 
                 case "Room":
                     _clusterContext.RoomTable = null;
-                break;
+                    break;
             }
         }
     }

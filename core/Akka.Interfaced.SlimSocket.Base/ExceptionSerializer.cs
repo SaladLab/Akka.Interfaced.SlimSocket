@@ -15,8 +15,10 @@ namespace Akka.Interfaced.SlimSocket.Base
 
         public void Serialize(Stream dest, Exception value)
         {
-            if (dest == null) throw new ArgumentNullException("dest");
-            if (value == null) throw new ArgumentNullException("value");
+            if (dest == null)
+                throw new ArgumentNullException("dest");
+            if (value == null)
+                throw new ArgumentNullException("value");
 
             var type = value.GetType();
             int typeAlias = _data.TypeTable.GetAlias(type);
@@ -39,7 +41,8 @@ namespace Akka.Interfaced.SlimSocket.Base
 
         public Exception Deserialize(Stream source)
         {
-            if (source == null) throw new ArgumentNullException("source");
+            if (source == null)
+                throw new ArgumentNullException("source");
 
             Exception exception = null;
 
@@ -71,7 +74,7 @@ namespace Akka.Interfaced.SlimSocket.Base
 
             if (exception == null)
             {
-                exception = (Exception) Activator.CreateInstance(type);
+                exception = (Exception)Activator.CreateInstance(type);
                 if (typeSerializable)
                 {
                     int dataLen = source.Read32BitEncodedInt();
