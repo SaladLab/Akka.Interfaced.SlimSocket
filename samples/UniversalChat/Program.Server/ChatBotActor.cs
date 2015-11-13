@@ -20,15 +20,13 @@ namespace UniversalChat.Program.Server
     public class ChatBotActor : InterfacedActor<ChatBotActor>
     {
         private ClusterNodeContext _clusterContext;
-        private IActorRef _userTableContainer;
         private string _userId;
         private UserRef _user;
         private OccupantRef _occupant;
 
-        public ChatBotActor(ClusterNodeContext clusterContext, IActorRef userTableContainer)
+        public ChatBotActor(ClusterNodeContext clusterContext)
         {
             _clusterContext = clusterContext;
-            _userTableContainer = userTableContainer;
         }
 
         protected override void OnReceiveUnhandled(object message)
@@ -59,8 +57,7 @@ namespace UniversalChat.Program.Server
             // start login
 
             var userLoginActor = Context.ActorOf(Props.Create(
-                () => new UserLoginActor(_clusterContext, Self, new IPEndPoint(IPAddress.Loopback, 0),
-                                         _userTableContainer)));
+                () => new UserLoginActor(_clusterContext, Self, new IPEndPoint(IPAddress.Loopback, 0))));
             var userLogin = new UserLoginRef(userLoginActor, this, null);
             await userLogin.Login(_userId, "bot", 1);
 

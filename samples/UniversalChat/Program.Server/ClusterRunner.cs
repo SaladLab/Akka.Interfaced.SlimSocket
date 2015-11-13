@@ -70,7 +70,11 @@ namespace UniversalChat.Program.Server
                         break;
 
                     case "bot":
-                        actors.AddRange(InitBot(context));
+                        actors.AddRange(InitBot(context, false));
+                        break;
+
+                    case "bot-user":
+                        actors.AddRange(InitBot(context, true));
                         break;
 
                     default:
@@ -116,11 +120,12 @@ namespace UniversalChat.Program.Server
                 Props.Create(() => new DistributedActorTableContainer<string>(
                                        "User", context.ClusterActorDiscovery, null, null)),
                 "UserTableContainer");
+            context.UserTableContainer = container;
 
-            var userSystem = new UserClusterSystem(context, container);
-            var gateway = userSystem.Start(clientPort, container);
+            var userSystem = new UserClusterSystem(context);
+            var gateway = userSystem.Start(clientPort);
 
-            return new[] { gateway, container };
+            return new[] { container, gateway };
         }
 
         private IActorRef[] InitRoomTable(ClusterNodeContext context)
@@ -136,41 +141,45 @@ namespace UniversalChat.Program.Server
 
         private IActorRef[] InitRoom(ClusterNodeContext context)
         {
-            return new[]
-            {
-                context.System.ActorOf(
-                    Props.Create(() => new DistributedActorTableContainer<string>(
-                                           "Room", context.ClusterActorDiscovery,
-                                           typeof(RoomActorFactory), new object[] { context })),
-                    "RoomTableContainer")
-            };
-        }
-
-        private IActorRef[] InitBot(ClusterNodeContext context)
-        {
             var container = context.System.ActorOf(
                 Props.Create(() => new DistributedActorTableContainer<string>(
-                                       "User", context.ClusterActorDiscovery, null, null)),
-                "UserTableContainer");
+                                       "Room", context.ClusterActorDiscovery,
+                                       typeof(RoomActorFactory), new object[] { context })),
+                "RoomTableContainer");
+            context.RoomTableContainer = container;
+
+            return new[] { container };
+        }
+
+        private IActorRef[] InitBot(ClusterNodeContext context, bool withUserTableContainer)
+        {
+            if (withUserTableContainer)
+            {
+                var container = context.System.ActorOf(
+                    Props.Create(() => new DistributedActorTableContainer<string>(
+                                           "User", context.ClusterActorDiscovery, null, null)),
+                    "UserTableContainer");
+                context.UserTableContainer = container;
+            }
 
             var botCommander = context.System.ActorOf(
-                Props.Create(() => new ChatBotCommanderActor(context, container)), "ChatBotCommander");
+                Props.Create(() => new ChatBotCommanderActor(context)), "ChatBotCommander");
             botCommander.Tell(new ChatBotCommanderMessage.Start());
 
-            return new[] { container, botCommander };
+            return withUserTableContainer
+                       ? new[] { context.UserTableContainer, botCommander }
+                       : new[] { botCommander };
         }
     }
 
     internal class UserClusterSystem
     {
         private readonly ClusterNodeContext _context;
-        private readonly IActorRef _userTableContainer;
         private readonly TcpConnectionSettings _tcpConnectionSettings;
 
-        public UserClusterSystem(ClusterNodeContext context, IActorRef userTableContainer)
+        public UserClusterSystem(ClusterNodeContext context)
         {
             _context = context;
-            _userTableContainer = userTableContainer;
             _tcpConnectionSettings = new TcpConnectionSettings
             {
                 PacketSerializer = new PacketSerializer(
@@ -180,7 +189,7 @@ namespace UniversalChat.Program.Server
             };
         }
 
-        public IActorRef Start(int port, IActorRef userTableContainer)
+        public IActorRef Start(int port)
         {
             var logger = LogManager.GetLogger("ClientGateway");
             var clientGateway = _context.System.ActorOf(Props.Create(() => new ClientGateway(logger, CreateSession)));
@@ -201,7 +210,7 @@ namespace UniversalChat.Program.Server
             {
                 Tuple.Create(
                     context.ActorOf(Props.Create(
-                        () => new UserLoginActor(_context, context.Self, socket.RemoteEndPoint, _userTableContainer))),
+                        () => new UserLoginActor(_context, context.Self, socket.RemoteEndPoint))),
                     typeof(IUserLogin))
             };
         }

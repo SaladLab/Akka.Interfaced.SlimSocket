@@ -67,12 +67,10 @@ namespace UniversalChat.Program.Server
 
             var reply = await _clusterContext.RoomTable.Ask<DistributedActorTableMessage<string>.GetOrCreateReply>(
                 new DistributedActorTableMessage<string>.GetOrCreate(name, null));
-
-            var roomRaw = reply.Actor;
-            if (roomRaw == null)
+            if (reply.Actor == null)
                 throw new ResultException(ResultCodeType.RoomRemoved);
 
-            var room = new RoomRef(roomRaw, this, null);
+            var room = new RoomRef(reply.Actor, this, null);
 
             // Let's enter the room !
 

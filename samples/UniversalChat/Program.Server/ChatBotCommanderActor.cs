@@ -17,14 +17,12 @@ namespace UniversalChat.Program.Server
     {
         private ILog _logger = LogManager.GetLogger("ChatBotCommander");
         private ClusterNodeContext _clusterContext;
-        private IActorRef _userTableContainer;
         private HashSet<IActorRef> _botSet = new HashSet<IActorRef>();
         private bool _isStopped;
 
-        public ChatBotCommanderActor(ClusterNodeContext clusterContext, IActorRef userTableContainer)
+        public ChatBotCommanderActor(ClusterNodeContext clusterContext)
         {
             _clusterContext = clusterContext;
-            _userTableContainer = userTableContainer;
 
             Receive<ChatBotCommanderMessage.Start>(m => Handle(m));
             Receive<ShutdownMessage>(m => Handle(m));
@@ -40,7 +38,7 @@ namespace UniversalChat.Program.Server
                 return;
             }
 
-            var chatBot = Context.ActorOf(Props.Create(() => new ChatBotActor(_clusterContext, _userTableContainer)));
+            var chatBot = Context.ActorOf(Props.Create(() => new ChatBotActor(_clusterContext)));
             chatBot.Tell(new ChatBotMessage.Start { UserId = "bot1", RoomName = "#bot1" });
             Context.Watch(chatBot);
             _botSet.Add(chatBot);

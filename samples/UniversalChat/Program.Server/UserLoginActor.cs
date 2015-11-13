@@ -17,16 +17,13 @@ namespace UniversalChat.Program.Server
         private readonly ILog _logger;
         private readonly ClusterNodeContext _clusterContext;
         private readonly IActorRef _clientSession;
-        private readonly IActorRef _userTableContainer;
 
         public UserLoginActor(ClusterNodeContext clusterContext,
-                              IActorRef clientSession, EndPoint clientRemoteEndPoint,
-                              IActorRef userTableContainer)
+                              IActorRef clientSession, EndPoint clientRemoteEndPoint)
         {
             _logger = LogManager.GetLogger($"UserLoginActor({clientRemoteEndPoint})");
             _clusterContext = clusterContext;
             _clientSession = clientSession;
-            _userTableContainer = userTableContainer;
         }
 
         [MessageHandler]
@@ -59,13 +56,12 @@ namespace UniversalChat.Program.Server
                 throw new ResultException(ResultCodeType.LoginFailedAlreadyConnected);
             }
 
-            // Register User in UserDirectory
+            // Register User in UserTable
 
-            var userRef = new UserRef(user);
             var registered = false;
             for (int i = 0; i < 10; i++)
             {
-                var reply = await _userTableContainer.Ask<DistributedActorTableMessage<string>.AddReply>(
+                var reply = await _clusterContext.UserTableContainer.Ask<DistributedActorTableMessage<string>.AddReply>(
                     new DistributedActorTableMessage<string>.Add(id, user));
                 if (reply.Added)
                 {

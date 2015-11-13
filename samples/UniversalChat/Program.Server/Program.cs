@@ -67,7 +67,7 @@ namespace UniversalChat.Program.Server
                 clusterRunner.LaunchNode(3012, 0, "room");
                 clusterRunner.LaunchNode(3021, 9001, "user");
                 clusterRunner.LaunchNode(3022, 9002, "user");
-                clusterRunner.LaunchNode(3031, 0, "bot");
+                clusterRunner.LaunchNode(3031, 0, "bot-user");
             }
 
             // wait for stop signal
