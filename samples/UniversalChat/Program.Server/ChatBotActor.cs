@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Interfaced;
 using Akka.Interfaced.SlimSocket.Server;
+using Common.Logging;
 using UniversalChat.Interface;
 
 namespace UniversalChat.Program.Server
@@ -19,34 +20,19 @@ namespace UniversalChat.Program.Server
 
     public class ChatBotActor : InterfacedActor<ChatBotActor>
     {
-        private ClusterNodeContext _clusterContext;
+        private readonly ILog _log;
+        private readonly ClusterNodeContext _clusterContext;
         private string _userId;
         private UserRef _user;
         private OccupantRef _occupant;
 
-        public ChatBotActor(ClusterNodeContext clusterContext)
+        public ChatBotActor(ClusterNodeContext clusterContext, string name)
         {
+            _log = LogManager.GetLogger($"Bot({name})");
             _clusterContext = clusterContext;
         }
 
-        protected override void OnReceiveUnhandled(object message)
-        {
-            if (message is ChatBotMessage.Start)
-            {
-                RunTask(() => Handle((ChatBotMessage.Start)message), true);
-            }
-            else if (message is ClientSessionMessage.BindActorRequest)
-            {
-                Handle((ClientSessionMessage.BindActorRequest)message);
-            }
-            else
-            {
-                base.OnReceiveUnhandled(message);
-            }
-
-            // Notice 처리는?
-        }
-
+        [MessageHandler]
         private async Task Handle(ChatBotMessage.Start m)
         {
             if (_user != null)
@@ -74,23 +60,25 @@ namespace UniversalChat.Program.Server
             }
         }
 
-        private void Handle(ClientSessionMessage.BindActorRequest m)
+        [MessageHandler]
+        private void Handle(ActorBoundSessionMessage.Bind m)
         {
             if (m.InterfaceType == typeof(IUser))
             {
                 _user = new UserRef(m.Actor);
-                Sender.Tell(new ClientSessionMessage.BindActorResponse());
+                Sender.Tell(new ActorBoundSessionMessage.BindReply(0));
                 return;
             }
 
             if (m.InterfaceType == typeof(IOccupant))
             {
                 _occupant = new OccupantRef(m.Actor);
-                Sender.Tell(new ClientSessionMessage.BindActorResponse());
+                Sender.Tell(new ActorBoundSessionMessage.BindReply(0));
                 return;
             }
 
-            // TODO: 에러 처리?
+            _log.ErrorFormat("Unexpected bind type. (InterfaceType={0}, Actor={1})",
+                             m.InterfaceType?.FullName, m.Actor);
         }
     }
 }

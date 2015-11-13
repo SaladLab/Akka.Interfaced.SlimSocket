@@ -33,7 +33,7 @@ namespace UniversalChat.Program.Server
         }
 
         [MessageHandler]
-        private void OnMessage(ClientSessionMessage.BoundSessionTerminated message)
+        private void OnMessage(ActorBoundSessionMessage.SessionTerminated message)
         {
             UnlinkAll();
             Context.Stop(Self);
@@ -79,13 +79,8 @@ namespace UniversalChat.Program.Server
 
             // Bind an occupant actor with client session
 
-            var reply2 = await _clientSession.Ask<ClientSessionMessage.BindActorResponse>(
-                new ClientSessionMessage.BindActorRequest
-                {
-                    Actor = room.Actor,
-                    InterfaceType = typeof(IOccupant),
-                    TagValue = _id
-                });
+            var reply2 = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
+                new ActorBoundSessionMessage.Bind(room.Actor, typeof(IOccupant), _id));
 
             _enteredRoomMap[name] = room;
             return Tuple.Create(reply2.ActorId, info);
@@ -103,8 +98,7 @@ namespace UniversalChat.Program.Server
 
             // Unbind an occupant actor with client session
 
-            _clientSession.Tell(
-                new ClientSessionMessage.UnbindActorRequest { Actor = room.Actor });
+            _clientSession.Tell(new ActorBoundSessionMessage.Unbind(room.Actor));
 
             _enteredRoomMap.Remove(name);
         }
