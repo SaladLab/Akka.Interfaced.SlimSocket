@@ -165,8 +165,7 @@ namespace UniversalChat.Program.Server
             if (targetUser == null)
                 throw new ResultException(ResultCodeType.UserNotOnline);
 
-            // TODO: not a good way.. is there a type-safe way?
-            var targetUserMessaging = new UserMessasingRef(((UserRef)targetUser).Actor, null, null);
+            var targetUserMessaging = new UserMessasingRef(targetUser);
             targetUserMessaging.WithNoReply().Invite(senderUserId, _name);
         }
     }

@@ -72,7 +72,7 @@ namespace UniversalChat.Program.Server
             if (roomRaw == null)
                 throw new ResultException(ResultCodeType.RoomRemoved);
 
-            var room = ((RoomRef)roomRaw).WithRequestWaiter(this);
+            var room = new RoomRef(roomRaw, this, null);
 
             // Let's enter the room !
 
@@ -116,6 +116,9 @@ namespace UniversalChat.Program.Server
             if (targetUserId == _id)
                 throw new ResultException(ResultCodeType.UserNotMyself);
 
+            if (_clusterContext.UserTable == null)
+                throw new ResultException(ResultCodeType.UserNotOnline);
+
             var reply = await _clusterContext.UserTable.Ask<DistributedActorTableMessage<string>.GetReply>(
                 new DistributedActorTableMessage<string>.Get(targetUserId));
             var targetUser = reply.Actor;
@@ -129,7 +132,7 @@ namespace UniversalChat.Program.Server
                 Message = message
             };
 
-            var targetUserMessaging = new UserMessasingRef(targetUser, null, null);
+            var targetUserMessaging = new UserMessasingRef(targetUser);
             targetUserMessaging.WithNoReply().Whisper(chatItem);
         }
 

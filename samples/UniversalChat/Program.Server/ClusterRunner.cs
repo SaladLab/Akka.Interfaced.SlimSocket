@@ -37,7 +37,7 @@ namespace UniversalChat.Program.Server
                 .WithFallback("akka.remote.helios.tcp.port = " + port)
                 .WithFallback("akka.cluster.roles = " + "[" + string.Join(",", roles) + "]");
 
-            var system = ActorSystem.Create("Cluster", config);
+            var system = ActorSystem.Create("ChatCluster", config);
 
             DeadRequestProcessingActor.Install(system);
 
@@ -78,6 +78,7 @@ namespace UniversalChat.Program.Server
                         throw new InvalidOperationException("Invalid role: " + role);
                 }
             }
+
             _nodes.Add(Tuple.Create(system, actors));
         }
 
@@ -148,10 +149,16 @@ namespace UniversalChat.Program.Server
 
         private IActorRef[] InitBot(ClusterNodeContext context)
         {
-            var actor = context.System.ActorOf(
-                Props.Create(() => new ChatBotCommanderActor(context)), "ChatBotCommander");
-            actor.Tell(new ChatBotCommanderMessage.Start());
-            return new[] { actor };
+            var container = context.System.ActorOf(
+                Props.Create(() => new DistributedActorTableContainer<string>(
+                                       "User", context.ClusterActorDiscovery, null, null)),
+                "UserTableContainer");
+
+            var botCommander = context.System.ActorOf(
+                Props.Create(() => new ChatBotCommanderActor(context, container)), "ChatBotCommander");
+            botCommander.Tell(new ChatBotCommanderMessage.Start());
+
+            return new[] { container, botCommander };
         }
     }
 

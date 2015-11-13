@@ -19,7 +19,7 @@ namespace UniversalChat.Program.Server
                 new ClusterActorDiscoveryMessage.MonitorActor("User"), Self);
 
             _clusterContext.ClusterActorDiscovery.Tell(
-                new ClusterActorDiscoveryMessage.MonitorActor("User"), Self);
+                new ClusterActorDiscoveryMessage.MonitorActor("Room"), Self);
         }
 
         [MessageHandler]
