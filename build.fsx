@@ -231,7 +231,6 @@ Target "Help" (fun _ ->
   ==> "AssemblyInfo"
   ==> "Build"
   ==> "Test"
-//  ==> "Package"
 
 "Build"
   ==> "Nuget"
