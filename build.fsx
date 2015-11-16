@@ -47,7 +47,7 @@ let projects = ([
         Folder="./core/Akka.Interfaced.SlimSocket.Client";
         Dependencies=[("Akka.Interfaced.SlimSocket.Base", "");
                       ("Akka.Interfaced-SlimClient", "0.2.0-build0029");
-                      ("Common.Logging.Core", "3.3.0");
+                      ("Common.Logging.Core", "3.3.1");
                       ("NetLegacySupport.Tuple", "1.0.2")];
     };
     {   emptyProject with
@@ -55,7 +55,7 @@ let projects = ([
         Folder="./core/Akka.Interfaced.SlimSocket.Server";
         Dependencies=[("Akka.Interfaced.SlimSocket.Base", "");
                       ("Akka.Interfaced", "0.2.0-build0029");
-                      ("Common.Logging.Core", "3.3.0")];
+                      ("Common.Logging.Core", "3.3.1")];
     }]
     |> List.map (fun p -> 
         let parsedReleases =
@@ -82,6 +82,15 @@ let binDir = "bin"
 let testDir = binDir @@ "test"
 let nugetDir = binDir @@ "nuget"
 let nugetWorkDir = nugetDir @@ "work"
+
+// ------------------------------------------------------------------------- Unity Helper
+
+let UnityPath = 
+    @"C:\Program Files\Unity\Editor\Unity.exe" 
+
+let Unity projectPath args = 
+    let result = Shell.Exec(UnityPath, "-quit -batchmode -logFile -projectPath \"" + projectPath + "\" " + args) 
+    if result < 0 then failwithf "Unity exited with error %d" result 
 
 // ------------------------------------------------------------------------------ Targets
 
@@ -115,6 +124,13 @@ Target "Test" (fun _ ->
             ToolPath = xunitToolPath;
             ShadowCopy = false;
             XmlOutputPath = Some (testDir @@ "TestResult.xml") })
+)
+
+Target "UnityPackage" (fun _ ->
+    Shell.Exec(".\core\UnityPackage\UpdateAkkaInterfacedSlimSocketDll.bat")
+    Unity (Path.GetFullPath "core/UnityPackage") "-executeMethod PackageBuilder.BuildPackage"
+    Unity (Path.GetFullPath "core/UnityPackage") "-executeMethod PackageBuilder.BuildPackageFull"
+    (!! "core/UnityPackage/*.unitypackage") |> Seq.iter (fun p -> MoveFile binDir p)
 )
 
 let createNugetPackages _ =
@@ -199,6 +215,7 @@ Target "Help" (fun _ ->
       " Targets for building:"
       " * Build        Build"
       " * Test         Build and Test"
+      " * UnityPackage Build UnityPackage"
       " * Nuget        Create and publish nugets packages"
       " * CreateNuget  Create nuget packages"
       "                [nugetprerelease={VERSION_PRERELEASE}] "
@@ -214,6 +231,7 @@ Target "Help" (fun _ ->
   ==> "AssemblyInfo"
   ==> "Build"
   ==> "Test"
+//  ==> "Package"
 
 "Build"
   ==> "Nuget"

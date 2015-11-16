@@ -9,8 +9,6 @@ public static class G
     static G()
     {
         _logger = LogManager.GetLogger("G");
-        _debugLogAdapter = new UnityDebugLogAdapter(LogLevel.All);
-        _debugLogAdapter.Attach();
     }
 
     // Communicator
@@ -33,12 +31,5 @@ public static class G
     public static ILog Logger
     {
         get { return _logger; }
-    }
-
-    private static readonly UnityDebugLogAdapter _debugLogAdapter;
-
-    public static UnityDebugLogAdapter DebugLogAdapter
-    {
-        get { return _debugLogAdapter; }
     }
 }

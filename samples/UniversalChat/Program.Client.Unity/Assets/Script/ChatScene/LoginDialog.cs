@@ -8,6 +8,7 @@ using System.Globalization;
 using UniversalChat.Interface;
 using Akka.Interfaced.SlimSocket.Client;
 using Akka.Interfaced.SlimSocket.Base;
+using Common.Logging;
 using TypeAlias;
 
 public class LoginDialog : UiDialog
