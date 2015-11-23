@@ -16,6 +16,10 @@ namespace UniversalChat.Program.Server
             public string UserId;
             public string RoomName;
         }
+
+        public class Stop
+        {
+        }
     }
 
     public class ChatBotActor : InterfacedActor<ChatBotActor>
@@ -25,6 +29,7 @@ namespace UniversalChat.Program.Server
         private string _userId;
         private UserRef _user;
         private OccupantRef _occupant;
+        private bool _stopped;
 
         public ChatBotActor(ClusterNodeContext clusterContext, string name)
         {
@@ -32,7 +37,7 @@ namespace UniversalChat.Program.Server
             _clusterContext = clusterContext;
         }
 
-        [MessageHandler]
+        [MessageHandler, Reentrant]
         private async Task Handle(ChatBotMessage.Start m)
         {
             if (_user != null)
@@ -45,19 +50,34 @@ namespace UniversalChat.Program.Server
             var userLoginActor = Context.ActorOf(Props.Create(
                 () => new UserLoginActor(_clusterContext, Self, new IPEndPoint(IPAddress.Loopback, 0))));
             var userLogin = new UserLoginRef(userLoginActor, this, null);
-            await userLogin.Login(_userId, "bot", 1);
+            await userLogin.Login(_userId, m.UserId, 1);
 
             // enter chat
 
-            await _user.EnterRoom("#bot", 2);
+            await _user.EnterRoom(m.RoomName, 2);
 
             // chat !
 
-            for (int i = 0; i < 10000; i++)
+            while (_stopped == false)
             {
                 await _occupant.Say(DateTime.Now.ToString(), _userId);
                 await Task.Delay(1000);
             }
+
+            // outro
+
+            await _user.ExitFromRoom(m.RoomName);
+
+            await Task.Delay(100);
+            _user.Actor.Tell(new ActorBoundSessionMessage.SessionTerminated());
+
+            Context.Stop(Self);
+        }
+
+        [MessageHandler]
+        private void Handle(ChatBotMessage.Stop m)
+        {
+            _stopped = true;
         }
 
         [MessageHandler]
@@ -65,14 +85,14 @@ namespace UniversalChat.Program.Server
         {
             if (m.InterfaceType == typeof(IUser))
             {
-                _user = new UserRef(m.Actor);
+                _user = new UserRef(m.Actor); //, this, null);
                 Sender.Tell(new ActorBoundSessionMessage.BindReply(0));
                 return;
             }
 
             if (m.InterfaceType == typeof(IOccupant))
             {
-                _occupant = new OccupantRef(m.Actor);
+                _occupant = new OccupantRef(m.Actor); //, this, null);
                 Sender.Tell(new ActorBoundSessionMessage.BindReply(0));
                 return;
             }

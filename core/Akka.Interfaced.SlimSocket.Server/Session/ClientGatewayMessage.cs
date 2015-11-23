@@ -25,7 +25,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
-        public class Shutdown
+        public class Stop
         {
         }
     }

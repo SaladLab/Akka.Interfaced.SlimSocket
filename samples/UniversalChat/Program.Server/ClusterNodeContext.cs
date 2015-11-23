@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using UniversalChat.Interface;
 
 namespace UniversalChat.Program.Server
 {

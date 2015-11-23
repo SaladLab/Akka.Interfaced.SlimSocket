@@ -11,9 +11,13 @@ namespace UniversalChat.Program.Server
         public class Start
         {
         }
+
+        public class Stop
+        {
+        }
     }
 
-    public class ChatBotCommanderActor : ReceiveActor
+    public class ChatBotCommanderActor : InterfacedActor<ChatBotCommanderActor>
     {
         private ILog _logger = LogManager.GetLogger("ChatBotCommander");
         private ClusterNodeContext _clusterContext;
@@ -23,12 +27,9 @@ namespace UniversalChat.Program.Server
         public ChatBotCommanderActor(ClusterNodeContext clusterContext)
         {
             _clusterContext = clusterContext;
-
-            Receive<ChatBotCommanderMessage.Start>(m => Handle(m));
-            Receive<ShutdownMessage>(m => Handle(m));
-            Receive<Terminated>(m => Handle(m));
         }
 
+        [MessageHandler]
         private void Handle(ChatBotCommanderMessage.Start m)
         {
             if (_clusterContext.UserTable == null ||
@@ -39,12 +40,13 @@ namespace UniversalChat.Program.Server
             }
 
             var chatBot = Context.ActorOf(Props.Create(() => new ChatBotActor(_clusterContext, "bot1")));
-            chatBot.Tell(new ChatBotMessage.Start { UserId = "bot1", RoomName = "#bot1" });
+            chatBot.Tell(new ChatBotMessage.Start { UserId = "bot1", RoomName = "#bot" });
             Context.Watch(chatBot);
             _botSet.Add(chatBot);
         }
 
-        private void Handle(ShutdownMessage m)
+        [MessageHandler]
+        private void Handle(ChatBotCommanderMessage.Stop m)
         {
             if (_isStopped)
                 return;
@@ -56,7 +58,7 @@ namespace UniversalChat.Program.Server
 
             if (_botSet.Count > 0)
             {
-                Context.ActorSelection("*").Tell(InterfacedPoisonPill.Instance);
+                Context.ActorSelection("*").Tell(new ChatBotMessage.Stop());
             }
             else
             {
@@ -64,6 +66,7 @@ namespace UniversalChat.Program.Server
             }
         }
 
+        [MessageHandler]
         private void Handle(Terminated m)
         {
             _botSet.Remove(m.ActorRef);

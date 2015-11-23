@@ -21,7 +21,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             Receive<ClientGatewayMessage.Start>(m => Handle(m));
             Receive<ClientGatewayMessage.Accept>(m => Handle(m));
-            Receive<ClientGatewayMessage.Shutdown>(m => Handle(m));
+            Receive<ClientGatewayMessage.Stop>(m => Handle(m));
             Receive<Terminated>(m => Handle(m));
         }
 
@@ -64,7 +64,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             _sessionSet.Add(clientSession);
         }
 
-        private void Handle(ClientGatewayMessage.Shutdown m)
+        private void Handle(ClientGatewayMessage.Stop m)
         {
             if (_isStopped)
                 return;
