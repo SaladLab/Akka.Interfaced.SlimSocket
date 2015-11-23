@@ -68,7 +68,6 @@ namespace UniversalChat.Program.Server
 
             await _user.ExitFromRoom(m.RoomName);
 
-            await Task.Delay(100);
             _user.Actor.Tell(new ActorBoundSessionMessage.SessionTerminated());
 
             Context.Stop(Self);
@@ -85,14 +84,14 @@ namespace UniversalChat.Program.Server
         {
             if (m.InterfaceType == typeof(IUser))
             {
-                _user = new UserRef(m.Actor); //, this, null);
+                _user = new UserRef(m.Actor, this, null);
                 Sender.Tell(new ActorBoundSessionMessage.BindReply(0));
                 return;
             }
 
             if (m.InterfaceType == typeof(IOccupant))
             {
-                _occupant = new OccupantRef(m.Actor); //, this, null);
+                _occupant = new OccupantRef(m.Actor, this, null);
                 Sender.Tell(new ActorBoundSessionMessage.BindReply(0));
                 return;
             }

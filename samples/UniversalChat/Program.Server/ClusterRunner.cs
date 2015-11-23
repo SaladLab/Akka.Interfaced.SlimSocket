@@ -134,7 +134,7 @@ namespace UniversalChat.Program.Server
             {
                 var tasks = GetRoleActors("user-table").Select(
                     actors => actors[0].GracefulStop(TimeSpan.FromMinutes(1),
-                                                     new DistributedActorTableMessage<long>.GracefulStop(
+                                                     new DistributedActorTableMessage<string>.GracefulStop(
                                                          InterfacedPoisonPill.Instance)));
                 Task.WhenAll(tasks.ToArray()).Wait();
             }
@@ -143,7 +143,7 @@ namespace UniversalChat.Program.Server
             {
                 var tasks = GetRoleActors("room-table").Select(
                     actors => actors[0].GracefulStop(TimeSpan.FromMinutes(1),
-                                                     new DistributedActorTableMessage<long>.GracefulStop(
+                                                     new DistributedActorTableMessage<string>.GracefulStop(
                                                          InterfacedPoisonPill.Instance)));
                 Task.WhenAll(tasks.ToArray()).Wait();
             }
