@@ -46,19 +46,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Akka.Interfaced, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Akka.Interfaced.0.2.0-build0037\lib\net45\Akka.Interfaced.dll</HintPath>
+      <HintPath>..\..\..\packages\Akka.Interfaced.0.2.0-build0042\lib\net45\Akka.Interfaced.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Akka.Interfaced-Base, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Akka.Interfaced-Base.0.2.0-build0037\lib\net45\Akka.Interfaced-Base.dll</HintPath>
+      <HintPath>..\..\..\packages\Akka.Interfaced-Base.0.2.0-build0042\lib\net45\Akka.Interfaced-Base.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Akka.Interfaced.LogFilter, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Akka.Interfaced.LogFilter.0.2.0-build0037\lib\net45\Akka.Interfaced.LogFilter.dll</HintPath>
+      <HintPath>..\..\..\packages\Akka.Interfaced.LogFilter.0.2.0-build0042\lib\net45\Akka.Interfaced.LogFilter.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Akka.Interfaced.ProtobufSerializer, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Akka.Interfaced.ProtobufSerializer.0.2.0-build0037\lib\net45\Akka.Interfaced.ProtobufSerializer.dll</HintPath>
+      <HintPath>..\..\..\packages\Akka.Interfaced.ProtobufSerializer.0.2.0-build0042\lib\net45\Akka.Interfaced.ProtobufSerializer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Akka.Remote, Version=1.0.4.12, Culture=neutral, processorArchitecture=MSIL">
