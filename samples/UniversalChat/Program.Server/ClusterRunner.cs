@@ -149,8 +149,10 @@ namespace UniversalChat.Program.Server
             }
 
             Console.WriteLine("Shutdown: Systems");
-            foreach (var node in Enumerable.Reverse(_nodes))
-                node.System.Shutdown();
+            {
+                foreach (var node in Enumerable.Reverse(_nodes))
+                    node.System.Shutdown();
+            }
         }
 
         private IEnumerable<IActorRef[]> GetRoleActors(string role)
