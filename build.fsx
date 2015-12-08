@@ -39,23 +39,23 @@ let projects = ([
     {   emptyProject with
         Name="Akka.Interfaced.SlimSocket.Base";
         Folder="./core/Akka.Interfaced.SlimSocket.Base";
-        Dependencies=[("protobuf-net", "2.0.0.668"); 
-                      ("TypeAlias", "1.0.1")];
+        Dependencies=[("protobuf-net", ""); 
+                      ("TypeAlias", "")];
     };
     {   emptyProject with
         Name="Akka.Interfaced.SlimSocket.Client";
         Folder="./core/Akka.Interfaced.SlimSocket.Client";
         Dependencies=[("Akka.Interfaced.SlimSocket.Base", "");
-                      ("Akka.Interfaced-SlimClient", "0.2.0-build0029");
-                      ("Common.Logging.Core", "3.3.1");
-                      ("NetLegacySupport.Tuple", "1.0.2")];
+                      ("Akka.Interfaced-SlimClient", "");
+                      ("Common.Logging.Core", "");
+                      ("NetLegacySupport.Tuple", "")];
     };
     {   emptyProject with
         Name="Akka.Interfaced.SlimSocket.Server";
         Folder="./core/Akka.Interfaced.SlimSocket.Server";
         Dependencies=[("Akka.Interfaced.SlimSocket.Base", "");
-                      ("Akka.Interfaced", "0.2.0-build0029");
-                      ("Common.Logging.Core", "3.3.1")];
+                      ("Akka.Interfaced", "");
+                      ("Common.Logging.Core", "")];
     }]
     |> List.map (fun p -> 
         let parsedReleases =
@@ -70,10 +70,12 @@ let projects = ([
 let project name =
     List.filter (fun p -> p.Name = name) projects |> List.head
 
-let dependencies p =
+let dependencies p deps =
     p.Dependencies |>
     List.map (fun d -> match d with 
-                       | (id, "") -> (id, (project id).PackageVersion)
+                       | (id, "") -> (id, match List.tryFind (fun (x, ver) -> x = id) deps with
+                                          | Some (_, ver) -> ver
+                                          | None -> ((project id).PackageVersion))
                        | (id, ver) -> (id, ver))
     
 // ---------------------------------------------------------------------------- Variables
@@ -156,12 +158,15 @@ let createNugetPackages _ =
         let isSrc f = (hasExt ".cs" f) && not (isAssemblyInfo f)
         CopyDir (workDir @@ "src") project.Folder isSrc
 
+        let packageFile = project.Folder @@ "packages.config"
+        let packageDependencies = if (fileExists packageFile) then (getDependencies packageFile) else []
+
         NuGet (fun p -> 
             {p with
                 Project = project.Name
                 OutputPath = nugetDir
                 WorkingDir = workDir
-                Dependencies = dependencies project
+                Dependencies = dependencies project packageDependencies
                 SymbolPackage = (if (project.Name.Contains("Templates")) then NugetSymbolPackage.None else NugetSymbolPackage.Nuspec)
                 Version = project.PackageVersion 
                 ReleaseNotes = (List.head project.Releases).Notes |> String.concat "\n"
