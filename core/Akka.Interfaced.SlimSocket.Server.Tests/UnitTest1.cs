@@ -7,10 +7,10 @@ namespace Akka.Interfaced.SlimSocket.Server.Tests
     public class UnitTest1
     {
         [Fact]
-        public void TestMethod1()
+        public void TestDummy()
         {
+            var dummy = new TcpConnection(null);
+            Assert.NotNull(dummy);
         }
     }
-
-
 }

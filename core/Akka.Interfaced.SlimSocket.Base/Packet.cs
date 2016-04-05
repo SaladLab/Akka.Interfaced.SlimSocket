@@ -4,7 +4,7 @@ namespace Akka.Interfaced.SlimSocket.Base
 {
     public enum PacketType
     {
-        Notification = 1, 
+        Notification = 1,
         Request = 2,
         Response = 3,
     }

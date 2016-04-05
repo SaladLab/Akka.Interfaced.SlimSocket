@@ -41,7 +41,10 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         public override long Position
         {
-            get { return _pos; }
+            get
+            {
+                return _pos;
+            }
             set
             {
                 if (value < 0)
@@ -181,12 +184,12 @@ namespace Akka.Interfaced.SlimSocket.Server
             if (pos < _head.Count && posEnd <= _head.Count)
             {
                 segment0 = new ArraySegment<byte>(_head.Array, _head.Offset + pos, length);
-                segment1 = new ArraySegment<byte>();
+                segment1 = default(ArraySegment<byte>);
             }
             else if (pos >= _head.Count && posEnd >= _head.Count)
             {
                 segment0 = new ArraySegment<byte>(_tail.Value.Array, _tail.Value.Offset + pos - _head.Count, length);
-                segment1 = new ArraySegment<byte>();
+                segment1 = default(ArraySegment<byte>);
             }
             else
             {

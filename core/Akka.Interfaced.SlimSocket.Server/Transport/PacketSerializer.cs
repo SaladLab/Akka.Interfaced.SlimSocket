@@ -19,7 +19,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             if (ms != null)
             {
                 segment0 = new ArraySegment<byte>(ms.GetBuffer(), pos, length);
-                segment1 = new ArraySegment<byte>();
+                segment1 = default(ArraySegment<byte>);
                 return;
             }
             var hs = stream as HeadTailWriteStream;

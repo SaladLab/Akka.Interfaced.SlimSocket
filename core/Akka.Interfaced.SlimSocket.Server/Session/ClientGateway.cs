@@ -71,7 +71,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             _logger?.Info("Stop listening.");
             _isStopped = true;
-            
+
             // stop listening
 
             if (_tcpAcceptor != null)

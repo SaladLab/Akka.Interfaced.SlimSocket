@@ -11,7 +11,7 @@ namespace UniversalChat.Program.Server
         private class AccountInfo
         {
             public string Password;
-            public DateTime LastLoginTime; 
+            public DateTime LastLoginTime;
         }
 
         // If account exists, check password correct.

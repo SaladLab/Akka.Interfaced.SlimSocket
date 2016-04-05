@@ -8,7 +8,7 @@ using Common.Logging;
 
 namespace Akka.Interfaced.SlimSocket.Client
 {
-    // TODO: 
+    // TODO:
     // - Session management (Session ID issued by host. Rebind ression when reconnect)
     // - Full-Ordered Request (1 Request a time)
 
@@ -35,7 +35,7 @@ namespace Akka.Interfaced.SlimSocket.Client
 
         private int _lastRequestId = 0;
         private readonly List<Packet> _requestPacketQueues = new List<Packet>();
-        private readonly ConcurrentDictionary<int, Action<ResponseMessage>> _requestResponseMap = 
+        private readonly ConcurrentDictionary<int, Action<ResponseMessage>> _requestResponseMap =
             new ConcurrentDictionary<int, Action<ResponseMessage>>();
 
         private int _lastObserverId;
@@ -43,7 +43,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         private readonly ConcurrentDictionary<int, ObserverEventDispatcher> _observerChannelMap =
             new ConcurrentDictionary<int, ObserverEventDispatcher>();
 
-        public Communicator(ILog logger, IPEndPoint remoteEndPoint, 
+        public Communicator(ILog logger, IPEndPoint remoteEndPoint,
                             Func<Communicator, TcpConnection> connectionFactory)
         {
             _state = StateType.None;

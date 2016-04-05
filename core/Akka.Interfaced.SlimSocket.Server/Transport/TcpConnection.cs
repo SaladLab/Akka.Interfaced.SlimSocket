@@ -17,7 +17,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         private Socket _socket;
         private IPEndPoint _localEndPoint;
         private IPEndPoint _remoteEndPoint;
-        private InterlockedCountFlag _issueCountFlag = new InterlockedCountFlag();
+        private InterlockedCountFlag _issueCountFlag = default(InterlockedCountFlag);
         private int _closeReason;
 
         private byte[] _receiveBuffer;
@@ -197,7 +197,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         private void ProcessClose()
         {
-            Debug.Assert(_issueCountFlag.Flag);
+            Debug.Assert(_issueCountFlag.Flag, "ProcessClose assumes it's still open");
 
             // Closed Event
 
@@ -527,7 +527,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 _sendLargeOffset = 0;
                 _sendLargeLength = streamLength - _sendBuffer.Length;
 
-                Debug.Assert(_sendLargeBuffer != null && _sendLargeLength > 0);
+                Debug.Assert(_sendLargeBuffer != null && _sendLargeLength > 0, "It should be valid");
             }
 
             IssueSend();
@@ -585,7 +585,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                     return;
 
                 int len = Math.Min(_sendLargeLength - _sendLargeOffset, _sendBuffer.Length);
-                Debug.Assert(len > 0);
+                Debug.Assert(len > 0, "It should be large enough");
 
                 Array.Copy(
                     _sendLargeBuffer.Value.Array,

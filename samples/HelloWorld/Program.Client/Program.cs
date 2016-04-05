@@ -11,7 +11,7 @@ using TypeAlias;
 
 namespace HelloWorld.Program.Client
 {
-    class TestDriver : IHelloWorldEventObserver
+    internal class TestDriver : IHelloWorldEventObserver
     {
         public void Run(Communicator communicator)
         {
@@ -37,9 +37,9 @@ namespace HelloWorld.Program.Client
         }
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var serializer = new PacketSerializer(
                 new PacketSerializerBase.Data(

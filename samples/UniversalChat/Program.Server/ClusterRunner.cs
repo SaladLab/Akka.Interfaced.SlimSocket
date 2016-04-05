@@ -277,7 +277,7 @@ namespace UniversalChat.Program.Server
                     typeof(IUserLogin))
             };
         }
-    };
+    }
 
     public class RoomActorFactory : IActorFactory
     {

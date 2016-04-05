@@ -37,32 +37,33 @@ namespace Akka.Interfaced.SlimSocket.Client
 
         public bool Pending
         {
-            get { return _isPending; }
+            get
+            {
+                return _isPending;
+            }
             set
             {
-                // When off, flush pending messages
                 if (_isPending && value == false)
                 {
                     FlushPendingMessage();
                 }
-
                 _isPending = value;
             }
         }
 
         public bool KeepingOrder
         {
-            get { return _isKeepingOrder; }
+            get
+            {
+                return _isKeepingOrder;
+            }
             set
             {
-                // When on, initialize queue
                 if (_isKeepingOrder == false && value)
                 {
                     _lastNotificationId = 0;
                     _outOfOrderQueue = new List<Tuple<int, IInvokable>>();
                 }
-
-                // When off, flush pending messages
                 if (_isKeepingOrder && value == false)
                 {
                     if (_outOfOrderQueue != null)
@@ -72,7 +73,6 @@ namespace Akka.Interfaced.SlimSocket.Client
                         _outOfOrderQueue.Clear();
                     }
                 }
-
                 _isKeepingOrder = value;
             }
         }

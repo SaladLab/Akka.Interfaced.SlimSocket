@@ -20,7 +20,7 @@ namespace Akka.Interfaced.SlimSocket.Client
             if (ms != null)
             {
                 segment0 = new ArraySegment<byte>(ms.GetBuffer(), pos, length);
-                segment1 = new ArraySegment<byte>();
+                segment1 = default(ArraySegment<byte>);
                 return;
             }
             throw new InvalidOperationException("Unknown stream!");

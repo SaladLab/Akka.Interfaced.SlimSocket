@@ -1,22 +1,22 @@
-﻿using Akka.Actor;
+﻿using System;
+using System.Net;
+using System.Net.Sockets;
+using Akka.Actor;
 using Akka.Interfaced;
 using Akka.Interfaced.SlimSocket.Base;
 using Akka.Interfaced.SlimSocket.Server;
 using Common.Logging;
 using HelloWorld.Interface;
 using ProtoBuf.Meta;
-using System;
-using System.Net;
-using System.Net.Sockets;
 using TypeAlias;
 
 namespace HelloWorld.Program.Server
 {
-    class Program
+    internal class Program
     {
-        static TcpConnectionSettings _tcpConnectionSettings;
+        private static TcpConnectionSettings s_tcpConnectionSettings;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             if (typeof(IHelloWorld) == null)
                 throw new Exception("Force interface module to be loaded");
@@ -30,11 +30,11 @@ namespace HelloWorld.Program.Server
             Console.ReadLine();
         }
 
-        static void StartListen(ActorSystem system, int port)
+        private static void StartListen(ActorSystem system, int port)
         {
             var logger = LogManager.GetLogger("ClientGateway");
 
-            _tcpConnectionSettings = new TcpConnectionSettings
+            s_tcpConnectionSettings = new TcpConnectionSettings
             {
                 PacketSerializer = new PacketSerializer(
                     new PacketSerializerBase.Data(
@@ -46,14 +46,14 @@ namespace HelloWorld.Program.Server
             clientGateway.Tell(new ClientGatewayMessage.Start(new IPEndPoint(IPAddress.Any, port)));
         }
 
-        static IActorRef CreateSession(IActorContext context, Socket socket)
+        private static IActorRef CreateSession(IActorContext context, Socket socket)
         {
             var logger = LogManager.GetLogger($"Client({socket.RemoteEndPoint.ToString()})");
             return context.ActorOf(Props.Create(() => new ClientSession(
-                logger, socket, _tcpConnectionSettings, CreateInitialActor)));
+                logger, socket, s_tcpConnectionSettings, CreateInitialActor)));
         }
 
-        static Tuple<IActorRef, Type>[] CreateInitialActor(IActorContext context, Socket socket)
+        private static Tuple<IActorRef, Type>[] CreateInitialActor(IActorContext context, Socket socket)
         {
             return new[]
             {

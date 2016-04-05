@@ -48,7 +48,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         protected override void PostStop()
         {
             _connection.Close();
-            
+
             base.PostStop();
         }
 
