@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Interfaced.SlimSocket.Base", "core\Akka.Interfaced.SlimSocket.Base\Akka.Interfaced.SlimSocket.Base.csproj", "{DD5819EE-4F82-4C37-8BFC-2E873EC11E56}"
 EndProject
@@ -12,12 +12,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{1B46353C-08BE-4292-A6C9-4FD85192B11E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample-UniversalChat", "Sample-UniversalChat", "{1FBD3CFD-663E-426A-ACD3-F996C9BE5025}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Interfaced.SlimSocket.Base.Tests", "core\Akka.Interfaced.SlimSocket.Base.Tests\Akka.Interfaced.SlimSocket.Base.Tests.csproj", "{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Interfaced.SlimSocket.Client.Tests", "core\Akka.Interfaced.SlimSocket.Client.Tests\Akka.Interfaced.SlimSocket.Client.Tests.csproj", "{21CD0AFB-0CC8-4279-AC7D-FF3A9A78D4CA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Interfaced.SlimSocket.Server.Tests", "core\Akka.Interfaced.SlimSocket.Server.Tests\Akka.Interfaced.SlimSocket.Server.Tests.csproj", "{1039029A-BC09-4C65-8A4A-C6A8127996B0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample-UnityBasic", "Sample-UnityBasic", "{C4D23D1E-5F29-40A9-923C-18F44FF7A736}"
 EndProject
@@ -55,6 +49,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalChat.Program.Serve
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalChat.Program.Client.Console", "samples\UniversalChat\Program.Client.Console\UniversalChat.Program.Client.Console.csproj", "{86769538-F049-4F59-94CE-B7CCCE8CF48F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Interfaced.SlimSocket.Base.Tests", "core\Akka.Interfaced.SlimSocket.Base.Tests\Akka.Interfaced.SlimSocket.Base.Tests.csproj", "{C3BA09D2-EBFF-4F0C-A2A3-AA1334BD0BE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Interfaced.SlimSocket.Client.Tests", "core\Akka.Interfaced.SlimSocket.Client.Tests\Akka.Interfaced.SlimSocket.Client.Tests.csproj", "{E7E19F51-AF93-4D85-8B5D-748C23B0DFB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Interfaced.SlimSocket.Server.Tests", "core\Akka.Interfaced.SlimSocket.Server.Tests\Akka.Interfaced.SlimSocket.Server.Tests.csproj", "{E9E80AFA-C09F-4025-9B2D-AE36C5783A4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,18 +73,6 @@ Global
 		{BB4A7F05-5F17-46B4-AF99-32E9BA28F673}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB4A7F05-5F17-46B4-AF99-32E9BA28F673}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB4A7F05-5F17-46B4-AF99-32E9BA28F673}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}.Release|Any CPU.Build.0 = Release|Any CPU
-		{21CD0AFB-0CC8-4279-AC7D-FF3A9A78D4CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{21CD0AFB-0CC8-4279-AC7D-FF3A9A78D4CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{21CD0AFB-0CC8-4279-AC7D-FF3A9A78D4CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{21CD0AFB-0CC8-4279-AC7D-FF3A9A78D4CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1039029A-BC09-4C65-8A4A-C6A8127996B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1039029A-BC09-4C65-8A4A-C6A8127996B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1039029A-BC09-4C65-8A4A-C6A8127996B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1039029A-BC09-4C65-8A4A-C6A8127996B0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0A82F9F5-3E7E-4759-A3B1-E65BD31C3AD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0A82F9F5-3E7E-4759-A3B1-E65BD31C3AD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A82F9F5-3E7E-4759-A3B1-E65BD31C3AD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -149,6 +137,18 @@ Global
 		{86769538-F049-4F59-94CE-B7CCCE8CF48F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86769538-F049-4F59-94CE-B7CCCE8CF48F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86769538-F049-4F59-94CE-B7CCCE8CF48F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3BA09D2-EBFF-4F0C-A2A3-AA1334BD0BE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3BA09D2-EBFF-4F0C-A2A3-AA1334BD0BE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3BA09D2-EBFF-4F0C-A2A3-AA1334BD0BE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3BA09D2-EBFF-4F0C-A2A3-AA1334BD0BE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7E19F51-AF93-4D85-8B5D-748C23B0DFB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7E19F51-AF93-4D85-8B5D-748C23B0DFB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7E19F51-AF93-4D85-8B5D-748C23B0DFB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7E19F51-AF93-4D85-8B5D-748C23B0DFB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9E80AFA-C09F-4025-9B2D-AE36C5783A4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9E80AFA-C09F-4025-9B2D-AE36C5783A4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9E80AFA-C09F-4025-9B2D-AE36C5783A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9E80AFA-C09F-4025-9B2D-AE36C5783A4C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,9 +157,6 @@ Global
 		{DD5819EE-4F82-4C37-8BFC-2E873EC11E56} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
 		{46710772-28C4-498F-BE7C-189FDA75130C} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
 		{BB4A7F05-5F17-46B4-AF99-32E9BA28F673} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
-		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
-		{21CD0AFB-0CC8-4279-AC7D-FF3A9A78D4CA} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
-		{1039029A-BC09-4C65-8A4A-C6A8127996B0} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
 		{0A82F9F5-3E7E-4759-A3B1-E65BD31C3AD3} = {1BE4A351-A3C6-4D1D-BFF9-A8F06615C93A}
 		{A1A28538-15BF-4202-91A1-D56525B1E274} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
 		{C4008395-CE4C-430B-8F78-623B6BE83989} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
@@ -176,5 +173,8 @@ Global
 		{B443861F-D8A7-4E32-98DA-520B65232A9B} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
 		{5FC0EDBC-28C2-43A4-B0EF-3AE91A5F405E} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
 		{86769538-F049-4F59-94CE-B7CCCE8CF48F} = {1FBD3CFD-663E-426A-ACD3-F996C9BE5025}
+		{C3BA09D2-EBFF-4F0C-A2A3-AA1334BD0BE1} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
+		{E7E19F51-AF93-4D85-8B5D-748C23B0DFB5} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
+		{E9E80AFA-C09F-4025-9B2D-AE36C5783A4C} = {1B46353C-08BE-4292-A6C9-4FD85192B11E}
 	EndGlobalSection
 EndGlobal
