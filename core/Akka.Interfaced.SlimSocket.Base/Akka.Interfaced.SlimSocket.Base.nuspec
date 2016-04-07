@@ -7,8 +7,8 @@
     <authors>Esun Kim</authors>
     <owners>Esun Kim</owners>
     <description>Akka.Interfaced.SlimSocket.Base</description>
-    <licenseUrl>https://raw.githubusercontent.com/SaladbowlCreative/Akka.Interfaced.SlimSocket/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/SaladbowlCreative/Akka.Interfaced.SlimSocket</projectUrl>
+    <licenseUrl>https://raw.githubusercontent.com/SaladLab/Akka.Interfaced.SlimSocket/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/SaladLab/Akka.Interfaced.SlimSocket</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>@releaseNotes@</releaseNotes>
     <copyright>Copyright © 2016 SaladLab</copyright>
