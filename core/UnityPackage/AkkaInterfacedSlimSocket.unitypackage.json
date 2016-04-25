@@ -1,0 +1,36 @@
+{
+  "id": "AkkaInterfacedSlimSocket",
+  "version": "0.2.1",
+  "authors": [ "Esun Kim" ],
+  "owners": [ "Esun Kim" ],
+  "description": "SlimSocket-Client for Akka.Interfaced",
+  "dependencies": {
+    "AkkaInterfaced": {
+      "version": ">=0.2.1",
+      "source": "github:SaladLab/Akka.Interfaced"
+    },
+    "CommonLogging": {
+      "version": ">=3.3.1",
+      "source": "github:SaladLab/Common.Logging.Unity3D"
+    },
+    "NetLegacySupport": {
+      "version": ">=1.1.0",
+      "source": "github:SaladLab/NetLegacySupport"
+    },
+    "protobuf-net": {
+      "version": "2.0.0.668",
+      "source": "nuget:net20"
+    },
+    "TypeAlias": {
+      "version": ">=1.1.2",
+      "source": "github:SaladLab/TypeAlias"
+    }
+  },
+  "files": [
+    "../Akka.Interfaced.SlimSocket.Base.Net35/bin/Release/Akka.Interfaced.SlimSocket.Base.dll",
+    "../Akka.Interfaced.SlimSocket.Client.Net35/bin/Release/Akka.Interfaced.SlimSocket.Client.dll",
+    "Sources/SlimRequestWaiter.cs",
+    "Sources/SlimTask.cs",
+    "$dependencies$"
+  ]
+}

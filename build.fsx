@@ -45,17 +45,18 @@ Target "Cover" <| fun _ ->
     
 Target "Coverity" <| fun _ -> coveritySolution solution "SaladLab/Akka.Interfaced.SlimSocket"
 
-Target "Nuget" <| fun _ ->
-    createNugetPackages solution
-    publishNugetPackages solution
+Target "PackNuget" <| fun _ -> createNugetPackages solution
 
-Target "CreateNuget" <| fun _ ->
-    createNugetPackages solution
+Target "PackUnity" <| fun _ ->
+    packUnityPackage "./core/UnityPackage/AkkaInterfacedSlimSocket.unitypackage.json"
 
-Target "PublishNuget" <| fun _ ->
-    publishNugetPackages solution
+Target "Pack" <| fun _ -> ()
 
-Target "Unity" <| fun _ -> buildUnityPackage "./core/UnityPackage"
+Target "PublishNuget" <| fun _ -> publishNugetPackages solution
+
+Target "PublishUnity" <| fun _ -> ()
+
+Target "Publish" <| fun _ -> ()
 
 Target "CI" <| fun _ -> ()
 
@@ -68,13 +69,20 @@ Target "Help" <| fun _ ->
   ==> "Build"
   ==> "Test"
 
-"Build" ==> "Nuget"
-"Build" ==> "CreateNuget"
 "Build" ==> "Cover"
 "Restore" ==> "Coverity"
 
+let isPublishOnly = getBuildParam "publishonly"
+
+"Build" ==> "PackNuget" =?> ("PublishNuget", isPublishOnly = "")
+"Build" ==> "PackUnity" =?> ("PublishUnity", isPublishOnly = "")
+"PackNuget" ==> "Pack"
+"PackUnity" ==> "Pack"
+"PublishNuget" ==> "Publish"
+"PublishUnity" ==> "Publish"
+
 "Test" ==> "CI"
 "Cover" ==> "CI"
-"Nuget" ==> "CI"
+"Publish" ==> "CI"
 
 RunTargetOrDefault "Help"
