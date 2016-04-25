@@ -9,6 +9,10 @@
   ],
   "Description": "SlimSocket-Client for Akka.Interfaced",
   "Dependencies": {
+    "AkkaInterfaced": {
+      "Version": ">=0.2.1",
+      "Source": "github:SaladLab/Akka.Interfaced"
+    },
     "CommonLogging": {
       "Version": ">=3.3.1",
       "Source": "github:SaladLab/Common.Logging.Unity3D"
@@ -27,11 +31,14 @@
     }
   },
   "MergedDependencies": {
+    "AkkaInterfaced": {
+      "Version": "0.2.1"
+    },
     "CommonLogging": {
       "Version": "3.3.1"
     },
     "NetLegacySupport": {
-      "Version": "1.1.2"
+      "Version": "1.1.0"
     },
     "protobuf-net": {
       "Version": "2.0.0.668"
@@ -45,10 +52,12 @@
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced.SlimSocket.Base.dll.mdb",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced.SlimSocket.Client.dll",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced.SlimSocket.Client.dll.mdb",
-    "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced-Base.dll",
-    "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced-SlimClient.dll",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/SlimRequestWaiter.cs",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/SlimTask.cs",
+    {
+      "Target": "Assets/UnityPackages/AkkaInterfaced.unitypackage.json",
+      "Merged": true
+    },
     {
       "Target": "Assets/UnityPackages/CommonLogging.unitypackage.json",
       "Merged": true
@@ -63,6 +72,22 @@
     },
     {
       "Target": "Assets/UnityPackages/TypeAlias.unitypackage.json",
+      "Merged": true
+    },
+    {
+      "Target": "Assets/UnityPackages/AkkaInterfaced/Akka.Interfaced-Base.dll.mdb",
+      "Merged": true
+    },
+    {
+      "Target": "Assets/UnityPackages/AkkaInterfaced/Akka.Interfaced-Base.dll",
+      "Merged": true
+    },
+    {
+      "Target": "Assets/UnityPackages/AkkaInterfaced/Akka.Interfaced-SlimClient.dll.mdb",
+      "Merged": true
+    },
+    {
+      "Target": "Assets/UnityPackages/AkkaInterfaced/Akka.Interfaced-SlimClient.dll",
       "Merged": true
     },
     {
