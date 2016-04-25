@@ -129,7 +129,7 @@ namespace UniversalChat.Program.Server
 
                 _removed = true;
 
-                _clusterContext.RoomTable.Tell(new DistributedActorTableMessage<string>.Remove(_name));
+                Self.Tell(InterfacedPoisonPill.Instance);
             }
         }
 
