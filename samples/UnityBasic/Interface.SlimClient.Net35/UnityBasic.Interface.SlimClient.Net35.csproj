@@ -96,8 +96,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>"$(ProtobufNetPrecompileExe)" "$(TargetPath)" -o:InterfaceProtobufSerializer.dll -t:InterfaceProtobufSerializer "-f:.NETFramework\v3.5\Profile\Unity Subset v3.5"
-COPY /Y "$(TargetDir)InterfaceProtobufSerializer.dll" "$(ProjectDir)..\Program.Client\Assets\Script"
-COPY /Y "$(TargetPath)" "$(ProjectDir)..\Program.Client\Assets\Script\Interface.dll"
+COPY /Y "$(TargetDir)InterfaceProtobufSerializer.dll" "$(ProjectDir)..\Program.Client\Assets\Interface"
+COPY /Y "$(TargetPath)" "$(ProjectDir)..\Program.Client\Assets\Interface\Interface.dll"
 
 </PostBuildEvent>
   </PropertyGroup>
