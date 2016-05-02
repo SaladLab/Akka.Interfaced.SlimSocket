@@ -118,9 +118,9 @@ namespace Akka.Interfaced.SlimSocket.Client
 
                     _requestPacketQueues.Clear();
                 }
-            }
 
-            _state = StateType.Connected;
+                _state = StateType.Connected;
+            }
         }
 
         // BEWARE: CALLED BY WORK THREAD
@@ -227,7 +227,11 @@ namespace Akka.Interfaced.SlimSocket.Client
             {
                 lock (_requestPacketQueues)
                 {
-                    _requestPacketQueues.Add(packet);
+                    // double check state because state can be changed after first check
+                    if (_state == StateType.Connected)
+                        _tcpConnection.SendPacket(packet);
+                    else
+                        _requestPacketQueues.Add(packet);
                 }
             }
         }
