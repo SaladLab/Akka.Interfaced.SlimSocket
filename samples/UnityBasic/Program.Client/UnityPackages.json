@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "AkkaInterfacedSlimSocket": {
-      "version": ">=0.2.1",
+      "version": "0.2.*",
       "source": "github:SaladLab/Akka.Interfaced.SlimSocket"
     }
   }
