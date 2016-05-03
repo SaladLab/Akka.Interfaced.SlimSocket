@@ -1,3 +1,7 @@
+## 0.2.2 (Released 2016/05/03)
+
+* Fix broken send chain on connect
+ 
 ## 0.2.1 (Released 2016/04/25)
 
 * Update Akka.NET 1.0.7
