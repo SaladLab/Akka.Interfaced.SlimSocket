@@ -11,11 +11,13 @@ let solution =
         "./Akka.Interfaced.SlimSocket.sln" "Release" 
         [ { emptyProject with Name = "Akka.Interfaced.SlimSocket.Base"
                               Folder = "./core/Akka.Interfaced.SlimSocket.Base"
+                              PackagePrerelease = "beta"
                               Dependencies = 
                                   [ ("protobuf-net", "")
                                     ("TypeAlias", "") ] }
           { emptyProject with Name = "Akka.Interfaced.SlimSocket.Client"
                               Folder = "./core/Akka.Interfaced.SlimSocket.Client"
+                              PackagePrerelease = "beta"
                               Dependencies = 
                                   [ ("Akka.Interfaced.SlimSocket.Base", "")
                                     ("Akka.Interfaced-SlimClient", "")
@@ -23,6 +25,7 @@ let solution =
                                     ("NetLegacySupport.Tuple", "") ] }
           { emptyProject with Name = "Akka.Interfaced.SlimSocket.Server"
                               Folder = "./core/Akka.Interfaced.SlimSocket.Server"
+                              PackagePrerelease = "beta"
                               Dependencies = 
                                   [ ("Akka.Interfaced.SlimSocket.Base", "")
                                     ("Akka.Interfaced", "")
