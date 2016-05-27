@@ -52,6 +52,8 @@
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced.SlimSocket.Base.dll.mdb",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced.SlimSocket.Client.dll",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/Akka.Interfaced.SlimSocket.Client.dll.mdb",
+    "Assets/UnityPackages/AkkaInterfacedSlimSocket/CommunicatorHelper.cs",
+    "Assets/UnityPackages/AkkaInterfacedSlimSocket/CommunicatorWorker.cs",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/SlimTaskCompletionSource.cs",
     "Assets/UnityPackages/AkkaInterfacedSlimSocket/SlimTaskFactory.cs",
     {

@@ -2,10 +2,8 @@
 using System.Collections;
 using System.Net;
 using Akka.Interfaced;
-using Akka.Interfaced.SlimSocket.Base;
 using Akka.Interfaced.SlimSocket.Client;
 using Common.Logging;
-using TypeAlias;
 using UnityBasic.Interface;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,17 +14,8 @@ public class MainScene : MonoBehaviour, IHelloWorldEventObserver
 
     void Start()
     {
-        ApplicationComponent.TryInit();
-
-        var serializer = new PacketSerializer(
-            new PacketSerializerBase.Data(
-                new ProtoBufMessageSerializer(new InterfaceProtobufSerializer()),
-                new TypeAliasTable()));
-
-        var comm = new Communicator(G.Logger, new IPEndPoint(IPAddress.Loopback, 5000),
-                                    _ => new TcpConnection(serializer, LogManager.GetLogger("Connection")));
-        comm.TaskFactory = new SlimTaskFactory { Owner = ApplicationComponent.Instance };
-        comm.ObserverEventPoster = c => ApplicationComponent.Post(c, null);
+        var comm = CommunicatorHelper.CreateCommunicator< InterfaceProtobufSerializer>(
+            G.Logger, new IPEndPoint(IPAddress.Loopback, 5000));
         comm.Start();
         G.Comm = comm;
 
@@ -63,12 +52,8 @@ public class MainScene : MonoBehaviour, IHelloWorldEventObserver
     {
         WriteLine("*** HelloWorld ***");
 
-        // add observer
-
         var observer = G.Comm.CreateObserver<IHelloWorldEventObserver>(this);
         yield return helloWorld.AddObserver(observer).WaitHandle;
-
-        // make some noise
 
         var t1 = helloWorld.SayHello("World");
         yield return t1.WaitHandle;
