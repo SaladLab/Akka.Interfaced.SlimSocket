@@ -56,6 +56,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Base\AutoSurrogate.cs">
+      <Link>AutoSurrogate.cs</Link>
+    </Compile>
     <Compile Include="..\Akka.Interfaced.SlimSocket.Base\ExceptionSerializer.cs">
       <Link>ExceptionSerializer.cs</Link>
     </Compile>

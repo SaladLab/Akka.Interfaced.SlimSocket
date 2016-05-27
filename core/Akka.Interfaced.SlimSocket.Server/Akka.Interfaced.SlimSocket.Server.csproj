@@ -76,6 +76,7 @@
     <Compile Include="Session\ClientGateway.cs" />
     <Compile Include="Session\ClientGatewayMessage.cs" />
     <Compile Include="Session\ClientSession.cs" />
+    <Compile Include="Transport\AkkaSurrogate.cs" />
     <Compile Include="Transport\HeadTailWriteStream.cs" />
     <Compile Include="Transport\InterlockedCountFlag.cs" />
     <Compile Include="Transport\PacketSerializer.cs" />

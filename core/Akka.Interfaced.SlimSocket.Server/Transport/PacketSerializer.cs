@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Akka.Interfaced.SlimSocket.Base;
+using ProtoBuf.Meta;
 
 namespace Akka.Interfaced.SlimSocket.Server
 {
@@ -9,6 +10,14 @@ namespace Akka.Interfaced.SlimSocket.Server
         public PacketSerializer(Data data)
             : base(data)
         {
+        }
+
+        public static TypeModel CreateTypeModel()
+        {
+            RuntimeTypeModel typeModel = TypeModel.Create();
+            AkkaSurrogate.Register(typeModel);
+            AutoSurrogate.Register(typeModel);
+            return typeModel;
         }
 
         protected override void GetBuffers(

@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoSurrogate.cs" />
     <Compile Include="ExceptionSerializer.cs" />
     <Compile Include="IMessageSerializer.cs" />
     <Compile Include="IPacketSerializer.cs" />

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Akka.Interfaced.SlimSocket.Client
 {
-    public class ObserverEventDispatcher
+    public class ObserverEventDispatcher : INotificationChannel
     {
         private readonly List<IInterfacedObserver> _observers = new List<IInterfacedObserver>();
 
@@ -75,6 +75,11 @@ namespace Akka.Interfaced.SlimSocket.Client
                 }
                 _isKeepingOrder = value;
             }
+        }
+
+        public void Notify(NotificationMessage notificationMessage)
+        {
+            Invoke(notificationMessage.NotificationId, notificationMessage.InvokePayload);
         }
 
         public void Invoke(int notificationId, IInvokable message)
@@ -154,6 +159,21 @@ namespace Akka.Interfaced.SlimSocket.Client
                 foreach (var observer in _observers)
                     message.Invoke(observer);
             }
+        }
+    }
+
+    public static class ObserverEventDispatcherExtensions
+    {
+        public static void Dispose(this IInterfacedObserver observer)
+        {
+            var o = observer as InterfacedObserver;
+            o?.Dispose();
+        }
+
+        public static ObserverEventDispatcher GetEventDispatcher(this IInterfacedObserver observer)
+        {
+            var o = observer as InterfacedObserver;
+            return o?.Channel as ObserverEventDispatcher;
         }
     }
 }

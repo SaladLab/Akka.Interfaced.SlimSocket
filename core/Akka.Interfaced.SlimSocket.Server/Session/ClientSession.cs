@@ -118,14 +118,20 @@ namespace Akka.Interfaced.SlimSocket.Server
 
                 if (actor.IsTagOverridable)
                 {
-                    var msg = (ITagOverridable)p.Message;
+                    var msg = (IPayloadTagOverridable)p.Message;
                     msg.SetTag(actor.TagValue);
+                }
+
+                var observerUpdatable = p.Message as IPayloadObserverUpdatable;
+                if (observerUpdatable != null)
+                {
+                    observerUpdatable.Update(o => ((InterfacedObserver)o).Channel = new ActorNotificationChannel(_self));
                 }
 
                 actor.Actor.Tell(new RequestMessage
                 {
                     RequestId = p.RequestId,
-                    InvokePayload = (IAsyncInvokable)p.Message
+                    InvokePayload = (IInterfacedPayload)p.Message
                 }, _self);
             }
         }

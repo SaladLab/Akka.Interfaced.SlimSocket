@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using Akka.Interfaced.SlimSocket.Base;
 using Common.Logging;
 
@@ -12,7 +13,7 @@ namespace Akka.Interfaced.SlimSocket.Client
     // - Session management (Session ID issued by host. Rebind ression when reconnect)
     // - Full-Ordered Request (1 Request a time)
 
-    public class Communicator
+    public class Communicator : IRequestWaiter
     {
         public enum StateType
         {
@@ -25,6 +26,8 @@ namespace Akka.Interfaced.SlimSocket.Client
         }
 
         public StateType State => _state;
+
+        public ISlimTaskFactory TaskFactory { get; set; }
         public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
 
         private volatile StateType _state;
@@ -40,8 +43,8 @@ namespace Akka.Interfaced.SlimSocket.Client
 
         private int _lastObserverId;
         private readonly List<Packet> _recvSimplePackets = new List<Packet>();
-        private readonly ConcurrentDictionary<int, ObserverEventDispatcher> _observerChannelMap =
-            new ConcurrentDictionary<int, ObserverEventDispatcher>();
+        private readonly ConcurrentDictionary<int, InterfacedObserver> _observerChannelMap =
+            new ConcurrentDictionary<int, InterfacedObserver>();
 
         public Communicator(ILog logger, IPEndPoint remoteEndPoint,
                             Func<Communicator, TcpConnection> connectionFactory)
@@ -50,6 +53,10 @@ namespace Akka.Interfaced.SlimSocket.Client
             _logger = logger;
             _remoteEndPoint = remoteEndPoint;
             _connectionFactory = connectionFactory;
+
+#if !NET35
+            TaskFactory = new SlimTaskFactory();
+#endif
         }
 
         public void Start()
@@ -80,25 +87,46 @@ namespace Akka.Interfaced.SlimSocket.Client
             _tcpConnection.Connect(_remoteEndPoint);
         }
 
-        public int IssueObserverId()
+        public TRef CreateRef<TRef>(int actorId = 1)
+            where TRef : InterfacedActorRef, new()
+        {
+            var actorRef = new TRef();
+            InterfacedActorRefModifier.SetActor(actorRef, new BoundActorRef(1));
+            InterfacedActorRefModifier.SetRequestWaiter(actorRef, this);
+            return actorRef;
+        }
+
+        public TObserver CreateObserver<TObserver>(TObserver observer, bool startPending = false)
+            where TObserver : IInterfacedObserver
+        {
+            var proxy = InterfacedObserver.Create(typeof(TObserver));
+            var observerId = IssueObserverId();
+            proxy.ObserverId = observerId;
+            proxy.Channel = new ObserverEventDispatcher(observer, startPending);
+            proxy.Disposed = () => { RemoveObserver(observerId); };
+            _observerChannelMap.TryAdd(observerId, proxy);
+            return (TObserver)(object)proxy;
+        }
+
+        private int IssueObserverId()
         {
             return ++_lastObserverId;
         }
 
-        public void AddObserver(int observerId, ObserverEventDispatcher observer)
+        private void AddObserver(int observerId, InterfacedObserver observer)
         {
             _observerChannelMap.TryAdd(observerId, observer);
         }
 
-        public void RemoveObserver(int observerId)
+        private void RemoveObserver(int observerId)
         {
-            ObserverEventDispatcher observer;
+            InterfacedObserver observer;
             _observerChannelMap.TryRemove(observerId, out observer);
         }
 
-        public ObserverEventDispatcher GetObserver(int observerId)
+        private InterfacedObserver GetObserver(int observerId)
         {
-            ObserverEventDispatcher observer;
+            InterfacedObserver observer;
             return _observerChannelMap.TryGetValue(observerId, out observer)
                        ? observer
                        : null;
@@ -137,16 +165,29 @@ namespace Akka.Interfaced.SlimSocket.Client
                                            p.ActorId, p.Message.GetType().Name);
                         break;
                     }
+                    var notificationMessage = new NotificationMessage
+                    {
+                        ObserverId = p.ActorId,
+                        NotificationId = p.RequestId,
+                        InvokePayload = (IInvokable)p.Message
+                    };
                     if (ObserverEventPoster != null)
-                        ObserverEventPoster(_ => observer.Invoke(p.RequestId, (IInvokable)p.Message));
+                        ObserverEventPoster(_ => observer.Channel.Notify(notificationMessage));
                     else
-                        observer.Invoke(p.RequestId, (IInvokable)p.Message);
+                        observer.Channel.Notify(notificationMessage);
                     break;
 
                 case PacketType.Response:
                     Action<ResponseMessage> handler;
                     if (_requestResponseMap.TryRemove(p.RequestId, out handler))
                     {
+                        var actorRefUpdatable = p.Message as IPayloadActorRefUpdatable;
+                        if (actorRefUpdatable != null)
+                        {
+                            actorRefUpdatable.Update(a =>
+                            InterfacedActorRefModifier.SetRequestWaiter((InterfacedActorRef)a, this));
+                        }
+
                         handler(new ResponseMessage
                         {
                             RequestId = p.RequestId,
@@ -171,18 +212,18 @@ namespace Akka.Interfaced.SlimSocket.Client
             SendRequestPacket(new Packet
             {
                 Type = PacketType.Request,
-                ActorId = ((SlimActorRef)target).Id,
+                ActorId = ((BoundActorRef)target).Id,
                 Message = requestMessage.InvokePayload,
             }, null);
         }
 
-        public void SendRequestAndWait(ISlimTaskCompletionSource<bool> tcs,
-                                         IActorRef target, RequestMessage requestMessage, TimeSpan? timeout)
+        public Task SendRequestAndWait(IActorRef target, RequestMessage requestMessage, TimeSpan? timeout)
         {
+            var tcs = TaskFactory.Create<bool>();
             SendRequestPacket(new Packet
             {
                 Type = PacketType.Request,
-                ActorId = ((SlimActorRef)target).Id,
+                ActorId = ((BoundActorRef)target).Id,
                 Message = requestMessage.InvokePayload,
             }, r =>
             {
@@ -191,15 +232,16 @@ namespace Akka.Interfaced.SlimSocket.Client
                 else
                     tcs.SetResult(true);
             });
+            return tcs.Task;
         }
 
-        public void SendRequestAndReceive<TResult>(ISlimTaskCompletionSource<TResult> tcs,
-                                                     IActorRef target, RequestMessage requestMessage, TimeSpan? timeout)
+        public Task<TResult> SendRequestAndReceive<TResult>(IActorRef target, RequestMessage requestMessage, TimeSpan? timeout)
         {
+            var tcs = TaskFactory.Create<TResult>();
             SendRequestPacket(new Packet
             {
                 Type = PacketType.Request,
-                ActorId = ((SlimActorRef)target).Id,
+                ActorId = ((BoundActorRef)target).Id,
                 Message = requestMessage.InvokePayload,
             }, r =>
             {
@@ -210,6 +252,7 @@ namespace Akka.Interfaced.SlimSocket.Client
                 else
                     tcs.SetException(new InvalidOperationException("No exception and result. Weird?"));
             });
+            return tcs.Task;
         }
 
         private void SendRequestPacket(Packet packet, Action<ResponseMessage> completionHandler)

@@ -57,6 +57,10 @@
       <HintPath>..\..\packages\NetLegacySupport.Tuple.1.1.0\lib\net40\NetLegacySupport.Tuple.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net.2.1.0-alpha-1\lib\net45\protobuf-net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -70,9 +74,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Session\Communicator.cs" />
     <Compile Include="Session\ISlimTaskCompletionSource.cs" />
+    <Compile Include="Session\ISlimTaskFactory.cs" />
     <Compile Include="Session\ObserverEventDispatcher.cs" />
-    <Compile Include="Session\SlimActorRef.cs" />
-    <Compile Include="Session\SlimTaskRequestWaiter.cs" />
+    <Compile Include="Session\SlimTaskFactory.cs" />
     <Compile Include="Session\SlimTaskCompletionSource.cs" />
     <Compile Include="Transport\PacketSerializer.cs" />
     <Compile Include="Transport\TcpConnection.cs" />

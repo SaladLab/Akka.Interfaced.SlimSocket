@@ -1,12 +1,12 @@
 {
   "id": "AkkaInterfacedSlimSocket",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "authors": [ "Esun Kim" ],
   "owners": [ "Esun Kim" ],
   "description": "SlimSocket-Client for Akka.Interfaced",
   "dependencies": {
     "AkkaInterfaced": {
-      "version": "0.2.*",
+      "version": "0.3.*",
       "source": "github:SaladLab/Akka.Interfaced"
     },
     "CommonLogging": {
@@ -18,8 +18,8 @@
       "source": "github:SaladLab/NetLegacySupport"
     },
     "protobuf-net": {
-      "version": "2.0.0.668",
-      "source": "nuget:net20"
+      "version": "2.1.0-alpha-1",
+      "source": "nuget:net30"
     },
     "TypeAlias": {
       "version": "1.*",
