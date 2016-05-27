@@ -14,11 +14,38 @@ using ProtoBuf;
 using TypeAlias;
 using System.ComponentModel;
 
+namespace UnityBasic.Interface
+{
+    #region SurrogateForIActorRef
+
+    [ProtoContract]
+    public class SurrogateForIActorRef
+    {
+        [ProtoMember(1)] public int Id;
+
+        [ProtoConverter]
+        public static SurrogateForIActorRef Convert(IActorRef value)
+        {
+            if (value == null) return null;
+            var actor = ((BoundActorRef)value);
+            return new SurrogateForIActorRef { Id = actor.Id };
+        }
+
+        [ProtoConverter]
+        public static IActorRef Convert(SurrogateForIActorRef value)
+        {
+            if (value == null) return null;
+            return new BoundActorRef(value.Id);
+        }
+    }
+}
+
+#endregion
 #region UnityBasic.Interface.ICalculator
 
 namespace UnityBasic.Interface
 {
-    [PayloadTableForInterfacedActor(typeof(ICalculator))]
+    [PayloadTable(typeof(ICalculator), PayloadTableKind.Request)]
     public static class ICalculator_PayloadTable
     {
         public static Type[,] GetPayloadTypes()
@@ -36,8 +63,13 @@ namespace UnityBasic.Interface
         {
             [ProtoMember(1)] public System.String a;
             [ProtoMember(2)] public System.String b;
-            public Type GetInterfaceType() { return typeof(ICalculator); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICalculator);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -48,8 +80,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.String v;
-            public Type GetInterfaceType() { return typeof(ICalculator); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICalculator);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -58,8 +98,13 @@ namespace UnityBasic.Interface
         {
             [ProtoMember(1)] public System.Int32 a;
             [ProtoMember(2)] public System.Int32 b;
-            public Type GetInterfaceType() { return typeof(ICalculator); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICalculator);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -70,8 +115,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.Int32 v;
-            public Type GetInterfaceType() { return typeof(ICalculator); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICalculator);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -79,8 +132,13 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IAsyncInvokable
         {
             [ProtoMember(1)] public System.Tuple<System.Int32, System.Int32> v;
-            public Type GetInterfaceType() { return typeof(ICalculator); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICalculator);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -91,8 +149,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.Int32 v;
-            public Type GetInterfaceType() { return typeof(ICalculator); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICalculator);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
     }
 
@@ -105,6 +171,14 @@ namespace UnityBasic.Interface
 
     public class CalculatorRef : InterfacedActorRef, ICalculator, ICalculator_NoReply
     {
+        public CalculatorRef() : base(null)
+        {
+        }
+
+        public CalculatorRef(IActorRef actor) : base(actor)
+        {
+        }
+
         public CalculatorRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
         {
         }
@@ -143,7 +217,7 @@ namespace UnityBasic.Interface
         public Task<System.Int32> Sum(System.Tuple<System.Int32, System.Int32> v)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new ICalculator_PayloadTable.Sum_2_Invoke { v = (System.Tuple<System.Int32, System.Int32>)v }
+                InvokePayload = new ICalculator_PayloadTable.Sum_2_Invoke { v = v }
             };
             return SendRequestAndReceive<System.Int32>(requestMessage);
         }
@@ -167,9 +241,29 @@ namespace UnityBasic.Interface
         void ICalculator_NoReply.Sum(System.Tuple<System.Int32, System.Int32> v)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new ICalculator_PayloadTable.Sum_2_Invoke { v = (System.Tuple<System.Int32, System.Int32>)v }
+                InvokePayload = new ICalculator_PayloadTable.Sum_2_Invoke { v = v }
             };
             SendRequest(requestMessage);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForICalculator
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForICalculator Convert(ICalculator value)
+        {
+            if (value == null) return null;
+            return new SurrogateForICalculator { Actor = ((CalculatorRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static ICalculator Convert(SurrogateForICalculator value)
+        {
+            if (value == null) return null;
+            return new CalculatorRef(value.Actor);
         }
     }
 }
@@ -179,7 +273,7 @@ namespace UnityBasic.Interface
 
 namespace UnityBasic.Interface
 {
-    [PayloadTableForInterfacedActor(typeof(ICounter))]
+    [PayloadTable(typeof(ICounter), PayloadTableKind.Request)]
     public static class ICounter_PayloadTable
     {
         public static Type[,] GetPayloadTypes()
@@ -194,8 +288,12 @@ namespace UnityBasic.Interface
         public class GetCounter_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            public Type GetInterfaceType() { return typeof(ICounter); }
-            public Task<IValueGetable> InvokeAsync(object target)
+            public Type GetInterfaceType()
+            {
+                return typeof(ICounter);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -206,8 +304,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.Int32 v;
-            public Type GetInterfaceType() { return typeof(ICounter); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICounter);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -215,8 +321,13 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IAsyncInvokable
         {
             [ProtoMember(1)] public System.Int32 delta;
-            public Type GetInterfaceType() { return typeof(ICounter); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(ICounter);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -231,6 +342,14 @@ namespace UnityBasic.Interface
 
     public class CounterRef : InterfacedActorRef, ICounter, ICounter_NoReply
     {
+        public CounterRef() : base(null)
+        {
+        }
+
+        public CounterRef(IActorRef actor) : base(actor)
+        {
+        }
+
         public CounterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
         {
         }
@@ -282,6 +401,543 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
     }
+
+    [ProtoContract]
+    public class SurrogateForICounter
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForICounter Convert(ICounter value)
+        {
+            if (value == null) return null;
+            return new SurrogateForICounter { Actor = ((CounterRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static ICounter Convert(SurrogateForICounter value)
+        {
+            if (value == null) return null;
+            return new CounterRef(value.Actor);
+        }
+    }
+}
+
+#endregion
+#region UnityBasic.Interface.IEntry
+
+namespace UnityBasic.Interface
+{
+    [PayloadTable(typeof(IEntry), PayloadTableKind.Request)]
+    public static class IEntry_PayloadTable
+    {
+        public static Type[,] GetPayloadTypes()
+        {
+            return new Type[,] {
+                { typeof(GetCalculator_Invoke), typeof(GetCalculator_Return) },
+                { typeof(GetCounter_Invoke), typeof(GetCounter_Return) },
+                { typeof(GetHelloWorld_Invoke), typeof(GetHelloWorld_Return) },
+                { typeof(GetPedantic_Invoke), typeof(GetPedantic_Return) },
+            };
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetCalculator_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetCalculator_Return
+            : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
+        {
+            [ProtoMember(1)] public UnityBasic.Interface.ICalculator v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+
+            void IPayloadActorRefUpdatable.Update(Action<object> updater)
+            {
+                if (v != null)
+                {
+                    updater(v); 
+                }
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetCounter_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetCounter_Return
+            : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
+        {
+            [ProtoMember(1)] public UnityBasic.Interface.ICounter v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+
+            void IPayloadActorRefUpdatable.Update(Action<object> updater)
+            {
+                if (v != null)
+                {
+                    updater(v); 
+                }
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetHelloWorld_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetHelloWorld_Return
+            : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
+        {
+            [ProtoMember(1)] public UnityBasic.Interface.IHelloWorld v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+
+            void IPayloadActorRefUpdatable.Update(Action<object> updater)
+            {
+                if (v != null)
+                {
+                    updater(v); 
+                }
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetPedantic_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetPedantic_Return
+            : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
+        {
+            [ProtoMember(1)] public UnityBasic.Interface.IPedantic v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+
+            void IPayloadActorRefUpdatable.Update(Action<object> updater)
+            {
+                if (v != null)
+                {
+                    updater(v); 
+                }
+            }
+        }
+    }
+
+    public interface IEntry_NoReply
+    {
+        void GetCalculator();
+        void GetCounter();
+        void GetHelloWorld();
+        void GetPedantic();
+    }
+
+    public class EntryRef : InterfacedActorRef, IEntry, IEntry_NoReply
+    {
+        public EntryRef() : base(null)
+        {
+        }
+
+        public EntryRef(IActorRef actor) : base(actor)
+        {
+        }
+
+        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        {
+        }
+
+        public IEntry_NoReply WithNoReply()
+        {
+            return this;
+        }
+
+        public EntryRef WithRequestWaiter(IRequestWaiter requestWaiter)
+        {
+            return new EntryRef(Actor, requestWaiter, Timeout);
+        }
+
+        public EntryRef WithTimeout(TimeSpan? timeout)
+        {
+            return new EntryRef(Actor, RequestWaiter, timeout);
+        }
+
+        public Task<UnityBasic.Interface.ICalculator> GetCalculator()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetCalculator_Invoke {  }
+            };
+            return SendRequestAndReceive<UnityBasic.Interface.ICalculator>(requestMessage);
+        }
+
+        public Task<UnityBasic.Interface.ICounter> GetCounter()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetCounter_Invoke {  }
+            };
+            return SendRequestAndReceive<UnityBasic.Interface.ICounter>(requestMessage);
+        }
+
+        public Task<UnityBasic.Interface.IHelloWorld> GetHelloWorld()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetHelloWorld_Invoke {  }
+            };
+            return SendRequestAndReceive<UnityBasic.Interface.IHelloWorld>(requestMessage);
+        }
+
+        public Task<UnityBasic.Interface.IPedantic> GetPedantic()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetPedantic_Invoke {  }
+            };
+            return SendRequestAndReceive<UnityBasic.Interface.IPedantic>(requestMessage);
+        }
+
+        void IEntry_NoReply.GetCalculator()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetCalculator_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IEntry_NoReply.GetCounter()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetCounter_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IEntry_NoReply.GetHelloWorld()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetHelloWorld_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IEntry_NoReply.GetPedantic()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetPedantic_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForIEntry
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForIEntry Convert(IEntry value)
+        {
+            if (value == null) return null;
+            return new SurrogateForIEntry { Actor = ((EntryRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static IEntry Convert(SurrogateForIEntry value)
+        {
+            if (value == null) return null;
+            return new EntryRef(value.Actor);
+        }
+    }
+}
+
+#endregion
+#region UnityBasic.Interface.IHelloWorld
+
+namespace UnityBasic.Interface
+{
+    [PayloadTable(typeof(IHelloWorld), PayloadTableKind.Request)]
+    public static class IHelloWorld_PayloadTable
+    {
+        public static Type[,] GetPayloadTypes()
+        {
+            return new Type[,] {
+                { typeof(AddObserver_Invoke), null },
+                { typeof(GetHelloCount_Invoke), typeof(GetHelloCount_Return) },
+                { typeof(SayHello_Invoke), typeof(SayHello_Return) },
+            };
+        }
+
+        [ProtoContract, TypeAlias]
+        public class AddObserver_Invoke
+            : IInterfacedPayload, IAsyncInvokable, IPayloadObserverUpdatable
+        {
+            [ProtoMember(1)] public UnityBasic.Interface.IHelloWorldEventObserver observer;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+
+            void IPayloadObserverUpdatable.Update(Action<IInterfacedObserver> updater)
+            {
+                if (observer != null)
+                {
+                    updater(observer);
+                }
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetHelloCount_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetHelloCount_Return
+            : IInterfacedPayload, IValueGetable
+        {
+            [ProtoMember(1)] public System.Int32 v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class SayHello_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            [ProtoMember(1)] public System.String name;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class SayHello_Return
+            : IInterfacedPayload, IValueGetable
+        {
+            [ProtoMember(1)] public System.String v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+        }
+    }
+
+    public interface IHelloWorld_NoReply
+    {
+        void AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer);
+        void GetHelloCount();
+        void SayHello(System.String name);
+    }
+
+    public class HelloWorldRef : InterfacedActorRef, IHelloWorld, IHelloWorld_NoReply
+    {
+        public HelloWorldRef() : base(null)
+        {
+        }
+
+        public HelloWorldRef(IActorRef actor) : base(actor)
+        {
+        }
+
+        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        {
+        }
+
+        public IHelloWorld_NoReply WithNoReply()
+        {
+            return this;
+        }
+
+        public HelloWorldRef WithRequestWaiter(IRequestWaiter requestWaiter)
+        {
+            return new HelloWorldRef(Actor, requestWaiter, Timeout);
+        }
+
+        public HelloWorldRef WithTimeout(TimeSpan? timeout)
+        {
+            return new HelloWorldRef(Actor, RequestWaiter, timeout);
+        }
+
+        public Task AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+            };
+            return SendRequestAndWait(requestMessage);
+        }
+
+        public Task<System.Int32> GetHelloCount()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IHelloWorld_PayloadTable.GetHelloCount_Invoke {  }
+            };
+            return SendRequestAndReceive<System.Int32>(requestMessage);
+        }
+
+        public Task<System.String> SayHello(System.String name)
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IHelloWorld_PayloadTable.SayHello_Invoke { name = name }
+            };
+            return SendRequestAndReceive<System.String>(requestMessage);
+        }
+
+        void IHelloWorld_NoReply.AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IHelloWorld_NoReply.GetHelloCount()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IHelloWorld_PayloadTable.GetHelloCount_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IHelloWorld_NoReply.SayHello(System.String name)
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IHelloWorld_PayloadTable.SayHello_Invoke { name = name }
+            };
+            SendRequest(requestMessage);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForIHelloWorld
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForIHelloWorld Convert(IHelloWorld value)
+        {
+            if (value == null) return null;
+            return new SurrogateForIHelloWorld { Actor = ((HelloWorldRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static IHelloWorld Convert(SurrogateForIHelloWorld value)
+        {
+            if (value == null) return null;
+            return new HelloWorldRef(value.Actor);
+        }
+    }
 }
 
 #endregion
@@ -289,7 +945,7 @@ namespace UnityBasic.Interface
 
 namespace UnityBasic.Interface
 {
-    [PayloadTableForInterfacedActor(typeof(IPedantic))]
+    [PayloadTable(typeof(IPedantic), PayloadTableKind.Request)]
     public static class IPedantic_PayloadTable
     {
         public static Type[,] GetPayloadTypes()
@@ -308,8 +964,12 @@ namespace UnityBasic.Interface
         public class TestCall_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public Task<IValueGetable> InvokeAsync(object target)
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -320,8 +980,13 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IAsyncInvokable
         {
             [ProtoMember(1)] public System.Nullable<System.Int32> value;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -332,8 +997,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.Nullable<System.Int32> v;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -341,8 +1014,13 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IAsyncInvokable
         {
             [ProtoMember(1)] public System.Int32[] values;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -353,8 +1031,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.Int32[] v;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -362,8 +1048,13 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IAsyncInvokable
         {
             [ProtoMember(1)] public UnityBasic.Interface.TestParam param;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -374,8 +1065,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.String v;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -384,8 +1083,13 @@ namespace UnityBasic.Interface
         {
             [ProtoMember(1)] public System.Int32 value;
             [ProtoMember(2)] public System.Int32 offset;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -396,8 +1100,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public UnityBasic.Interface.TestResult v;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -405,8 +1117,13 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IAsyncInvokable
         {
             [ProtoMember(1)] public System.Tuple<System.Int32, System.String> value;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -417,8 +1134,16 @@ namespace UnityBasic.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.Tuple<System.Int32, System.String> v;
-            public Type GetInterfaceType() { return typeof(IPedantic); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IPedantic);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
     }
 
@@ -434,6 +1159,14 @@ namespace UnityBasic.Interface
 
     public class PedanticRef : InterfacedActorRef, IPedantic, IPedantic_NoReply
     {
+        public PedanticRef() : base(null)
+        {
+        }
+
+        public PedanticRef(IActorRef actor) : base(actor)
+        {
+        }
+
         public PedanticRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
         {
         }
@@ -464,7 +1197,7 @@ namespace UnityBasic.Interface
         public Task<System.Nullable<System.Int32>> TestOptional(System.Nullable<System.Int32> value)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IPedantic_PayloadTable.TestOptional_Invoke { value = (System.Nullable<System.Int32>)value }
+                InvokePayload = new IPedantic_PayloadTable.TestOptional_Invoke { value = value }
             };
             return SendRequestAndReceive<System.Nullable<System.Int32>>(requestMessage);
         }
@@ -496,7 +1229,7 @@ namespace UnityBasic.Interface
         public Task<System.Tuple<System.Int32, System.String>> TestTuple(System.Tuple<System.Int32, System.String> value)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IPedantic_PayloadTable.TestTuple_Invoke { value = (System.Tuple<System.Int32, System.String>)value }
+                InvokePayload = new IPedantic_PayloadTable.TestTuple_Invoke { value = value }
             };
             return SendRequestAndReceive<System.Tuple<System.Int32, System.String>>(requestMessage);
         }
@@ -512,7 +1245,7 @@ namespace UnityBasic.Interface
         void IPedantic_NoReply.TestOptional(System.Nullable<System.Int32> value)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IPedantic_PayloadTable.TestOptional_Invoke { value = (System.Nullable<System.Int32>)value }
+                InvokePayload = new IPedantic_PayloadTable.TestOptional_Invoke { value = value }
             };
             SendRequest(requestMessage);
         }
@@ -544,9 +1277,126 @@ namespace UnityBasic.Interface
         void IPedantic_NoReply.TestTuple(System.Tuple<System.Int32, System.String> value)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IPedantic_PayloadTable.TestTuple_Invoke { value = (System.Tuple<System.Int32, System.String>)value }
+                InvokePayload = new IPedantic_PayloadTable.TestTuple_Invoke { value = value }
             };
             SendRequest(requestMessage);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForIPedantic
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForIPedantic Convert(IPedantic value)
+        {
+            if (value == null) return null;
+            return new SurrogateForIPedantic { Actor = ((PedanticRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static IPedantic Convert(SurrogateForIPedantic value)
+        {
+            if (value == null) return null;
+            return new PedanticRef(value.Actor);
+        }
+    }
+}
+
+#endregion
+namespace UnityBasic.Interface
+{
+    #region SurrogateForINotificationChannel
+
+    [ProtoContract]
+    public class SurrogateForINotificationChannel
+    {
+        [ProtoConverter]
+        public static SurrogateForINotificationChannel Convert(INotificationChannel value)
+        {
+            if (value == null) return null;
+            return new SurrogateForINotificationChannel();
+        }
+
+        [ProtoConverter]
+        public static INotificationChannel Convert(SurrogateForINotificationChannel value)
+        {
+            return null;
+        }
+    }
+}
+
+#endregion
+#region UnityBasic.Interface.IHelloWorldEventObserver
+
+namespace UnityBasic.Interface
+{
+    [PayloadTable(typeof(IHelloWorldEventObserver), PayloadTableKind.Notification)]
+    public static class IHelloWorldEventObserver_PayloadTable
+    {
+        public static Type[] GetPayloadTypes()
+        {
+            return new Type[] {
+                typeof(SayHello_Invoke),
+            };
+        }
+
+        [ProtoContract, TypeAlias]
+        public class SayHello_Invoke : IInterfacedPayload, IInvokable
+        {
+            [ProtoMember(1)] public System.String name;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorldEventObserver);
+            }
+
+            public void Invoke(object __target)
+            {
+                ((IHelloWorldEventObserver)__target).SayHello(name);
+            }
+        }
+    }
+
+    public class HelloWorldEventObserver : InterfacedObserver, IHelloWorldEventObserver
+    {
+        public HelloWorldEventObserver()
+            : base(null, 0)
+        {
+        }
+
+        public HelloWorldEventObserver(INotificationChannel channel, int observerId = 0)
+            : base(channel, observerId)
+        {
+        }
+
+        public void SayHello(System.String name)
+        {
+            var payload = new IHelloWorldEventObserver_PayloadTable.SayHello_Invoke { name = name };
+            Notify(payload);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForIHelloWorldEventObserver
+    {
+        [ProtoMember(1)] public INotificationChannel Channel;
+        [ProtoMember(2)] public int ObserverId;
+
+        [ProtoConverter]
+        public static SurrogateForIHelloWorldEventObserver Convert(IHelloWorldEventObserver value)
+        {
+            if (value == null) return null;
+            var o = (HelloWorldEventObserver)value;
+            return new SurrogateForIHelloWorldEventObserver { Channel = o.Channel, ObserverId = o.ObserverId };
+        }
+
+        [ProtoConverter]
+        public static IHelloWorldEventObserver Convert(SurrogateForIHelloWorldEventObserver value)
+        {
+            if (value == null) return null;
+            return new HelloWorldEventObserver(value.Channel, value.ObserverId);
         }
     }
 }

@@ -5,7 +5,8 @@ using UnityBasic.Interface;
 
 namespace UnityBasic.Program.Server
 {
-    public class CalculatorActor : InterfacedActor<CalculatorActor>, ICalculator
+    [ResponsiveException(typeof(ArgumentNullException))]
+    public class CalculatorActor : InterfacedActor, ICalculator
     {
         Task<string> ICalculator.Concat(string a, string b)
         {

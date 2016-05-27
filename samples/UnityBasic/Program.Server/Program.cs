@@ -38,7 +38,7 @@ namespace UnityBasic.Program.Server
             {
                 PacketSerializer = new PacketSerializer(
                     new PacketSerializerBase.Data(
-                        new ProtoBufMessageSerializer(TypeModel.Create()),
+                        new ProtoBufMessageSerializer(PacketSerializer.CreateTypeModel()),
                         new TypeAliasTable()))
             };
 
@@ -57,9 +57,8 @@ namespace UnityBasic.Program.Server
         {
             return new[]
             {
-                Tuple.Create(context.ActorOf(Props.Create(() => new CounterActor())), typeof(ICounter)),
-                Tuple.Create(context.ActorOf(Props.Create(() => new CalculatorActor())), typeof(ICalculator)),
-                Tuple.Create(context.ActorOf(Props.Create(() => new PedanticActor())), typeof(IPedantic))
+                Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self))),
+                             typeof(IEntry))
             };
         }
     }

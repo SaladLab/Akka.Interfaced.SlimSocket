@@ -40,11 +40,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Akka.Interfaced, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Akka.Interfaced.0.2.2\lib\net45\Akka.Interfaced.dll</HintPath>
+      <HintPath>..\..\..\packages\Akka.Interfaced.0.3.0\lib\net45\Akka.Interfaced.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Akka.Interfaced-Base, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Akka.Interfaced-Base.0.2.1\lib\net45\Akka.Interfaced-Base.dll</HintPath>
+      <HintPath>..\..\..\packages\Akka.Interfaced-Base.0.3.0\lib\net45\Akka.Interfaced-Base.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
@@ -76,7 +76,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+      <HintPath>..\..\..\packages\protobuf-net.2.1.0-alpha-1\lib\net45\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -99,6 +99,8 @@
   <ItemGroup>
     <Compile Include="CalculatorActor.cs" />
     <Compile Include="CounterActor.cs" />
+    <Compile Include="EntryActor.cs" />
+    <Compile Include="HelloWorldActor.cs" />
     <Compile Include="PedanticActor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

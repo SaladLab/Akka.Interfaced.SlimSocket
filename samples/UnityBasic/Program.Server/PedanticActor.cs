@@ -7,7 +7,7 @@ using UnityBasic.Interface;
 
 namespace UnityBasic.Program.Server
 {
-    public class PedanticActor : InterfacedActor<PedanticActor>, IPedantic
+    public class PedanticActor : InterfacedActor, IPedantic
     {
         async Task IPedantic.TestCall()
         {
