@@ -29,6 +29,8 @@
   "files": [
     "../Akka.Interfaced.SlimSocket.Base.Net35/bin/Release/Akka.Interfaced.SlimSocket.Base.dll",
     "../Akka.Interfaced.SlimSocket.Client.Net35/bin/Release/Akka.Interfaced.SlimSocket.Client.dll",
+    "Sources/CommunicatorHelper.cs",
+    "Sources/CommunicatorWorker.cs",
     "Sources/SlimTaskCompletionSource.cs",
     "Sources/SlimTaskFactory.cs",
     "$dependencies$"
