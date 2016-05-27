@@ -5,7 +5,7 @@ using HelloWorld.Interface;
 
 namespace HelloWorld.Program.Server
 {
-    public class HelloWorldActor : InterfacedActor<HelloWorldActor>, IHelloWorld
+    public class HelloWorldActor : InterfacedActor, IHelloWorld
     {
         private int _helloCount;
         private List<IHelloWorldEventObserver> _observers = new List<IHelloWorldEventObserver>();
@@ -25,9 +25,9 @@ namespace HelloWorld.Program.Server
             return Task.FromResult(_helloCount);
         }
 
-        public Task AddObserver(int observerId)
+        public Task AddObserver(IHelloWorldEventObserver observer)
         {
-            _observers.Add(new HelloWorldEventObserver(Sender, observerId));
+            _observers.Add(observer);
             return Task.FromResult(0);
         }
     }

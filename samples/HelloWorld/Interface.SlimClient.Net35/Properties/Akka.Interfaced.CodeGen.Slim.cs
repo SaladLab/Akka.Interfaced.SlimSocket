@@ -14,11 +14,166 @@ using ProtoBuf;
 using TypeAlias;
 using System.ComponentModel;
 
+namespace HelloWorld.Interface
+{
+    #region SurrogateForIActorRef
+
+    [ProtoContract]
+    public class SurrogateForIActorRef
+    {
+        [ProtoMember(1)] public int Id;
+
+        [ProtoConverter]
+        public static SurrogateForIActorRef Convert(IActorRef value)
+        {
+            if (value == null) return null;
+            var actor = ((BoundActorRef)value);
+            return new SurrogateForIActorRef { Id = actor.Id };
+        }
+
+        [ProtoConverter]
+        public static IActorRef Convert(SurrogateForIActorRef value)
+        {
+            if (value == null) return null;
+            return new BoundActorRef(value.Id);
+        }
+    }
+}
+
+#endregion
+#region HelloWorld.Interface.IEntry
+
+namespace HelloWorld.Interface
+{
+    [PayloadTable(typeof(IEntry), PayloadTableKind.Request)]
+    public static class IEntry_PayloadTable
+    {
+        public static Type[,] GetPayloadTypes()
+        {
+            return new Type[,] {
+                { typeof(GetHelloWorld_Invoke), typeof(GetHelloWorld_Return) },
+            };
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetHelloWorld_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetHelloWorld_Return
+            : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
+        {
+            [ProtoMember(1)] public HelloWorld.Interface.IHelloWorld v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+
+            void IPayloadActorRefUpdatable.Update(Action<object> updater)
+            {
+                if (v != null)
+                {
+                    updater(v); 
+                }
+            }
+        }
+    }
+
+    public interface IEntry_NoReply
+    {
+        void GetHelloWorld();
+    }
+
+    public class EntryRef : InterfacedActorRef, IEntry, IEntry_NoReply
+    {
+        public EntryRef() : base(null)
+        {
+        }
+
+        public EntryRef(IActorRef actor) : base(actor)
+        {
+        }
+
+        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        {
+        }
+
+        public IEntry_NoReply WithNoReply()
+        {
+            return this;
+        }
+
+        public EntryRef WithRequestWaiter(IRequestWaiter requestWaiter)
+        {
+            return new EntryRef(Actor, requestWaiter, Timeout);
+        }
+
+        public EntryRef WithTimeout(TimeSpan? timeout)
+        {
+            return new EntryRef(Actor, RequestWaiter, timeout);
+        }
+
+        public Task<HelloWorld.Interface.IHelloWorld> GetHelloWorld()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetHelloWorld_Invoke {  }
+            };
+            return SendRequestAndReceive<HelloWorld.Interface.IHelloWorld>(requestMessage);
+        }
+
+        void IEntry_NoReply.GetHelloWorld()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetHelloWorld_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForIEntry
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForIEntry Convert(IEntry value)
+        {
+            if (value == null) return null;
+            return new SurrogateForIEntry { Actor = ((EntryRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static IEntry Convert(SurrogateForIEntry value)
+        {
+            if (value == null) return null;
+            return new EntryRef(value.Actor);
+        }
+    }
+}
+
+#endregion
 #region HelloWorld.Interface.IHelloWorld
 
 namespace HelloWorld.Interface
 {
-    [PayloadTableForInterfacedActor(typeof(IHelloWorld))]
+    [PayloadTable(typeof(IHelloWorld), PayloadTableKind.Request)]
     public static class IHelloWorld_PayloadTable
     {
         public static Type[,] GetPayloadTypes()
@@ -32,13 +187,26 @@ namespace HelloWorld.Interface
 
         [ProtoContract, TypeAlias]
         public class AddObserver_Invoke
-            : IInterfacedPayload, IAsyncInvokable
+            : IInterfacedPayload, IAsyncInvokable, IPayloadObserverUpdatable
         {
-            [ProtoMember(1)] public System.Int32 observerId;
-            public Type GetInterfaceType() { return typeof(IHelloWorld); }
-            public Task<IValueGetable> InvokeAsync(object target)
+            [ProtoMember(1)] public HelloWorld.Interface.IHelloWorldEventObserver observer;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
+            }
+
+            void IPayloadObserverUpdatable.Update(Action<IInterfacedObserver> updater)
+            {
+                if (observer != null)
+                {
+                    updater(observer);
+                }
             }
         }
 
@@ -46,8 +214,12 @@ namespace HelloWorld.Interface
         public class GetHelloCount_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            public Type GetInterfaceType() { return typeof(IHelloWorld); }
-            public Task<IValueGetable> InvokeAsync(object target)
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -58,8 +230,16 @@ namespace HelloWorld.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.Int32 v;
-            public Type GetInterfaceType() { return typeof(IHelloWorld); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
 
         [ProtoContract, TypeAlias]
@@ -67,8 +247,13 @@ namespace HelloWorld.Interface
             : IInterfacedPayload, IAsyncInvokable
         {
             [ProtoMember(1)] public System.String name;
-            public Type GetInterfaceType() { return typeof(IHelloWorld); }
-            public Task<IValueGetable> InvokeAsync(object target)
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
@@ -79,20 +264,36 @@ namespace HelloWorld.Interface
             : IInterfacedPayload, IValueGetable
         {
             [ProtoMember(1)] public System.String v;
-            public Type GetInterfaceType() { return typeof(IHelloWorld); }
-            public object Value { get { return v; } }
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IHelloWorld);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
         }
     }
 
     public interface IHelloWorld_NoReply
     {
-        void AddObserver(System.Int32 observerId);
+        void AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer);
         void GetHelloCount();
         void SayHello(System.String name);
     }
 
     public class HelloWorldRef : InterfacedActorRef, IHelloWorld, IHelloWorld_NoReply
     {
+        public HelloWorldRef() : base(null)
+        {
+        }
+
+        public HelloWorldRef(IActorRef actor) : base(actor)
+        {
+        }
+
         public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
         {
         }
@@ -112,10 +313,10 @@ namespace HelloWorld.Interface
             return new HelloWorldRef(Actor, RequestWaiter, timeout);
         }
 
-        public Task AddObserver(System.Int32 observerId)
+        public Task AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observerId = observerId }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
             };
             return SendRequestAndWait(requestMessage);
         }
@@ -136,10 +337,10 @@ namespace HelloWorld.Interface
             return SendRequestAndReceive<System.String>(requestMessage);
         }
 
-        void IHelloWorld_NoReply.AddObserver(System.Int32 observerId)
+        void IHelloWorld_NoReply.AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observerId = observerId }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
             };
             SendRequest(requestMessage);
         }
@@ -160,6 +361,49 @@ namespace HelloWorld.Interface
             SendRequest(requestMessage);
         }
     }
+
+    [ProtoContract]
+    public class SurrogateForIHelloWorld
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForIHelloWorld Convert(IHelloWorld value)
+        {
+            if (value == null) return null;
+            return new SurrogateForIHelloWorld { Actor = ((HelloWorldRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static IHelloWorld Convert(SurrogateForIHelloWorld value)
+        {
+            if (value == null) return null;
+            return new HelloWorldRef(value.Actor);
+        }
+    }
+}
+
+#endregion
+namespace HelloWorld.Interface
+{
+    #region SurrogateForINotificationChannel
+
+    [ProtoContract]
+    public class SurrogateForINotificationChannel
+    {
+        [ProtoConverter]
+        public static SurrogateForINotificationChannel Convert(INotificationChannel value)
+        {
+            if (value == null) return null;
+            return new SurrogateForINotificationChannel();
+        }
+
+        [ProtoConverter]
+        public static INotificationChannel Convert(SurrogateForINotificationChannel value)
+        {
+            return null;
+        }
+    }
 }
 
 #endregion
@@ -167,16 +411,71 @@ namespace HelloWorld.Interface
 
 namespace HelloWorld.Interface
 {
+    [PayloadTable(typeof(IHelloWorldEventObserver), PayloadTableKind.Notification)]
     public static class IHelloWorldEventObserver_PayloadTable
     {
+        public static Type[] GetPayloadTypes()
+        {
+            return new Type[] {
+                typeof(SayHello_Invoke),
+            };
+        }
+
         [ProtoContract, TypeAlias]
-        public class SayHello_Invoke : IInvokable
+        public class SayHello_Invoke : IInterfacedPayload, IInvokable
         {
             [ProtoMember(1)] public System.String name;
-            public void Invoke(object target)
+
+            public Type GetInterfaceType()
             {
-                ((IHelloWorldEventObserver)target).SayHello(name);
+                return typeof(IHelloWorldEventObserver);
             }
+
+            public void Invoke(object __target)
+            {
+                ((IHelloWorldEventObserver)__target).SayHello(name);
+            }
+        }
+    }
+
+    public class HelloWorldEventObserver : InterfacedObserver, IHelloWorldEventObserver
+    {
+        public HelloWorldEventObserver()
+            : base(null, 0)
+        {
+        }
+
+        public HelloWorldEventObserver(INotificationChannel channel, int observerId = 0)
+            : base(channel, observerId)
+        {
+        }
+
+        public void SayHello(System.String name)
+        {
+            var payload = new IHelloWorldEventObserver_PayloadTable.SayHello_Invoke { name = name };
+            Notify(payload);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForIHelloWorldEventObserver
+    {
+        [ProtoMember(1)] public INotificationChannel Channel;
+        [ProtoMember(2)] public int ObserverId;
+
+        [ProtoConverter]
+        public static SurrogateForIHelloWorldEventObserver Convert(IHelloWorldEventObserver value)
+        {
+            if (value == null) return null;
+            var o = (HelloWorldEventObserver)value;
+            return new SurrogateForIHelloWorldEventObserver { Channel = o.Channel, ObserverId = o.ObserverId };
+        }
+
+        [ProtoConverter]
+        public static IHelloWorldEventObserver Convert(SurrogateForIHelloWorldEventObserver value)
+        {
+            if (value == null) return null;
+            return new HelloWorldEventObserver(value.Channel, value.ObserverId);
         }
     }
 }

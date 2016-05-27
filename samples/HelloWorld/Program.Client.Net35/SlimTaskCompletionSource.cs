@@ -89,5 +89,7 @@ namespace Akka.Interfaced.SlimSocket.Client
             _result = result;
             _event.Set();
         }
+
+        public Task<TResult> Task => this;
     }
 }

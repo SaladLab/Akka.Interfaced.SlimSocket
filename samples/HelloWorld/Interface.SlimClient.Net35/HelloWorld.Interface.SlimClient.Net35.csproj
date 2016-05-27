@@ -53,7 +53,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\protobuf-net.2.0.0.668\lib\net35\protobuf-net.dll</HintPath>
+      <HintPath>..\..\..\packages\protobuf-net.2.1.0-alpha-1\lib\net30\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -68,6 +68,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Interface\IEntry.cs">
+      <Link>IEntry.cs</Link>
+    </Compile>
     <Compile Include="..\Interface\IHelloWorld.cs">
       <Link>IHelloWorld.cs</Link>
     </Compile>

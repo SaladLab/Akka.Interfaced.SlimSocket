@@ -7,7 +7,6 @@ using Akka.Interfaced.SlimSocket.Base;
 using Akka.Interfaced.SlimSocket.Server;
 using Common.Logging;
 using HelloWorld.Interface;
-using ProtoBuf.Meta;
 using TypeAlias;
 
 namespace HelloWorld.Program.Server
@@ -21,7 +20,7 @@ namespace HelloWorld.Program.Server
             if (typeof(IHelloWorld) == null)
                 throw new Exception("Force interface module to be loaded");
 
-            var system = ActorSystem.Create("MySystem");
+            var system = ActorSystem.Create("MySystem", ""); // "akka.loglevel = DEBUG \n akka.actor.debug.lifecycle = on");
             DeadRequestProcessingActor.Install(system);
 
             StartListen(system, 5000);
@@ -38,7 +37,7 @@ namespace HelloWorld.Program.Server
             {
                 PacketSerializer = new PacketSerializer(
                     new PacketSerializerBase.Data(
-                        new ProtoBufMessageSerializer(TypeModel.Create()),
+                        new ProtoBufMessageSerializer(PacketSerializer.CreateTypeModel()),
                         new TypeAliasTable()))
             };
 
@@ -57,8 +56,8 @@ namespace HelloWorld.Program.Server
         {
             return new[]
             {
-                Tuple.Create(context.ActorOf(Props.Create(() => new HelloWorldActor())),
-                             typeof(IHelloWorld))
+                Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self))),
+                             typeof(IEntry))
             };
         }
     }

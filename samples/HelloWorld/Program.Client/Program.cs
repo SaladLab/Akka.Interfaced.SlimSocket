@@ -1,34 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using System.Net;
 using Akka.Interfaced.SlimSocket.Base;
 using Akka.Interfaced.SlimSocket.Client;
 using Common.Logging;
 using HelloWorld.Interface;
-using ProtoBuf.Meta;
 using TypeAlias;
 
 namespace HelloWorld.Program.Client
 {
     internal class TestDriver : IHelloWorldEventObserver
     {
-        public void Run(Communicator communicator)
+        public async Task Run(Communicator communicator)
         {
-            var requestWaiter = new SlimTaskRequestWaiter(communicator);
-            var helloWorld = new HelloWorldRef(new SlimActorRef(1), requestWaiter, null);
+            // get HelloWorld from Entry
+
+            var entry = communicator.CreateRef<EntryRef>(1);
+            var helloWorld = await entry.GetHelloWorld();
+            if (helloWorld == null)
+                throw new InvalidOperationException("Cannot retreive HelloWorld actor");
 
             // add observer
 
-            var observerId = communicator.IssueObserverId();
-            communicator.AddObserver(observerId, new ObserverEventDispatcher(this));
-            helloWorld.AddObserver(observerId);
+            var observer = communicator.CreateObserver<IHelloWorldEventObserver>(this);
+            await helloWorld.AddObserver(observer);
 
             // make some noise
 
-            Console.WriteLine(helloWorld.SayHello("World").Result);
-            Console.WriteLine(helloWorld.SayHello("Dlrow").Result);
-            Console.WriteLine(helloWorld.GetHelloCount().Result);
+            Console.WriteLine(await helloWorld.SayHello("World"));
+            Console.WriteLine(await helloWorld.SayHello("Dlrow"));
+            Console.WriteLine(await helloWorld.GetHelloCount());
         }
 
         public void SayHello(string name)
@@ -43,7 +44,7 @@ namespace HelloWorld.Program.Client
         {
             var serializer = new PacketSerializer(
                 new PacketSerializerBase.Data(
-                    new ProtoBufMessageSerializer(TypeModel.Create()),
+                    new ProtoBufMessageSerializer(PacketSerializer.CreateTypeModel()),
                     new TypeAliasTable()));
 
             var communicator = new Communicator(LogManager.GetLogger("Communicator"),
@@ -52,7 +53,7 @@ namespace HelloWorld.Program.Client
             communicator.Start();
 
             var driver = new TestDriver();
-            driver.Run(communicator);
+            driver.Run(communicator).Wait();
         }
     }
 }
