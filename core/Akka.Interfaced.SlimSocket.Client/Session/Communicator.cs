@@ -91,7 +91,7 @@ namespace Akka.Interfaced.SlimSocket.Client
             where TRef : InterfacedActorRef, new()
         {
             var actorRef = new TRef();
-            InterfacedActorRefModifier.SetActor(actorRef, new BoundActorRef(1));
+            InterfacedActorRefModifier.SetActor(actorRef, new BoundActorRef(actorId));
             InterfacedActorRefModifier.SetRequestWaiter(actorRef, this);
             return actorRef;
         }
@@ -104,7 +104,7 @@ namespace Akka.Interfaced.SlimSocket.Client
             proxy.ObserverId = observerId;
             proxy.Channel = new ObserverEventDispatcher(observer, startPending);
             proxy.Disposed = () => { RemoveObserver(observerId); };
-            _observerChannelMap.TryAdd(observerId, proxy);
+            AddObserver(observerId, proxy);
             return (TObserver)(object)proxy;
         }
 
