@@ -35,6 +35,8 @@ namespace Akka.Interfaced.SlimSocket.Base
                         var sourceType = FindSurrogateSourceType(field.FieldType);
                         if (sourceType != null)
                         {
+                            if (typeModel.CanSerialize(sourceType))
+                                continue;
                             try
                             {
                                 typeModel.Add(sourceType, false).SetSurrogate(field.FieldType);
@@ -50,6 +52,8 @@ namespace Akka.Interfaced.SlimSocket.Base
                     var sourceType = FindSurrogateSourceType(type);
                     if (sourceType != null)
                     {
+                        if (typeModel.CanSerialize(sourceType))
+                            continue;
                         try
                         {
                             typeModel.Add(sourceType, false).SetSurrogate(type);
