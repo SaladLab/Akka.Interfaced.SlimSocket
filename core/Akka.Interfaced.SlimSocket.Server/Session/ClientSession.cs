@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Reflection;
+using System.Linq;
 using Akka.Actor;
+using Akka.Event;
 using Akka.Interfaced.SlimSocket.Base;
 using Common.Logging;
 
@@ -12,12 +12,13 @@ namespace Akka.Interfaced.SlimSocket.Server
     {
         private ILog _logger;
         private IActorRef _self;
+        private EventStream _eventStream;
         private TcpConnection _connection;
         private Socket _socket;
-        private Func<IActorContext, Socket, Tuple<IActorRef, Type>[]> _initialActorFactory;
+        private Func<IActorContext, Socket, Tuple<IActorRef, ActorBoundSessionMessage.InterfaceType[]>[]> _initialActorFactory;
 
         public ClientSession(ILog logger, Socket socket, TcpConnectionSettings connectionSettings,
-                             Func<IActorContext, Socket, Tuple<IActorRef, Type>[]> initialActorFactory)
+                             Func<IActorContext, Socket, Tuple<IActorRef, ActorBoundSessionMessage.InterfaceType[]>[]> initialActorFactory)
         {
             _logger = logger;
             _socket = socket;
@@ -30,12 +31,13 @@ namespace Akka.Interfaced.SlimSocket.Server
             base.PreStart();
 
             _self = Self;
+            _eventStream = Context.System.EventStream;
 
             var actors = _initialActorFactory(Context, _socket);
             if (actors != null)
             {
                 foreach (var actor in actors)
-                    BindActor(actor.Item1, actor.Item2);
+                    BindActor(actor.Item1, actor.Item2.Select(t => new BoundType(t)));
             }
 
             _connection.Closed += OnConnectionClose;
@@ -97,43 +99,74 @@ namespace Akka.Interfaced.SlimSocket.Server
             // To deal with this contention lock protection is required.
 
             var p = packet as Packet;
-
-            if (p == null || p.Message == null)
+            if (p == null)
             {
+                _eventStream.Publish(new Warning(
+                    _self.Path.ToString(), GetType(),
+                    $"Receives null packet from {_connection?.RemoteEndpoint}"));
+                return;
+            }
+
+            var msg = p.Message as IInterfacedPayload;
+            if (msg == null)
+            {
+                _eventStream.Publish(new Warning(
+                    _self.Path.ToString(), GetType(),
+                    $"Receives a bad packet without a message from {_connection?.RemoteEndpoint}"));
                 return;
             }
 
             var actor = GetBoundActor(p.ActorId);
-            if (actor != null)
+            if (actor == null)
             {
-                if (actor.InterfaceType != null)
+                if (p.RequestId != 0)
                 {
-                    var msg = (IInterfacedPayload)p.Message;
-                    if (msg == null || msg.GetInterfaceType() != actor.InterfaceType)
+                    _connection.Send(new Packet
                     {
-                        Console.WriteLine("Got packet but weired! {0}", msg.GetType());
-                        return;
-                    }
+                        Type = PacketType.Response,
+                        ActorId = p.ActorId,
+                        RequestId = p.RequestId,
+                        Message = null,
+                        Exception = new RequestTargetException()
+                    });
                 }
-
-                if (actor.IsTagOverridable)
-                {
-                    var msg = (IPayloadTagOverridable)p.Message;
-                    msg.SetTag(actor.TagValue);
-                }
-
-                var observerUpdatable = p.Message as IPayloadObserverUpdatable;
-                if (observerUpdatable != null)
-                {
-                    observerUpdatable.Update(o => ((InterfacedObserver)o).Channel = new ActorNotificationChannel(_self));
-                }
-
-                actor.Actor.Tell(new RequestMessage
-                {
-                    RequestId = p.RequestId,
-                    InvokePayload = (IInterfacedPayload)p.Message
-                }, _self);
+                return;
             }
+
+            var boundType = actor.FindBoundType(msg.GetInterfaceType());
+            if (boundType == null)
+            {
+                if (p.RequestId != 0)
+                {
+                    _connection.Send(new Packet
+                    {
+                        Type = PacketType.Response,
+                        ActorId = p.ActorId,
+                        RequestId = p.RequestId,
+                        Message = null,
+                        Exception = new RequestHandlerNotFoundException()
+                    });
+                }
+                return;
+            }
+
+            if (boundType.IsTagOverridable)
+            {
+                var tagOverridable = (IPayloadTagOverridable)p.Message;
+                tagOverridable.SetTag(boundType.TagValue);
+            }
+
+            var observerUpdatable = p.Message as IPayloadObserverUpdatable;
+            if (observerUpdatable != null)
+            {
+                observerUpdatable.Update(o => ((InterfacedObserver)o).Channel = new ActorNotificationChannel(_self));
+            }
+
+            actor.Actor.Tell(new RequestMessage
+            {
+                RequestId = p.RequestId,
+                InvokePayload = (IInterfacedPayload)p.Message
+            }, _self);
         }
     }
 }

@@ -164,12 +164,6 @@ namespace Akka.Interfaced.SlimSocket.Client
 
     public static class ObserverEventDispatcherExtensions
     {
-        public static void Dispose(this IInterfacedObserver observer)
-        {
-            var o = observer as InterfacedObserver;
-            o?.Dispose();
-        }
-
         public static ObserverEventDispatcher GetEventDispatcher(this IInterfacedObserver observer)
         {
             var o = observer as InterfacedObserver;

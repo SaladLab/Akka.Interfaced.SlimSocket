@@ -50,16 +50,14 @@ namespace UnityBasic.Program.Server
         {
             var logger = LogManager.GetLogger($"Client({socket.RemoteEndPoint})");
             return context.ActorOf(Props.Create(() => new ClientSession(
-                                                          logger, socket, _tcpConnectionSettings, CreateInitialActor)));
+                logger, socket, _tcpConnectionSettings, CreateInitialActor)));
         }
 
-        private static Tuple<IActorRef, Type>[] CreateInitialActor(IActorContext context, Socket socket)
-        {
-            return new[]
+        private static Tuple<IActorRef, ActorBoundSessionMessage.InterfaceType[]>[] CreateInitialActor(IActorContext context, Socket socket) =>
+            new[]
             {
                 Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self))),
-                             typeof(IEntry))
+                              new[] { new ActorBoundSessionMessage.InterfaceType(typeof(IEntry)) })
             };
-        }
     }
 }

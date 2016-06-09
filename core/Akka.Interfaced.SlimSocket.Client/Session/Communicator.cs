@@ -100,12 +100,17 @@ namespace Akka.Interfaced.SlimSocket.Client
             where TObserver : IInterfacedObserver
         {
             var proxy = InterfacedObserver.Create(typeof(TObserver));
-            var observerId = IssueObserverId();
-            proxy.ObserverId = observerId;
+            proxy.ObserverId = IssueObserverId();
             proxy.Channel = new ObserverEventDispatcher(observer, startPending);
-            proxy.Disposed = () => { RemoveObserver(observerId); };
-            AddObserver(observerId, proxy);
+            AddObserver(proxy.ObserverId, proxy);
             return (TObserver)(object)proxy;
+        }
+
+        public void RemoveObserver<TObserver>(TObserver observer)
+             where TObserver : IInterfacedObserver
+        {
+            var proxy = (InterfacedObserver)(object)observer;
+            RemoveObserver(proxy.ObserverId);
         }
 
         private int IssueObserverId()

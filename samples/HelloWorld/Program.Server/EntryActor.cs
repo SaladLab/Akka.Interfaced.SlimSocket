@@ -22,7 +22,7 @@ namespace HelloWorld.Program.Server
             try
             {
                 var reply = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
-                    new ActorBoundSessionMessage.Bind(actor, typeof(IHelloWorld), null));
+                    new ActorBoundSessionMessage.Bind(actor, typeof(IHelloWorld)));
                 if (reply.ActorId != 0)
                     return BoundActorRef.Create<HelloWorldRef>(reply.ActorId);
             }
