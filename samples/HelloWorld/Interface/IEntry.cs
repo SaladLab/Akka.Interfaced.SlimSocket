@@ -5,6 +5,6 @@ namespace HelloWorld.Interface
 {
     public interface IEntry : IInterfacedActor
     {
-        Task<IHelloWorld> GetHelloWorld();
+        Task<IGreeterWithObserver> GetGreeter();
     }
 }

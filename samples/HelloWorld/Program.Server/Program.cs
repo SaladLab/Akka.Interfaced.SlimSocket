@@ -3,11 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using Akka.Actor;
 using Akka.Interfaced;
-using Akka.Interfaced.SlimSocket.Base;
 using Akka.Interfaced.SlimSocket.Server;
 using Common.Logging;
 using HelloWorld.Interface;
-using TypeAlias;
 
 namespace HelloWorld.Program.Server
 {
@@ -17,7 +15,7 @@ namespace HelloWorld.Program.Server
 
         private static void Main(string[] args)
         {
-            if (typeof(IHelloWorld) == null)
+            if (typeof(IGreeter) == null)
                 throw new Exception("Force interface module to be loaded");
 
             var system = ActorSystem.Create("MySystem", ""); // "akka.loglevel = DEBUG \n akka.actor.debug.lifecycle = on");
@@ -33,13 +31,8 @@ namespace HelloWorld.Program.Server
         {
             var logger = LogManager.GetLogger("ClientGateway");
 
-            s_tcpConnectionSettings = new TcpConnectionSettings
-            {
-                PacketSerializer = new PacketSerializer(
-                    new PacketSerializerBase.Data(
-                        new ProtoBufMessageSerializer(PacketSerializer.CreateTypeModel()),
-                        new TypeAliasTable()))
-            };
+            s_tcpConnectionSettings = new TcpConnectionSettings();
+            s_tcpConnectionSettings.PacketSerializer = PacketSerializer.CreatePacketSerializer();
 
             var clientGateway = system.ActorOf(Props.Create(() => new ClientGateway(logger, CreateSession)));
             clientGateway.Tell(new ClientGatewayMessage.Start(new IPEndPoint(IPAddress.Any, port)));

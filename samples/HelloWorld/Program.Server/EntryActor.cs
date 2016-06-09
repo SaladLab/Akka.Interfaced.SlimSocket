@@ -15,16 +15,16 @@ namespace HelloWorld.Program.Server
             _clientSession = clientSession;
         }
 
-        async Task<IHelloWorld> IEntry.GetHelloWorld()
+        async Task<IGreeterWithObserver> IEntry.GetGreeter()
         {
-            var actor = Context.ActorOf<HelloWorldActor>();
+            var actor = Context.ActorOf<GreetingActor>();
 
             try
             {
                 var reply = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
-                    new ActorBoundSessionMessage.Bind(actor, typeof(IHelloWorld)));
+                    new ActorBoundSessionMessage.Bind(actor, typeof(IGreeterWithObserver)));
                 if (reply.ActorId != 0)
-                    return BoundActorRef.Create<HelloWorldRef>(reply.ActorId);
+                    return BoundActorRef.Create<GreeterWithObserverRef>(reply.ActorId);
             }
             catch (Exception)
             {

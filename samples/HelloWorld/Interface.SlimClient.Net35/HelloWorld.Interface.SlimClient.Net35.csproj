@@ -71,11 +71,11 @@
     <Compile Include="..\Interface\IEntry.cs">
       <Link>IEntry.cs</Link>
     </Compile>
-    <Compile Include="..\Interface\IHelloWorld.cs">
-      <Link>IHelloWorld.cs</Link>
+    <Compile Include="..\Interface\IGreeterWithObserver.cs">
+      <Link>IGreeterWithObserver.cs</Link>
     </Compile>
-    <Compile Include="..\Interface\IHelloWorldEventObserver.cs">
-      <Link>IHelloWorldEventObserver.cs</Link>
+    <Compile Include="..\Interface\IGreetObserver.cs">
+      <Link>IGreetObserver.cs</Link>
     </Compile>
     <Compile Include="Properties\Akka.Interfaced.CodeGen.Slim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

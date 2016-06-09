@@ -98,7 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EntryActor.cs" />
-    <Compile Include="HelloWorldActor.cs" />
+    <Compile Include="GreetingActor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

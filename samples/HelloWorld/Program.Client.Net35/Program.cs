@@ -8,32 +8,35 @@ using TypeAlias;
 
 namespace HelloWorld.Program.Client
 {
-    internal class TestDriver : IHelloWorldEventObserver
+    internal class TestDriver : IGreetObserver
     {
         public void Run(Communicator communicator)
         {
             // get HelloWorld from Entry
 
             var entry = communicator.CreateRef<EntryRef>(1);
-            var helloWorld = entry.GetHelloWorld().Result;
-            if (helloWorld == null)
-                throw new InvalidOperationException("Cannot retreive HelloWorld actor");
+            var greeter = entry.GetGreeter().Result;
+            if (greeter == null)
+                throw new InvalidOperationException("Cannot obtain GreetingActor");
 
             // add observer
 
-            var observer = communicator.CreateObserver<IHelloWorldEventObserver>(this);
-            helloWorld.AddObserver(observer);
+            var observer = communicator.CreateObserver<IGreetObserver>(this);
+            greeter.Subscribe(observer);
 
             // make some noise
 
-            Console.WriteLine(helloWorld.SayHello("World").Result);
-            Console.WriteLine(helloWorld.SayHello("Dlrow").Result);
-            Console.WriteLine(helloWorld.GetHelloCount().Result);
+            Console.WriteLine(greeter.Greet("World").Result);
+            Console.WriteLine(greeter.Greet("Actor").Result);
+            Console.WriteLine(greeter.GetCount().Result);
+
+            greeter.Unsubscribe(observer);
+            communicator.RemoveObserver(observer);
         }
 
-        public void SayHello(string name)
+        void IGreetObserver.Event(string message)
         {
-            Console.WriteLine($"<- SayHello({name})");
+            Console.WriteLine($"<- {message}");
         }
     }
 
