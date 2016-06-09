@@ -3,18 +3,17 @@ using System.Collections;
 using System.Net;
 using Akka.Interfaced;
 using Akka.Interfaced.SlimSocket.Client;
-using Common.Logging;
 using UnityBasic.Interface;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainScene : MonoBehaviour, IHelloWorldEventObserver
+public class MainScene : MonoBehaviour, IGreetObserver
 {
     public Text LogText;
 
     void Start()
     {
-        var comm = CommunicatorHelper.CreateCommunicator< InterfaceProtobufSerializer>(
+        var comm = CommunicatorHelper.CreateCommunicator<InterfaceProtobufSerializer>(
             G.Logger, new IPEndPoint(IPAddress.Loopback, 5000));
         comm.Start();
         G.Comm = comm;
@@ -29,9 +28,9 @@ public class MainScene : MonoBehaviour, IHelloWorldEventObserver
         WriteLine("Start ProcessTest");
         WriteLine("");
 
-        var t1 = entry.GetHelloWorld();
+        var t1 = entry.GetGreeter();
         yield return t1.WaitHandle;
-        yield return StartCoroutine(ProcessHelloWorld(t1.Result));
+        yield return StartCoroutine(ProcessGreeter(t1.Result));
 
         var t2 = entry.GetCalculator();
         yield return t2.WaitHandle;
@@ -48,31 +47,34 @@ public class MainScene : MonoBehaviour, IHelloWorldEventObserver
 
     // Tests
 
-    IEnumerator ProcessHelloWorld(IHelloWorld helloWorld)
+    IEnumerator ProcessGreeter(IGreeterWithObserver greeter)
     {
-        WriteLine("*** HelloWorld ***");
+        WriteLine("*** Greeter ***");
 
-        var observer = G.Comm.CreateObserver<IHelloWorldEventObserver>(this);
-        yield return helloWorld.AddObserver(observer).WaitHandle;
+        var observer = G.Comm.CreateObserver<IGreetObserver>(this);
+        yield return greeter.Subscribe(observer).WaitHandle;
 
-        var t1 = helloWorld.SayHello("World");
+        var t1 = greeter.Greet("World");
         yield return t1.WaitHandle;
-        ShowResult(t1, "SayHello(Hello)");
+        ShowResult(t1, "Greet(Hello)");
 
-        var t2 = helloWorld.SayHello("Dlrow");
+        var t2 = greeter.Greet("Actor");
         yield return t2.WaitHandle;
-        ShowResult(t2, "SayHello(Dlrow)");
+        ShowResult(t2, "Greet(Actor)");
 
-        var t3 = helloWorld.GetHelloCount();
+        var t3 = greeter.GetCount();
         yield return t3.WaitHandle;
-        ShowResult(t3, "GetHelloCount()");
+        ShowResult(t3, "GetCount()");
+
+        yield return greeter.Unsubscribe(observer).WaitHandle;
+        // G.Comm.RemoveObserver(observer);
 
         WriteLine("");
     }
 
-    void IHelloWorldEventObserver.SayHello(string name)
+    void IGreetObserver.Event(string message)
     {
-        WriteLine(string.Format("<- SayHello({0})", name));
+        WriteLine(string.Format("<- {0}", message));
     }
 
     IEnumerator ProcessCalculator(ICalculator calculator)
@@ -174,5 +176,4 @@ public class MainScene : MonoBehaviour, IHelloWorldEventObserver
         else
             ShowResult((Task)task, name);
     }
-
 }

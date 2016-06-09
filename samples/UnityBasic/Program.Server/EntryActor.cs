@@ -15,14 +15,14 @@ namespace UnityBasic.Program.Server
             _clientSession = clientSession;
         }
 
-        async Task<IHelloWorld> IEntry.GetHelloWorld()
+        async Task<IGreeterWithObserver> IEntry.GetGreeter()
         {
-            var actor = Context.ActorOf<HelloWorldActor>();
+            var actor = Context.ActorOf<GreetingActor>();
 
             var reply = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
-                new ActorBoundSessionMessage.Bind(actor, typeof(IHelloWorld), null));
+                new ActorBoundSessionMessage.Bind(actor, typeof(IGreeterWithObserver)));
 
-            return BoundActorRef.Create<HelloWorldRef>(reply.ActorId);
+            return BoundActorRef.Create<GreeterWithObserverRef>(reply.ActorId);
         }
 
         async Task<ICalculator> IEntry.GetCalculator()
@@ -30,7 +30,7 @@ namespace UnityBasic.Program.Server
             var actor = Context.ActorOf<CalculatorActor>();
 
             var reply = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
-                new ActorBoundSessionMessage.Bind(actor, typeof(ICalculator), null));
+                new ActorBoundSessionMessage.Bind(actor, typeof(ICalculator)));
 
             return BoundActorRef.Create<CalculatorRef>(reply.ActorId);
         }
@@ -40,7 +40,7 @@ namespace UnityBasic.Program.Server
             var actor = Context.ActorOf<CounterActor>();
 
             var reply = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
-                new ActorBoundSessionMessage.Bind(actor, typeof(ICounter), null));
+                new ActorBoundSessionMessage.Bind(actor, typeof(ICounter)));
 
             return BoundActorRef.Create<CounterRef>(reply.ActorId);
         }
@@ -50,7 +50,7 @@ namespace UnityBasic.Program.Server
             var actor = Context.ActorOf<PedanticActor>();
 
             var reply = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
-                new ActorBoundSessionMessage.Bind(actor, typeof(IPedantic), null));
+                new ActorBoundSessionMessage.Bind(actor, typeof(IPedantic)));
 
             return BoundActorRef.Create<PedanticRef>(reply.ActorId);
         }

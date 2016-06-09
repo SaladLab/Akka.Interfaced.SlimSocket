@@ -73,8 +73,8 @@
     <Compile Include="..\Interface\IEntry.cs">
       <Link>IEntry.cs</Link>
     </Compile>
-    <Compile Include="..\Interface\IGreeterWithObserver.cs">
-      <Link>IGreeterWithObserver.cs</Link>
+    <Compile Include="..\Interface\IGreeter.cs">
+      <Link>IGreeter.cs</Link>
     </Compile>
     <Compile Include="..\Interface\IGreetObserver.cs">
       <Link>IGreetObserver.cs</Link>

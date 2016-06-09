@@ -84,8 +84,8 @@
     <Compile Include="ICalculator.cs" />
     <Compile Include="ICounter.cs" />
     <Compile Include="IEntry.cs" />
-    <Compile Include="IHelloWorld.cs" />
-    <Compile Include="IHelloWorldEventObserver.cs" />
+    <Compile Include="IGreeter.cs" />
+    <Compile Include="IGreetObserver.cs" />
     <Compile Include="IPedantic.cs" />
     <Compile Include="Properties\Akka.Interfaced.CodeGen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -14,10 +14,10 @@ using ProtoBuf;
 using TypeAlias;
 using System.ComponentModel;
 
+#region SurrogateForIActorRef
+
 namespace UnityBasic.Interface
 {
-    #region SurrogateForIActorRef
-
     [ProtoContract]
     public class SurrogateForIActorRef
     {
@@ -436,7 +436,7 @@ namespace UnityBasic.Interface
             return new Type[,] {
                 { typeof(GetCalculator_Invoke), typeof(GetCalculator_Return) },
                 { typeof(GetCounter_Invoke), typeof(GetCounter_Return) },
-                { typeof(GetHelloWorld_Invoke), typeof(GetHelloWorld_Return) },
+                { typeof(GetGreeter_Invoke), typeof(GetGreeter_Return) },
                 { typeof(GetPedantic_Invoke), typeof(GetPedantic_Return) },
             };
         }
@@ -522,7 +522,7 @@ namespace UnityBasic.Interface
         }
 
         [ProtoContract, TypeAlias]
-        public class GetHelloWorld_Invoke
+        public class GetGreeter_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
             public Type GetInterfaceType()
@@ -537,10 +537,10 @@ namespace UnityBasic.Interface
         }
 
         [ProtoContract, TypeAlias]
-        public class GetHelloWorld_Return
+        public class GetGreeter_Return
             : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
         {
-            [ProtoMember(1)] public UnityBasic.Interface.IHelloWorld v;
+            [ProtoMember(1)] public UnityBasic.Interface.IGreeterWithObserver v;
 
             public Type GetInterfaceType()
             {
@@ -606,7 +606,7 @@ namespace UnityBasic.Interface
     {
         void GetCalculator();
         void GetCounter();
-        void GetHelloWorld();
+        void GetGreeter();
         void GetPedantic();
     }
 
@@ -655,12 +655,12 @@ namespace UnityBasic.Interface
             return SendRequestAndReceive<UnityBasic.Interface.ICounter>(requestMessage);
         }
 
-        public Task<UnityBasic.Interface.IHelloWorld> GetHelloWorld()
+        public Task<UnityBasic.Interface.IGreeterWithObserver> GetGreeter()
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IEntry_PayloadTable.GetHelloWorld_Invoke {  }
+                InvokePayload = new IEntry_PayloadTable.GetGreeter_Invoke {  }
             };
-            return SendRequestAndReceive<UnityBasic.Interface.IHelloWorld>(requestMessage);
+            return SendRequestAndReceive<UnityBasic.Interface.IGreeterWithObserver>(requestMessage);
         }
 
         public Task<UnityBasic.Interface.IPedantic> GetPedantic()
@@ -687,10 +687,10 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void IEntry_NoReply.GetHelloWorld()
+        void IEntry_NoReply.GetGreeter()
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IEntry_PayloadTable.GetHelloWorld_Invoke {  }
+                InvokePayload = new IEntry_PayloadTable.GetGreeter_Invoke {  }
             };
             SendRequest(requestMessage);
         }
@@ -726,31 +726,202 @@ namespace UnityBasic.Interface
 }
 
 #endregion
-#region UnityBasic.Interface.IHelloWorld
+#region UnityBasic.Interface.IGreeter
 
 namespace UnityBasic.Interface
 {
-    [PayloadTable(typeof(IHelloWorld), PayloadTableKind.Request)]
-    public static class IHelloWorld_PayloadTable
+    [PayloadTable(typeof(IGreeter), PayloadTableKind.Request)]
+    public static class IGreeter_PayloadTable
     {
         public static Type[,] GetPayloadTypes()
         {
             return new Type[,] {
-                { typeof(AddObserver_Invoke), null },
-                { typeof(GetHelloCount_Invoke), typeof(GetHelloCount_Return) },
-                { typeof(SayHello_Invoke), typeof(SayHello_Return) },
+                { typeof(GetCount_Invoke), typeof(GetCount_Return) },
+                { typeof(Greet_Invoke), typeof(Greet_Return) },
             };
         }
 
         [ProtoContract, TypeAlias]
-        public class AddObserver_Invoke
-            : IInterfacedPayload, IAsyncInvokable, IPayloadObserverUpdatable
+        public class GetCount_Invoke
+            : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public UnityBasic.Interface.IHelloWorldEventObserver observer;
+            public Type GetInterfaceType()
+            {
+                return typeof(IGreeter);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetCount_Return
+            : IInterfacedPayload, IValueGetable
+        {
+            [ProtoMember(1)] public System.Int32 v;
 
             public Type GetInterfaceType()
             {
-                return typeof(IHelloWorld);
+                return typeof(IGreeter);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class Greet_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            [ProtoMember(1)] public System.String name;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IGreeter);
+            }
+
+            public Task<IValueGetable> InvokeAsync(object __target)
+            {
+                return null;
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class Greet_Return
+            : IInterfacedPayload, IValueGetable
+        {
+            [ProtoMember(1)] public System.String v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IGreeter);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+        }
+    }
+
+    public interface IGreeter_NoReply
+    {
+        void GetCount();
+        void Greet(System.String name);
+    }
+
+    public class GreeterRef : InterfacedActorRef, IGreeter, IGreeter_NoReply
+    {
+        public GreeterRef() : base(null)
+        {
+        }
+
+        public GreeterRef(IActorRef actor) : base(actor)
+        {
+        }
+
+        public GreeterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        {
+        }
+
+        public IGreeter_NoReply WithNoReply()
+        {
+            return this;
+        }
+
+        public GreeterRef WithRequestWaiter(IRequestWaiter requestWaiter)
+        {
+            return new GreeterRef(Actor, requestWaiter, Timeout);
+        }
+
+        public GreeterRef WithTimeout(TimeSpan? timeout)
+        {
+            return new GreeterRef(Actor, RequestWaiter, timeout);
+        }
+
+        public Task<System.Int32> GetCount()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
+            };
+            return SendRequestAndReceive<System.Int32>(requestMessage);
+        }
+
+        public Task<System.String> Greet(System.String name)
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
+            };
+            return SendRequestAndReceive<System.String>(requestMessage);
+        }
+
+        void IGreeter_NoReply.GetCount()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IGreeter_NoReply.Greet(System.String name)
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
+            };
+            SendRequest(requestMessage);
+        }
+    }
+
+    [ProtoContract]
+    public class SurrogateForIGreeter
+    {
+        [ProtoMember(1)] public IActorRef Actor;
+
+        [ProtoConverter]
+        public static SurrogateForIGreeter Convert(IGreeter value)
+        {
+            if (value == null) return null;
+            return new SurrogateForIGreeter { Actor = ((GreeterRef)value).Actor };
+        }
+
+        [ProtoConverter]
+        public static IGreeter Convert(SurrogateForIGreeter value)
+        {
+            if (value == null) return null;
+            return new GreeterRef(value.Actor);
+        }
+    }
+}
+
+#endregion
+#region UnityBasic.Interface.IGreeterWithObserver
+
+namespace UnityBasic.Interface
+{
+    [PayloadTable(typeof(IGreeterWithObserver), PayloadTableKind.Request)]
+    public static class IGreeterWithObserver_PayloadTable
+    {
+        public static Type[,] GetPayloadTypes()
+        {
+            return new Type[,] {
+                { typeof(Subscribe_Invoke), null },
+                { typeof(Unsubscribe_Invoke), null },
+            };
+        }
+
+        [ProtoContract, TypeAlias]
+        public class Subscribe_Invoke
+            : IInterfacedPayload, IAsyncInvokable, IPayloadObserverUpdatable
+        {
+            [ProtoMember(1)] public UnityBasic.Interface.IGreetObserver observer;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IGreeterWithObserver);
             }
 
             public Task<IValueGetable> InvokeAsync(object __target)
@@ -768,174 +939,148 @@ namespace UnityBasic.Interface
         }
 
         [ProtoContract, TypeAlias]
-        public class GetHelloCount_Invoke
-            : IInterfacedPayload, IAsyncInvokable
+        public class Unsubscribe_Invoke
+            : IInterfacedPayload, IAsyncInvokable, IPayloadObserverUpdatable
         {
+            [ProtoMember(1)] public UnityBasic.Interface.IGreetObserver observer;
+
             public Type GetInterfaceType()
             {
-                return typeof(IHelloWorld);
+                return typeof(IGreeterWithObserver);
             }
 
             public Task<IValueGetable> InvokeAsync(object __target)
             {
                 return null;
             }
-        }
 
-        [ProtoContract, TypeAlias]
-        public class GetHelloCount_Return
-            : IInterfacedPayload, IValueGetable
-        {
-            [ProtoMember(1)] public System.Int32 v;
-
-            public Type GetInterfaceType()
+            void IPayloadObserverUpdatable.Update(Action<IInterfacedObserver> updater)
             {
-                return typeof(IHelloWorld);
-            }
-
-            public object Value
-            {
-                get { return v; }
-            }
-        }
-
-        [ProtoContract, TypeAlias]
-        public class SayHello_Invoke
-            : IInterfacedPayload, IAsyncInvokable
-        {
-            [ProtoMember(1)] public System.String name;
-
-            public Type GetInterfaceType()
-            {
-                return typeof(IHelloWorld);
-            }
-
-            public Task<IValueGetable> InvokeAsync(object __target)
-            {
-                return null;
-            }
-        }
-
-        [ProtoContract, TypeAlias]
-        public class SayHello_Return
-            : IInterfacedPayload, IValueGetable
-        {
-            [ProtoMember(1)] public System.String v;
-
-            public Type GetInterfaceType()
-            {
-                return typeof(IHelloWorld);
-            }
-
-            public object Value
-            {
-                get { return v; }
+                if (observer != null)
+                {
+                    updater(observer);
+                }
             }
         }
     }
 
-    public interface IHelloWorld_NoReply
+    public interface IGreeterWithObserver_NoReply : IGreeter_NoReply
     {
-        void AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer);
-        void GetHelloCount();
-        void SayHello(System.String name);
+        void Subscribe(UnityBasic.Interface.IGreetObserver observer);
+        void Unsubscribe(UnityBasic.Interface.IGreetObserver observer);
     }
 
-    public class HelloWorldRef : InterfacedActorRef, IHelloWorld, IHelloWorld_NoReply
+    public class GreeterWithObserverRef : InterfacedActorRef, IGreeterWithObserver, IGreeterWithObserver_NoReply
     {
-        public HelloWorldRef() : base(null)
+        public GreeterWithObserverRef() : base(null)
         {
         }
 
-        public HelloWorldRef(IActorRef actor) : base(actor)
+        public GreeterWithObserverRef(IActorRef actor) : base(actor)
         {
         }
 
-        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public GreeterWithObserverRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
-        public IHelloWorld_NoReply WithNoReply()
+        public IGreeterWithObserver_NoReply WithNoReply()
         {
             return this;
         }
 
-        public HelloWorldRef WithRequestWaiter(IRequestWaiter requestWaiter)
+        public GreeterWithObserverRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new HelloWorldRef(Actor, requestWaiter, Timeout);
+            return new GreeterWithObserverRef(Actor, requestWaiter, Timeout);
         }
 
-        public HelloWorldRef WithTimeout(TimeSpan? timeout)
+        public GreeterWithObserverRef WithTimeout(TimeSpan? timeout)
         {
-            return new HelloWorldRef(Actor, RequestWaiter, timeout);
+            return new GreeterWithObserverRef(Actor, RequestWaiter, timeout);
         }
 
-        public Task AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
+        public Task Subscribe(UnityBasic.Interface.IGreetObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
+                InvokePayload = new IGreeterWithObserver_PayloadTable.Subscribe_Invoke { observer = (GreetObserver)observer }
             };
             return SendRequestAndWait(requestMessage);
         }
 
-        public Task<System.Int32> GetHelloCount()
+        public Task Unsubscribe(UnityBasic.Interface.IGreetObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.GetHelloCount_Invoke {  }
+                InvokePayload = new IGreeterWithObserver_PayloadTable.Unsubscribe_Invoke { observer = (GreetObserver)observer }
+            };
+            return SendRequestAndWait(requestMessage);
+        }
+
+        public Task<System.Int32> GetCount()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
             };
             return SendRequestAndReceive<System.Int32>(requestMessage);
         }
 
-        public Task<System.String> SayHello(System.String name)
+        public Task<System.String> Greet(System.String name)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.SayHello_Invoke { name = name }
+                InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
             return SendRequestAndReceive<System.String>(requestMessage);
         }
 
-        void IHelloWorld_NoReply.AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
+        void IGreeterWithObserver_NoReply.Subscribe(UnityBasic.Interface.IGreetObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
+                InvokePayload = new IGreeterWithObserver_PayloadTable.Subscribe_Invoke { observer = (GreetObserver)observer }
             };
             SendRequest(requestMessage);
         }
 
-        void IHelloWorld_NoReply.GetHelloCount()
+        void IGreeterWithObserver_NoReply.Unsubscribe(UnityBasic.Interface.IGreetObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.GetHelloCount_Invoke {  }
+                InvokePayload = new IGreeterWithObserver_PayloadTable.Unsubscribe_Invoke { observer = (GreetObserver)observer }
             };
             SendRequest(requestMessage);
         }
 
-        void IHelloWorld_NoReply.SayHello(System.String name)
+        void IGreeter_NoReply.GetCount()
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.SayHello_Invoke { name = name }
+                InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IGreeter_NoReply.Greet(System.String name)
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
             SendRequest(requestMessage);
         }
     }
 
     [ProtoContract]
-    public class SurrogateForIHelloWorld
+    public class SurrogateForIGreeterWithObserver
     {
         [ProtoMember(1)] public IActorRef Actor;
 
         [ProtoConverter]
-        public static SurrogateForIHelloWorld Convert(IHelloWorld value)
+        public static SurrogateForIGreeterWithObserver Convert(IGreeterWithObserver value)
         {
             if (value == null) return null;
-            return new SurrogateForIHelloWorld { Actor = ((HelloWorldRef)value).Actor };
+            return new SurrogateForIGreeterWithObserver { Actor = ((GreeterWithObserverRef)value).Actor };
         }
 
         [ProtoConverter]
-        public static IHelloWorld Convert(SurrogateForIHelloWorld value)
+        public static IGreeterWithObserver Convert(SurrogateForIGreeterWithObserver value)
         {
             if (value == null) return null;
-            return new HelloWorldRef(value.Actor);
+            return new GreeterWithObserverRef(value.Actor);
         }
     }
 }
@@ -1305,10 +1450,10 @@ namespace UnityBasic.Interface
 }
 
 #endregion
+#region SurrogateForINotificationChannel
+
 namespace UnityBasic.Interface
 {
-    #region SurrogateForINotificationChannel
-
     [ProtoContract]
     public class SurrogateForINotificationChannel
     {
@@ -1328,75 +1473,75 @@ namespace UnityBasic.Interface
 }
 
 #endregion
-#region UnityBasic.Interface.IHelloWorldEventObserver
+#region UnityBasic.Interface.IGreetObserver
 
 namespace UnityBasic.Interface
 {
-    [PayloadTable(typeof(IHelloWorldEventObserver), PayloadTableKind.Notification)]
-    public static class IHelloWorldEventObserver_PayloadTable
+    [PayloadTable(typeof(IGreetObserver), PayloadTableKind.Notification)]
+    public static class IGreetObserver_PayloadTable
     {
         public static Type[] GetPayloadTypes()
         {
             return new Type[] {
-                typeof(SayHello_Invoke),
+                typeof(Event_Invoke),
             };
         }
 
         [ProtoContract, TypeAlias]
-        public class SayHello_Invoke : IInterfacedPayload, IInvokable
+        public class Event_Invoke : IInterfacedPayload, IInvokable
         {
-            [ProtoMember(1)] public System.String name;
+            [ProtoMember(1)] public System.String message;
 
             public Type GetInterfaceType()
             {
-                return typeof(IHelloWorldEventObserver);
+                return typeof(IGreetObserver);
             }
 
             public void Invoke(object __target)
             {
-                ((IHelloWorldEventObserver)__target).SayHello(name);
+                ((IGreetObserver)__target).Event(message);
             }
         }
     }
 
-    public class HelloWorldEventObserver : InterfacedObserver, IHelloWorldEventObserver
+    public class GreetObserver : InterfacedObserver, IGreetObserver
     {
-        public HelloWorldEventObserver()
+        public GreetObserver()
             : base(null, 0)
         {
         }
 
-        public HelloWorldEventObserver(INotificationChannel channel, int observerId = 0)
+        public GreetObserver(INotificationChannel channel, int observerId = 0)
             : base(channel, observerId)
         {
         }
 
-        public void SayHello(System.String name)
+        public void Event(System.String message)
         {
-            var payload = new IHelloWorldEventObserver_PayloadTable.SayHello_Invoke { name = name };
+            var payload = new IGreetObserver_PayloadTable.Event_Invoke { message = message };
             Notify(payload);
         }
     }
 
     [ProtoContract]
-    public class SurrogateForIHelloWorldEventObserver
+    public class SurrogateForIGreetObserver
     {
         [ProtoMember(1)] public INotificationChannel Channel;
         [ProtoMember(2)] public int ObserverId;
 
         [ProtoConverter]
-        public static SurrogateForIHelloWorldEventObserver Convert(IHelloWorldEventObserver value)
+        public static SurrogateForIGreetObserver Convert(IGreetObserver value)
         {
             if (value == null) return null;
-            var o = (HelloWorldEventObserver)value;
-            return new SurrogateForIHelloWorldEventObserver { Channel = o.Channel, ObserverId = o.ObserverId };
+            var o = (GreetObserver)value;
+            return new SurrogateForIGreetObserver { Channel = o.Channel, ObserverId = o.ObserverId };
         }
 
         [ProtoConverter]
-        public static IHelloWorldEventObserver Convert(SurrogateForIHelloWorldEventObserver value)
+        public static IGreetObserver Convert(SurrogateForIGreetObserver value)
         {
             if (value == null) return null;
-            return new HelloWorldEventObserver(value.Channel, value.ObserverId);
+            return new GreetObserver(value.Channel, value.ObserverId);
         }
     }
 }

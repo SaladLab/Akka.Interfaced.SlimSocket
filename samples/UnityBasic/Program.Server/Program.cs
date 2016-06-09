@@ -3,17 +3,16 @@ using System.Net;
 using System.Net.Sockets;
 using Akka.Actor;
 using Akka.Interfaced;
-using Akka.Interfaced.SlimSocket.Base;
 using Akka.Interfaced.SlimSocket.Server;
 using Common.Logging;
-using ProtoBuf.Meta;
-using TypeAlias;
 using UnityBasic.Interface;
 
 namespace UnityBasic.Program.Server
 {
     internal class Program
     {
+        private static TcpConnectionSettings s_tcpConnectionSettings;
+
         private static void Main(string[] args)
         {
             if (typeof(ICalculator) == null)
@@ -28,19 +27,12 @@ namespace UnityBasic.Program.Server
             Console.ReadLine();
         }
 
-        private static TcpConnectionSettings _tcpConnectionSettings;
-
         private static void StartListen(ActorSystem system, int port)
         {
             var logger = LogManager.GetLogger("ClientGateway");
 
-            _tcpConnectionSettings = new TcpConnectionSettings
-            {
-                PacketSerializer = new PacketSerializer(
-                    new PacketSerializerBase.Data(
-                        new ProtoBufMessageSerializer(PacketSerializer.CreateTypeModel()),
-                        new TypeAliasTable()))
-            };
+            s_tcpConnectionSettings = new TcpConnectionSettings();
+            s_tcpConnectionSettings.PacketSerializer = PacketSerializer.CreatePacketSerializer();
 
             var clientGateway = system.ActorOf(Props.Create(() => new ClientGateway(logger, CreateSession)));
             clientGateway.Tell(new ClientGatewayMessage.Start(new IPEndPoint(IPAddress.Any, port)));
@@ -50,7 +42,7 @@ namespace UnityBasic.Program.Server
         {
             var logger = LogManager.GetLogger($"Client({socket.RemoteEndPoint})");
             return context.ActorOf(Props.Create(() => new ClientSession(
-                logger, socket, _tcpConnectionSettings, CreateInitialActor)));
+                logger, socket, s_tcpConnectionSettings, CreateInitialActor)));
         }
 
         private static Tuple<IActorRef, ActorBoundSessionMessage.InterfaceType[]>[] CreateInitialActor(IActorContext context, Socket socket) =>
