@@ -87,8 +87,8 @@ namespace Akka.Interfaced.SlimSocket.Client
             catch (Exception e)
             {
                 _state = TcpState.Closed;
-                Closed?.Invoke(this, 0);
                 _logger?.TraceFormat("Connect Failed {0}", e, _remoteEndPoint);
+                Closed?.Invoke(this, 0);
                 return;
             }
 

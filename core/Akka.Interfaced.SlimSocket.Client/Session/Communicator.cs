@@ -21,14 +21,14 @@ namespace Akka.Interfaced.SlimSocket.Client
             Offline,
             Connecting,
             Connected,
-            Paused,
             Stopped,
         }
 
         public StateType State => _state;
-
         public ISlimTaskFactory TaskFactory { get; set; }
         public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
+
+        public event Action<Communicator, StateType> StateChanged;
 
         private volatile StateType _state;
         private readonly ILog _logger;
@@ -49,7 +49,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         public Communicator(ILog logger, IPEndPoint remoteEndPoint,
                             Func<Communicator, TcpConnection> connectionFactory)
         {
-            _state = StateType.None;
+            _state = StateType.Offline;
             _logger = logger;
             _remoteEndPoint = remoteEndPoint;
             _connectionFactory = connectionFactory;
@@ -59,17 +59,28 @@ namespace Akka.Interfaced.SlimSocket.Client
 #endif
         }
 
+        private bool SetState(StateType state)
+        {
+            if (_state == state)
+                return false;
+
+            _state = state;
+            StateChanged?.Invoke(this, state);
+            return true;
+        }
+
         public void Start()
         {
             _logger.Info("Start.");
-            _state = StateType.Offline;
+
             CreateNewConnect();
         }
 
         public void Stop()
         {
             _logger.Info("Stop.");
-            _state = StateType.Stopped;
+
+            SetState(StateType.Stopped);
             _tcpConnection?.Close();
         }
 
@@ -79,7 +90,8 @@ namespace Akka.Interfaced.SlimSocket.Client
             if (connection == null)
                 throw new InvalidOperationException("Null connection is not allowed");
 
-            _state = StateType.Connecting;
+            SetState(StateType.Connecting);
+
             _tcpConnection = connection;
             _tcpConnection.Connected += OnConnect;
             _tcpConnection.Received += OnReceive;
@@ -152,7 +164,7 @@ namespace Akka.Interfaced.SlimSocket.Client
                     _requestPacketQueues.Clear();
                 }
 
-                _state = StateType.Connected;
+                SetState(StateType.Connected);
             }
         }
 
@@ -209,7 +221,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         {
             _logger.TraceFormat("Closed. (reason={0})", reason);
 
-            _state = StateType.Offline;
+            SetState(StateType.Offline);
         }
 
         public void SendRequest(IActorRef target, RequestMessage requestMessage)
