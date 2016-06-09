@@ -86,7 +86,7 @@ namespace HelloWorld.Interface
         {
         }
 
-        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -140,6 +140,12 @@ namespace HelloWorld.Interface
             if (value == null) return null;
             return new EntryRef(value.Actor);
         }
+    }
+
+    [AlternativeInterface(typeof(IEntry))]
+    public interface IEntrySync : IInterfacedActor
+    {
+        HelloWorld.Interface.IHelloWorld GetHelloWorld();
     }
 }
 
@@ -272,7 +278,7 @@ namespace HelloWorld.Interface
         {
         }
 
-        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -294,7 +300,7 @@ namespace HelloWorld.Interface
         public Task AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             return SendRequestAndWait(requestMessage);
         }
@@ -318,7 +324,7 @@ namespace HelloWorld.Interface
         void IHelloWorld_NoReply.AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             SendRequest(requestMessage);
         }
@@ -358,6 +364,14 @@ namespace HelloWorld.Interface
             if (value == null) return null;
             return new HelloWorldRef(value.Actor);
         }
+    }
+
+    [AlternativeInterface(typeof(IHelloWorld))]
+    public interface IHelloWorldSync : IInterfacedActor
+    {
+        void AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer);
+        System.Int32 GetHelloCount();
+        System.String SayHello(System.String name);
     }
 }
 
@@ -405,11 +419,6 @@ namespace HelloWorld.Interface
         {
         }
 
-        public HelloWorldEventObserver(IActorRef target, int observerId = 0)
-            : base(new ActorNotificationChannel(target), observerId)
-        {
-        }
-
         public void SayHello(System.String name)
         {
             var payload = new IHelloWorldEventObserver_PayloadTable.SayHello_Invoke { name = name };
@@ -437,6 +446,12 @@ namespace HelloWorld.Interface
             if (value == null) return null;
             return new HelloWorldEventObserver(value.Channel, value.ObserverId);
         }
+    }
+
+    [AlternativeInterface(typeof(IHelloWorldEventObserver))]
+    public interface IHelloWorldEventObserverAsync : IInterfacedObserver
+    {
+        Task SayHello(System.String name);
     }
 }
 

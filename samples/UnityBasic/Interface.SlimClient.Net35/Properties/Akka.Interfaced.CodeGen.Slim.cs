@@ -179,7 +179,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public CalculatorRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public CalculatorRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -350,7 +350,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public CounterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public CounterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -620,7 +620,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -851,7 +851,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -873,7 +873,7 @@ namespace UnityBasic.Interface
         public Task AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             return SendRequestAndWait(requestMessage);
         }
@@ -897,7 +897,7 @@ namespace UnityBasic.Interface
         void IHelloWorld_NoReply.AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             SendRequest(requestMessage);
         }
@@ -1167,7 +1167,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public PedanticRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public PedanticRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 

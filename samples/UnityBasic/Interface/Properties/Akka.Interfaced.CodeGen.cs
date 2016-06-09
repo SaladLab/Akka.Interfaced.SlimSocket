@@ -156,7 +156,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public CalculatorRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public CalculatorRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -242,6 +242,14 @@ namespace UnityBasic.Interface
             if (value == null) return null;
             return new CalculatorRef(value.Actor);
         }
+    }
+
+    [AlternativeInterface(typeof(ICalculator))]
+    public interface ICalculatorSync : IInterfacedActor
+    {
+        System.String Concat(System.String a, System.String b);
+        System.Int32 Sum(System.Int32 a, System.Int32 b);
+        System.Int32 Sum(System.Tuple<System.Int32, System.Int32> v);
     }
 }
 
@@ -329,7 +337,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public CounterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public CounterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -399,6 +407,13 @@ namespace UnityBasic.Interface
             if (value == null) return null;
             return new CounterRef(value.Actor);
         }
+    }
+
+    [AlternativeInterface(typeof(ICounter))]
+    public interface ICounterSync : IInterfacedActor
+    {
+        System.Int32 GetCounter();
+        void IncCounter(System.Int32 delta);
     }
 }
 
@@ -603,7 +618,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -705,6 +720,15 @@ namespace UnityBasic.Interface
             if (value == null) return null;
             return new EntryRef(value.Actor);
         }
+    }
+
+    [AlternativeInterface(typeof(IEntry))]
+    public interface IEntrySync : IInterfacedActor
+    {
+        UnityBasic.Interface.ICalculator GetCalculator();
+        UnityBasic.Interface.ICounter GetCounter();
+        UnityBasic.Interface.IHelloWorld GetHelloWorld();
+        UnityBasic.Interface.IPedantic GetPedantic();
     }
 }
 
@@ -837,7 +861,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -859,7 +883,7 @@ namespace UnityBasic.Interface
         public Task AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             return SendRequestAndWait(requestMessage);
         }
@@ -883,7 +907,7 @@ namespace UnityBasic.Interface
         void IHelloWorld_NoReply.AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             SendRequest(requestMessage);
         }
@@ -923,6 +947,14 @@ namespace UnityBasic.Interface
             if (value == null) return null;
             return new HelloWorldRef(value.Actor);
         }
+    }
+
+    [AlternativeInterface(typeof(IHelloWorld))]
+    public interface IHelloWorldSync : IInterfacedActor
+    {
+        void AddObserver(UnityBasic.Interface.IHelloWorldEventObserver observer);
+        System.Int32 GetHelloCount();
+        System.String SayHello(System.String name);
     }
 }
 
@@ -1159,7 +1191,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public PedanticRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public PedanticRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -1294,6 +1326,17 @@ namespace UnityBasic.Interface
             return new PedanticRef(value.Actor);
         }
     }
+
+    [AlternativeInterface(typeof(IPedantic))]
+    public interface IPedanticSync : IInterfacedActor
+    {
+        void TestCall();
+        System.Nullable<System.Int32> TestOptional(System.Nullable<System.Int32> value);
+        System.Int32[] TestParams(params System.Int32[] values);
+        System.String TestPassClass(UnityBasic.Interface.TestParam param);
+        UnityBasic.Interface.TestResult TestReturnClass(System.Int32 value, System.Int32 offset);
+        System.Tuple<System.Int32, System.String> TestTuple(System.Tuple<System.Int32, System.String> value);
+    }
 }
 
 #endregion
@@ -1340,11 +1383,6 @@ namespace UnityBasic.Interface
         {
         }
 
-        public HelloWorldEventObserver(IActorRef target, int observerId = 0)
-            : base(new ActorNotificationChannel(target), observerId)
-        {
-        }
-
         public void SayHello(System.String name)
         {
             var payload = new IHelloWorldEventObserver_PayloadTable.SayHello_Invoke { name = name };
@@ -1372,6 +1410,12 @@ namespace UnityBasic.Interface
             if (value == null) return null;
             return new HelloWorldEventObserver(value.Channel, value.ObserverId);
         }
+    }
+
+    [AlternativeInterface(typeof(IHelloWorldEventObserver))]
+    public interface IHelloWorldEventObserverAsync : IInterfacedObserver
+    {
+        Task SayHello(System.String name);
     }
 }
 

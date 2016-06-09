@@ -111,7 +111,7 @@ namespace HelloWorld.Interface
         {
         }
 
-        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -294,7 +294,7 @@ namespace HelloWorld.Interface
         {
         }
 
-        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout) : base(actor, requestWaiter, timeout)
+        public HelloWorldRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
         {
         }
 
@@ -316,7 +316,7 @@ namespace HelloWorld.Interface
         public Task AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             return SendRequestAndWait(requestMessage);
         }
@@ -340,7 +340,7 @@ namespace HelloWorld.Interface
         void IHelloWorld_NoReply.AddObserver(HelloWorld.Interface.IHelloWorldEventObserver observer)
         {
             var requestMessage = new RequestMessage {
-                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = observer }
+                InvokePayload = new IHelloWorld_PayloadTable.AddObserver_Invoke { observer = (HelloWorldEventObserver)observer }
             };
             SendRequest(requestMessage);
         }
