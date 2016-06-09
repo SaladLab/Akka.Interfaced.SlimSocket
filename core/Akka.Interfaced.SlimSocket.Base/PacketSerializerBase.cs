@@ -11,6 +11,11 @@ namespace Akka.Interfaced.SlimSocket.Base
             public IMessageSerializer MessageSerializer;
             public TypeAliasTable TypeTable;
 
+            public Data(IMessageSerializer serializer)
+                : this(serializer, new TypeAliasTable())
+            {
+            }
+
             public Data(IMessageSerializer serializer, TypeAliasTable typeTable)
             {
                 MessageSerializer = serializer;

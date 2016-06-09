@@ -39,5 +39,18 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
             throw new InvalidOperationException("Unknown stream!");
         }
+
+        public static PacketSerializer CreatePacketSerializer()
+        {
+            return new PacketSerializer(
+                new Data(new ProtoBufMessageSerializer(CreateTypeModel())));
+        }
+
+        public static PacketSerializer CreatePacketSerializer<TTypeModel>()
+            where TTypeModel : TypeModel, new()
+        {
+            return new PacketSerializer(
+                new Data(new ProtoBufMessageSerializer(new TTypeModel())));
+        }
     }
 }
