@@ -63,6 +63,9 @@ Target "Publish" <| fun _ -> ()
 
 Target "CI" <| fun _ -> ()
 
+Target "DevLink" <| fun _ ->
+    devlink "./packages" [ "../Akka.Interfaced" ]
+
 Target "Help" <| fun _ -> 
     showUsage solution (fun _ -> None)
 

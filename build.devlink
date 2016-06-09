@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<packages>
+    <package id="Akka.Interfaced.SlimSocket.Base">
+        <files dir="lib/net45" source="core/Akka.Interfaced.SlimSocket.Base/bin/Debug"/>
+        <files dir="lib/net35" source="core/Akka.Interfaced.SlimSocket.Base.Net35/bin/Debug"/>
+    </package>
+    <package id="Akka.Interfaced.SlimSocket.Client">
+        <files dir="lib/net45" source="core/Akka.Interfaced.SlimSocket.Client/bin/Debug"/>
+        <files dir="lib/net35" source="core/Akka.Interfaced.SlimSocket.Client.Net35/bin/Debug"/>
+    </package>
+    <package id="Akka.Interfaced.SlimSocket.Server">
+        <files dir="lib/net45" source="core/Akka.Interfaced.SlimSocket.Server/bin/Debug"/>
+    </package>
+</packages>
