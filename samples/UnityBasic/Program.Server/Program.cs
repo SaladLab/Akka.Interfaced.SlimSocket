@@ -49,7 +49,7 @@ namespace UnityBasic.Program.Server
             new[]
             {
                 Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self))),
-                              new[] { new ActorBoundSessionMessage.InterfaceType(typeof(IEntry)) })
+                             new[] { new ActorBoundSessionMessage.InterfaceType(typeof(IEntry)) })
             };
     }
 }
