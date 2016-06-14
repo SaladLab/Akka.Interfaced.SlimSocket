@@ -245,7 +245,7 @@ namespace UnityBasic.Interface
     }
 
     [AlternativeInterface(typeof(ICalculator))]
-    public interface ICalculatorSync : IInterfacedActor
+    public interface ICalculatorSync : IInterfacedActorSync
     {
         System.String Concat(System.String a, System.String b);
         System.Int32 Sum(System.Int32 a, System.Int32 b);
@@ -410,7 +410,7 @@ namespace UnityBasic.Interface
     }
 
     [AlternativeInterface(typeof(ICounter))]
-    public interface ICounterSync : IInterfacedActor
+    public interface ICounterSync : IInterfacedActorSync
     {
         System.Int32 GetCounter();
         void IncCounter(System.Int32 delta);
@@ -723,7 +723,7 @@ namespace UnityBasic.Interface
     }
 
     [AlternativeInterface(typeof(IEntry))]
-    public interface IEntrySync : IInterfacedActor
+    public interface IEntrySync : IInterfacedActorSync
     {
         UnityBasic.Interface.ICalculator GetCalculator();
         UnityBasic.Interface.ICounter GetCounter();
@@ -906,7 +906,7 @@ namespace UnityBasic.Interface
     }
 
     [AlternativeInterface(typeof(IGreeter))]
-    public interface IGreeterSync : IInterfacedActor
+    public interface IGreeterSync : IInterfacedActorSync
     {
         System.Int32 GetCount();
         System.String Greet(System.String name);
@@ -1480,7 +1480,7 @@ namespace UnityBasic.Interface
     }
 
     [AlternativeInterface(typeof(IPedantic))]
-    public interface IPedanticSync : IInterfacedActor
+    public interface IPedanticSync : IInterfacedActorSync
     {
         void TestCall();
         System.Nullable<System.Int32> TestOptional(System.Nullable<System.Int32> value);
@@ -1565,7 +1565,7 @@ namespace UnityBasic.Interface
     }
 
     [AlternativeInterface(typeof(IGreetObserver))]
-    public interface IGreetObserverAsync : IInterfacedObserver
+    public interface IGreetObserverAsync : IInterfacedObserverSync
     {
         Task Event(System.String message);
     }

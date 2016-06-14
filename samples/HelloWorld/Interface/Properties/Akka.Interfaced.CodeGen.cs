@@ -143,7 +143,7 @@ namespace HelloWorld.Interface
     }
 
     [AlternativeInterface(typeof(IEntry))]
-    public interface IEntrySync : IInterfacedActor
+    public interface IEntrySync : IInterfacedActorSync
     {
         HelloWorld.Interface.IGreeterWithObserver GetGreeter();
     }
@@ -323,7 +323,7 @@ namespace HelloWorld.Interface
     }
 
     [AlternativeInterface(typeof(IGreeter))]
-    public interface IGreeterSync : IInterfacedActor
+    public interface IGreeterSync : IInterfacedActorSync
     {
         System.Int32 GetCount();
         System.String Greet(System.String name);
@@ -601,7 +601,7 @@ namespace HelloWorld.Interface
     }
 
     [AlternativeInterface(typeof(IGreetObserver))]
-    public interface IGreetObserverAsync : IInterfacedObserver
+    public interface IGreetObserverAsync : IInterfacedObserverSync
     {
         Task Event(System.String message);
     }
