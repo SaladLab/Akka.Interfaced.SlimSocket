@@ -7,7 +7,7 @@
     <ProjectGuid>{DD5819EE-4F82-4C37-8BFC-2E873EC11E56}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Akka.Interfaced.SlimSocket.Base</RootNamespace>
+    <RootNamespace>Akka.Interfaced.SlimSocket</RootNamespace>
     <AssemblyName>Akka.Interfaced.SlimSocket.Base</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoSurrogate.cs" />
+    <Compile Include="ChannelType.cs" />
     <Compile Include="ExceptionSerializer.cs" />
     <Compile Include="IMessageSerializer.cs" />
     <Compile Include="IPacketSerializer.cs" />

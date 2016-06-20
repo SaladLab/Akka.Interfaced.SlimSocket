@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
 using Akka.Actor;
 using Akka.Interfaced;
 using Akka.Interfaced.SlimSocket.Server;
 using Common.Logging;
 using UnityBasic.Interface;
+using Akka.Interfaced.SlimSocket;
 
 namespace UnityBasic.Program.Server
 {
     internal class Program
     {
-        private static TcpConnectionSettings s_tcpConnectionSettings;
-
         private static void Main(string[] args)
         {
             if (typeof(ICalculator) == null)
@@ -21,35 +19,36 @@ namespace UnityBasic.Program.Server
             var system = ActorSystem.Create("MySystem");
             DeadRequestProcessingActor.Install(system);
 
-            StartListen(system, 5000);
+            StartGateway(system, ChannelType.Tcp, 5001);
+            StartGateway(system, ChannelType.Udp, 5001);
 
             Console.WriteLine("Please enter key to quit.");
             Console.ReadLine();
         }
 
-        private static void StartListen(ActorSystem system, int port)
+        private static void StartGateway(ActorSystem system, ChannelType type, int port)
         {
-            var logger = LogManager.GetLogger("ClientGateway");
+            var serializer = PacketSerializer.CreatePacketSerializer();
 
-            s_tcpConnectionSettings = new TcpConnectionSettings();
-            s_tcpConnectionSettings.PacketSerializer = PacketSerializer.CreatePacketSerializer();
-
-            var clientGateway = system.ActorOf(Props.Create(() => new ClientGateway(logger, CreateSession)));
-            clientGateway.Tell(new ClientGatewayMessage.Start(new IPEndPoint(IPAddress.Any, port)));
-        }
-
-        private static IActorRef CreateSession(IActorContext context, Socket socket)
-        {
-            var logger = LogManager.GetLogger($"Client({socket.RemoteEndPoint})");
-            return context.ActorOf(Props.Create(() => new ClientSession(
-                logger, socket, s_tcpConnectionSettings, CreateInitialActor)));
-        }
-
-        private static Tuple<IActorRef, ActorBoundSessionMessage.InterfaceType[]>[] CreateInitialActor(IActorContext context, Socket socket) =>
-            new[]
+            var initiator = new GatewayInitiator
             {
-                Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self))),
-                             new[] { new ActorBoundSessionMessage.InterfaceType(typeof(IEntry)) })
+                ListenEndPoint = new IPEndPoint(IPAddress.Any, port),
+                GatewayLogger = LogManager.GetLogger("Gateway"),
+                CreateChannelLogger = (ep, _) => LogManager.GetLogger($"Channel({ep}"),
+                ConnectionSettings = new TcpConnectionSettings { PacketSerializer = serializer },
+                PacketSerializer = serializer,
+                CreateInitialActors = (context, connection) => new[]
+                {
+                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self))),
+                                 new[] { new ActorBoundChannelMessage.InterfaceType(typeof(IEntry)) })
+                }
             };
+
+            var gateway = (type == ChannelType.Tcp)
+                ? system.ActorOf(Props.Create(() => new TcpGateway(initiator)))
+                : system.ActorOf(Props.Create(() => new UdpGateway(initiator)));
+
+            gateway.Tell(new GatewayMessage.Start());
+        }
     }
 }

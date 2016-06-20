@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Akka.Interfaced.SlimSocket.Base;
 using Common.Logging;
 
 namespace Akka.Interfaced.SlimSocket.Client

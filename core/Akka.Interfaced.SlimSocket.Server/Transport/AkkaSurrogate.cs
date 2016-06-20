@@ -8,28 +8,28 @@ namespace Akka.Interfaced.SlimSocket.Server
     public static class AkkaSurrogate
     {
         [ProtoContract]
-        public class SurrogateForIActorRef
+        public class SurrogateForIRequestTarget
         {
             [ProtoMember(1)] public int Id;
 
             [ProtoConverter]
-            public static SurrogateForIActorRef Convert(IActorRef value)
+            public static SurrogateForIRequestTarget Convert(IRequestTarget value)
             {
                 // used for sending an bound actor-ref to client.
                 if (value == null)
                     return null;
-                var actor = ((BoundActorRef)value);
-                return new SurrogateForIActorRef { Id = actor.Id };
+                var target = ((BoundActorTarget)value);
+                return new SurrogateForIRequestTarget { Id = target.Id };
             }
 
             [ProtoConverter]
-            public static IActorRef Convert(SurrogateForIActorRef value)
+            public static IRequestTarget Convert(SurrogateForIRequestTarget value)
             {
-                // not necessary because client cannot send IActorRef
+                // not necessary because client cannot send IRequestTarget
                 // but implemented to keep this class symmetrical.
                 if (value == null)
                     return null;
-                return new BoundActorRef(value.Id);
+                return new BoundActorTarget(value.Id);
             }
         }
 
@@ -54,7 +54,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         public static void Register(RuntimeTypeModel typeModel)
         {
-            typeModel.Add(typeof(IActorRef), false).SetSurrogate(typeof(SurrogateForIActorRef));
+            typeModel.Add(typeof(IRequestTarget), false).SetSurrogate(typeof(SurrogateForIRequestTarget));
             typeModel.Add(typeof(INotificationChannel), false).SetSurrogate(typeof(SurrogateForINotificationChannel));
         }
     }

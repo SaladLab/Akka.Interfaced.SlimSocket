@@ -1,6 +1,4 @@
-﻿using Akka.Interfaced.SlimSocket.Base;
-
-namespace Akka.Interfaced.SlimSocket.Server
+﻿namespace Akka.Interfaced.SlimSocket.Server
 {
     public class TcpConnectionSettings
     {

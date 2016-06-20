@@ -49,6 +49,10 @@
       <HintPath>..\..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="LidgrenUdpNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\LidgrenUdpNet.1.0.2\lib\net45\LidgrenUdpNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -71,11 +75,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Channel\UdpChannel.cs" />
+    <Compile Include="Channel\UdpGateway.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfoGenerated.cs" />
-    <Compile Include="Session\ClientGateway.cs" />
-    <Compile Include="Session\ClientGatewayMessage.cs" />
-    <Compile Include="Session\ClientSession.cs" />
+    <Compile Include="Channel\TcpGateway.cs" />
+    <Compile Include="Channel\GatewayMessage.cs" />
+    <Compile Include="Channel\GatewayInitiator.cs" />
+    <Compile Include="Channel\TcpChannel.cs" />
+    <Compile Include="Channel\TokenChecker.cs" />
     <Compile Include="Transport\AkkaSurrogate.cs" />
     <Compile Include="Transport\HeadTailWriteStream.cs" />
     <Compile Include="Transport\InterlockedCountFlag.cs" />

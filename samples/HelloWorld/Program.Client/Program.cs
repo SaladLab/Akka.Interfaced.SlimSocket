@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
-using Akka.Interfaced.SlimSocket.Base;
+using Akka.Interfaced.SlimSocket;
 using Akka.Interfaced.SlimSocket.Client;
 using Common.Logging;
 using HelloWorld.Interface;
@@ -11,18 +12,20 @@ namespace HelloWorld.Program.Client
 {
     internal class TestDriver : IGreetObserver
     {
-        public async Task Run(Communicator communicator)
+        public async Task Run(IChannel channel)
         {
+            await channel.ConnectAsync();
+
             // get HelloWorld from Entry
 
-            var entry = communicator.CreateRef<EntryRef>(1);
+            var entry = channel.CreateRef<EntryRef>(1);
             var greeter = await entry.GetGreeter();
             if (greeter == null)
                 throw new InvalidOperationException("Cannot obtain GreetingActor");
 
             // add observer
 
-            var observer = communicator.CreateObserver<IGreetObserver>(this);
+            var observer = channel.CreateObserver<IGreetObserver>(this);
             await greeter.Subscribe(observer);
 
             // make some noise
@@ -32,7 +35,7 @@ namespace HelloWorld.Program.Client
             Console.WriteLine(await greeter.GetCount());
 
             await greeter.Unsubscribe(observer);
-            communicator.RemoveObserver(observer);
+            channel.RemoveObserver(observer);
         }
 
         void IGreetObserver.Event(string message)
@@ -45,26 +48,21 @@ namespace HelloWorld.Program.Client
     {
         private static void Main(string[] args)
         {
-            var serializer = PacketSerializer.CreatePacketSerializer();
-
-            var communicator = new Communicator(
-                LogManager.GetLogger("Communicator"),
-                new IPEndPoint(IPAddress.Loopback, 5000),
-                _ => new TcpConnection(serializer, LogManager.GetLogger("Connection")));
-
-            communicator.StateChanged += (_, state) =>
+            var channelFactory = new ChannelFactory
             {
-                if (state == Communicator.StateType.Offline)
-                {
-                    Console.WriteLine("Disconnected!");
-                    Environment.Exit(1);
-                }
+                Type = ChannelType.Tcp,
+                ConnectEndPoint = new IPEndPoint(IPAddress.Loopback, 5001),
+                CreateChannelLogger = () => null,
+                PacketSerializer = PacketSerializer.CreatePacketSerializer()
             };
 
-            communicator.Start();
-
+            // TCP
             var driver = new TestDriver();
-            driver.Run(communicator).Wait();
+            driver.Run(channelFactory.Create()).Wait();
+
+            // UDP
+            channelFactory.Type = ChannelType.Udp;
+            driver.Run(channelFactory.Create()).Wait();
         }
     }
 }

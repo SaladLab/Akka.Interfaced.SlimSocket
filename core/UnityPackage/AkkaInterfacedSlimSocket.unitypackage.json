@@ -13,6 +13,10 @@
       "version": "3.*",
       "source": "github:SaladLab/Common.Logging.Unity3D"
     },
+    "LidgrenUdpNet": {
+      "version": "1.*",
+      "source": "github:SaladLab/LidgrenUdpNet"
+    },
     "NetLegacySupport": {
       "version": "1.*",
       "source": "github:SaladLab/NetLegacySupport"

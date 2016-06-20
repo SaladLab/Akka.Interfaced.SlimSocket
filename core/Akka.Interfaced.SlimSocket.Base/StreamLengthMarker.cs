@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Akka.Interfaced.SlimSocket.Base
+namespace Akka.Interfaced.SlimSocket
 {
     internal struct StreamLengthMarker
     {

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace Akka.Interfaced.SlimSocket.Base
+namespace Akka.Interfaced.SlimSocket
 {
     public static class SerializeExtensions
     {

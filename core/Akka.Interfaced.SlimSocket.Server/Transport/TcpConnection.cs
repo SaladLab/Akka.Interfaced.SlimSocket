@@ -48,12 +48,12 @@ namespace Akka.Interfaced.SlimSocket.Server
             get { return _socket; }
         }
 
-        public IPEndPoint LocalEndpoint
+        public IPEndPoint LocalEndPoint
         {
             get { return _localEndPoint; }
         }
 
-        public IPEndPoint RemoteEndpoint
+        public IPEndPoint RemoteEndPoint
         {
             get { return _remoteEndPoint; }
         }

@@ -2,7 +2,7 @@
 using System.IO;
 using TypeAlias;
 
-namespace Akka.Interfaced.SlimSocket.Base
+namespace Akka.Interfaced.SlimSocket
 {
     public abstract class PacketSerializerBase : IPacketSerializer
     {
@@ -75,14 +75,23 @@ namespace Akka.Interfaced.SlimSocket.Base
             stream.Write7BitEncodedInt(p.ActorId);
             stream.Write7BitEncodedInt(p.RequestId);
 
-            // Write Message Length, Signature and Data
+            // Write Message
             if (p.Message != null)
             {
-                var messageTypeAlias = _data.TypeTable.GetAlias(p.Message.GetType());
-                stream.Write7BitEncodedInt(messageTypeAlias);
-                var messageLengthMarker = new StreamLengthMarker(stream, true);
-                _data.MessageSerializer.Serialize(stream, p.Message);
-                messageLengthMarker.WriteLength(true);
+                if (p.Type == PacketType.System)
+                {
+                    // System message: Always string.
+                    stream.WriteString((string)p.Message);
+                }
+                else
+                {
+                    // User message: Length, Signature, and Data
+                    var messageTypeAlias = _data.TypeTable.GetAlias(p.Message.GetType());
+                    stream.Write7BitEncodedInt(messageTypeAlias);
+                    var messageLengthMarker = new StreamLengthMarker(stream, true);
+                    _data.MessageSerializer.Serialize(stream, p.Message);
+                    messageLengthMarker.WriteLength(true);
+                }
             }
 
             // Write Exception
@@ -164,22 +173,29 @@ namespace Akka.Interfaced.SlimSocket.Base
 
             // Read PacketType, ActorId, RequestId
             var header = stream.ReadByte();
-            p.Type = (PacketType)(header & 0x3);
+            p.Type = (PacketType)(header & 0x0F);
             p.ActorId = stream.Read7BitEncodedInt();
             p.RequestId = stream.Read7BitEncodedInt();
 
             // Read Message
             if ((header & 0x80) != 0)
             {
-                var messageTypeAlias = stream.Read7BitEncodedInt();
-                var messageLen = stream.Read32BitEncodedInt();
+                if (p.Type == PacketType.System)
+                {
+                    p.Message = stream.ReadString();
+                }
+                else
+                {
+                    var messageTypeAlias = stream.Read7BitEncodedInt();
+                    var messageLen = stream.Read32BitEncodedInt();
 
-                Type type = _data.TypeTable.GetType(messageTypeAlias);
-                if (type == null)
-                    throw new Exception("Cannot resolve message type. TypeAlias=" + messageTypeAlias);
+                    Type type = _data.TypeTable.GetType(messageTypeAlias);
+                    if (type == null)
+                        throw new Exception("Cannot resolve message type. TypeAlias=" + messageTypeAlias);
 
-                p.Message = Activator.CreateInstance(type);
-                _data.MessageSerializer.Deserialize(stream, p.Message, type, messageLen);
+                    p.Message = Activator.CreateInstance(type);
+                    _data.MessageSerializer.Deserialize(stream, p.Message, type, messageLen);
+                }
             }
 
             // Read Exception

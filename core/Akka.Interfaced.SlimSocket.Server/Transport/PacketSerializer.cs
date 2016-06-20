@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Akka.Interfaced.SlimSocket.Base;
 using ProtoBuf.Meta;
 
 namespace Akka.Interfaced.SlimSocket.Server

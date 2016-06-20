@@ -20,7 +20,7 @@ let solution =
                               PackagePrerelease = "beta"
                               Dependencies = 
                                   [ ("Akka.Interfaced.SlimSocket.Base", "")
-                                    ("Akka.Interfaced-SlimClient", "")
+                                    ("Akka.Interfaced-Base", "")
                                     ("Common.Logging.Core", "")
                                     ("NetLegacySupport.Tuple", "") ] }
           { emptyProject with Name = "Akka.Interfaced.SlimSocket.Server"

@@ -5,7 +5,7 @@ using System.Reflection;
 using ProtoBuf.Meta;
 
 // This file is a copy of Akka.Interfaced.ProtobufSerializer.AutoSurrogate
-namespace Akka.Interfaced.SlimSocket.Base
+namespace Akka.Interfaced.SlimSocket
 {
     public static class AutoSurrogate
     {

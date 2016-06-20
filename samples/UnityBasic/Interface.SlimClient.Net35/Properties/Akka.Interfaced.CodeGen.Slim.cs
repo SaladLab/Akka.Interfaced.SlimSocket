@@ -14,28 +14,27 @@ using ProtoBuf;
 using TypeAlias;
 using System.ComponentModel;
 
-#region SurrogateForIActorRef
+#region SurrogateForIRequestTarget
 
 namespace UnityBasic.Interface
 {
     [ProtoContract]
-    public class SurrogateForIActorRef
+    public class SurrogateForIRequestTarget
     {
         [ProtoMember(1)] public int Id;
 
         [ProtoConverter]
-        public static SurrogateForIActorRef Convert(IActorRef value)
+        public static SurrogateForIRequestTarget Convert(IRequestTarget value)
         {
             if (value == null) return null;
-            var actor = ((BoundActorRef)value);
-            return new SurrogateForIActorRef { Id = actor.Id };
+            return new SurrogateForIRequestTarget { Id = ((BoundActorTarget)value).Id };
         }
 
         [ProtoConverter]
-        public static IActorRef Convert(SurrogateForIActorRef value)
+        public static IRequestTarget Convert(SurrogateForIRequestTarget value)
         {
             if (value == null) return null;
-            return new BoundActorRef(value.Id);
+            return new BoundActorTarget(value.Id);
         }
     }
 }
@@ -175,11 +174,11 @@ namespace UnityBasic.Interface
         {
         }
 
-        public CalculatorRef(IActorRef actor) : base(actor)
+        public CalculatorRef(IRequestTarget target) : base(target)
         {
         }
 
-        public CalculatorRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public CalculatorRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
 
@@ -190,12 +189,12 @@ namespace UnityBasic.Interface
 
         public CalculatorRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new CalculatorRef(Actor, requestWaiter, Timeout);
+            return new CalculatorRef(Target, requestWaiter, Timeout);
         }
 
         public CalculatorRef WithTimeout(TimeSpan? timeout)
         {
-            return new CalculatorRef(Actor, RequestWaiter, timeout);
+            return new CalculatorRef(Target, RequestWaiter, timeout);
         }
 
         public Task<System.String> Concat(System.String a, System.String b)
@@ -250,20 +249,20 @@ namespace UnityBasic.Interface
     [ProtoContract]
     public class SurrogateForICalculator
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForICalculator Convert(ICalculator value)
         {
             if (value == null) return null;
-            return new SurrogateForICalculator { Actor = ((CalculatorRef)value).Actor };
+            return new SurrogateForICalculator { Target = ((CalculatorRef)value).Target };
         }
 
         [ProtoConverter]
         public static ICalculator Convert(SurrogateForICalculator value)
         {
             if (value == null) return null;
-            return new CalculatorRef(value.Actor);
+            return new CalculatorRef(value.Target);
         }
     }
 }
@@ -346,11 +345,11 @@ namespace UnityBasic.Interface
         {
         }
 
-        public CounterRef(IActorRef actor) : base(actor)
+        public CounterRef(IRequestTarget target) : base(target)
         {
         }
 
-        public CounterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public CounterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
 
@@ -361,12 +360,12 @@ namespace UnityBasic.Interface
 
         public CounterRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new CounterRef(Actor, requestWaiter, Timeout);
+            return new CounterRef(Target, requestWaiter, Timeout);
         }
 
         public CounterRef WithTimeout(TimeSpan? timeout)
         {
-            return new CounterRef(Actor, RequestWaiter, timeout);
+            return new CounterRef(Target, RequestWaiter, timeout);
         }
 
         public Task<System.Int32> GetCounter()
@@ -405,20 +404,20 @@ namespace UnityBasic.Interface
     [ProtoContract]
     public class SurrogateForICounter
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForICounter Convert(ICounter value)
         {
             if (value == null) return null;
-            return new SurrogateForICounter { Actor = ((CounterRef)value).Actor };
+            return new SurrogateForICounter { Target = ((CounterRef)value).Target };
         }
 
         [ProtoConverter]
         public static ICounter Convert(SurrogateForICounter value)
         {
             if (value == null) return null;
-            return new CounterRef(value.Actor);
+            return new CounterRef(value.Target);
         }
     }
 }
@@ -616,11 +615,11 @@ namespace UnityBasic.Interface
         {
         }
 
-        public EntryRef(IActorRef actor) : base(actor)
+        public EntryRef(IRequestTarget target) : base(target)
         {
         }
 
-        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public EntryRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
 
@@ -631,12 +630,12 @@ namespace UnityBasic.Interface
 
         public EntryRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new EntryRef(Actor, requestWaiter, Timeout);
+            return new EntryRef(Target, requestWaiter, Timeout);
         }
 
         public EntryRef WithTimeout(TimeSpan? timeout)
         {
-            return new EntryRef(Actor, RequestWaiter, timeout);
+            return new EntryRef(Target, RequestWaiter, timeout);
         }
 
         public Task<UnityBasic.Interface.ICalculator> GetCalculator()
@@ -707,20 +706,20 @@ namespace UnityBasic.Interface
     [ProtoContract]
     public class SurrogateForIEntry
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForIEntry Convert(IEntry value)
         {
             if (value == null) return null;
-            return new SurrogateForIEntry { Actor = ((EntryRef)value).Actor };
+            return new SurrogateForIEntry { Target = ((EntryRef)value).Target };
         }
 
         [ProtoConverter]
         public static IEntry Convert(SurrogateForIEntry value)
         {
             if (value == null) return null;
-            return new EntryRef(value.Actor);
+            return new EntryRef(value.Target);
         }
     }
 }
@@ -820,11 +819,11 @@ namespace UnityBasic.Interface
         {
         }
 
-        public GreeterRef(IActorRef actor) : base(actor)
+        public GreeterRef(IRequestTarget target) : base(target)
         {
         }
 
-        public GreeterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public GreeterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
 
@@ -835,12 +834,12 @@ namespace UnityBasic.Interface
 
         public GreeterRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new GreeterRef(Actor, requestWaiter, Timeout);
+            return new GreeterRef(Target, requestWaiter, Timeout);
         }
 
         public GreeterRef WithTimeout(TimeSpan? timeout)
         {
-            return new GreeterRef(Actor, RequestWaiter, timeout);
+            return new GreeterRef(Target, RequestWaiter, timeout);
         }
 
         public Task<System.Int32> GetCount()
@@ -879,20 +878,20 @@ namespace UnityBasic.Interface
     [ProtoContract]
     public class SurrogateForIGreeter
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForIGreeter Convert(IGreeter value)
         {
             if (value == null) return null;
-            return new SurrogateForIGreeter { Actor = ((GreeterRef)value).Actor };
+            return new SurrogateForIGreeter { Target = ((GreeterRef)value).Target };
         }
 
         [ProtoConverter]
         public static IGreeter Convert(SurrogateForIGreeter value)
         {
             if (value == null) return null;
-            return new GreeterRef(value.Actor);
+            return new GreeterRef(value.Target);
         }
     }
 }
@@ -976,11 +975,11 @@ namespace UnityBasic.Interface
         {
         }
 
-        public GreeterWithObserverRef(IActorRef actor) : base(actor)
+        public GreeterWithObserverRef(IRequestTarget target) : base(target)
         {
         }
 
-        public GreeterWithObserverRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public GreeterWithObserverRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
 
@@ -991,12 +990,12 @@ namespace UnityBasic.Interface
 
         public GreeterWithObserverRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new GreeterWithObserverRef(Actor, requestWaiter, Timeout);
+            return new GreeterWithObserverRef(Target, requestWaiter, Timeout);
         }
 
         public GreeterWithObserverRef WithTimeout(TimeSpan? timeout)
         {
-            return new GreeterWithObserverRef(Actor, RequestWaiter, timeout);
+            return new GreeterWithObserverRef(Target, RequestWaiter, timeout);
         }
 
         public Task Subscribe(UnityBasic.Interface.IGreetObserver observer)
@@ -1067,20 +1066,20 @@ namespace UnityBasic.Interface
     [ProtoContract]
     public class SurrogateForIGreeterWithObserver
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForIGreeterWithObserver Convert(IGreeterWithObserver value)
         {
             if (value == null) return null;
-            return new SurrogateForIGreeterWithObserver { Actor = ((GreeterWithObserverRef)value).Actor };
+            return new SurrogateForIGreeterWithObserver { Target = ((GreeterWithObserverRef)value).Target };
         }
 
         [ProtoConverter]
         public static IGreeterWithObserver Convert(SurrogateForIGreeterWithObserver value)
         {
             if (value == null) return null;
-            return new GreeterWithObserverRef(value.Actor);
+            return new GreeterWithObserverRef(value.Target);
         }
     }
 }
@@ -1308,11 +1307,11 @@ namespace UnityBasic.Interface
         {
         }
 
-        public PedanticRef(IActorRef actor) : base(actor)
+        public PedanticRef(IRequestTarget target) : base(target)
         {
         }
 
-        public PedanticRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public PedanticRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
 
@@ -1323,12 +1322,12 @@ namespace UnityBasic.Interface
 
         public PedanticRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new PedanticRef(Actor, requestWaiter, Timeout);
+            return new PedanticRef(Target, requestWaiter, Timeout);
         }
 
         public PedanticRef WithTimeout(TimeSpan? timeout)
         {
-            return new PedanticRef(Actor, RequestWaiter, timeout);
+            return new PedanticRef(Target, RequestWaiter, timeout);
         }
 
         public Task TestCall()
@@ -1431,20 +1430,20 @@ namespace UnityBasic.Interface
     [ProtoContract]
     public class SurrogateForIPedantic
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForIPedantic Convert(IPedantic value)
         {
             if (value == null) return null;
-            return new SurrogateForIPedantic { Actor = ((PedanticRef)value).Actor };
+            return new SurrogateForIPedantic { Target = ((PedanticRef)value).Target };
         }
 
         [ProtoConverter]
         public static IPedantic Convert(SurrogateForIPedantic value)
         {
             if (value == null) return null;
-            return new PedanticRef(value.Actor);
+            return new PedanticRef(value.Target);
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.IO;
 using ProtoBuf.Meta;
 
-namespace Akka.Interfaced.SlimSocket.Base
+namespace Akka.Interfaced.SlimSocket
 {
     public class ProtoBufMessageSerializer : IMessageSerializer
     {

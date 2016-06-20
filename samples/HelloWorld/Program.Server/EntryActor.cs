@@ -8,11 +8,11 @@ namespace HelloWorld.Program.Server
 {
     public class EntryActor : InterfacedActor, IEntry
     {
-        private readonly IActorRef _clientSession;
+        private readonly IActorRef _channel;
 
-        public EntryActor(IActorRef clientSession)
+        public EntryActor(IActorRef channel)
         {
-            _clientSession = clientSession;
+            _channel = channel;
         }
 
         async Task<IGreeterWithObserver> IEntry.GetGreeter()
@@ -21,10 +21,10 @@ namespace HelloWorld.Program.Server
 
             try
             {
-                var reply = await _clientSession.Ask<ActorBoundSessionMessage.BindReply>(
-                    new ActorBoundSessionMessage.Bind(actor, typeof(IGreeterWithObserver)));
+                var reply = await _channel.Ask<ActorBoundChannelMessage.BindReply>(
+                    new ActorBoundChannelMessage.Bind(actor, typeof(IGreeterWithObserver)));
                 if (reply.ActorId != 0)
-                    return BoundActorRef.Create<GreeterWithObserverRef>(reply.ActorId);
+                    return new GreeterWithObserverRef(new BoundActorTarget(reply.ActorId));
             }
             catch (Exception)
             {

@@ -82,13 +82,23 @@ namespace HelloWorld.Interface
         {
         }
 
-        public EntryRef(IActorRef actor) : base(actor)
+        public EntryRef(IRequestTarget target) : base(target)
         {
         }
 
-        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public EntryRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
+
+        public EntryRef(IActorRef actor) : base(new AkkaActorTarget(actor))
+        {
+        }
+
+        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(new AkkaActorTarget(actor), requestWaiter, timeout)
+        {
+        }
+
+        public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
 
         public IEntry_NoReply WithNoReply()
         {
@@ -97,12 +107,12 @@ namespace HelloWorld.Interface
 
         public EntryRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new EntryRef(Actor, requestWaiter, Timeout);
+            return new EntryRef(Target, requestWaiter, Timeout);
         }
 
         public EntryRef WithTimeout(TimeSpan? timeout)
         {
-            return new EntryRef(Actor, RequestWaiter, timeout);
+            return new EntryRef(Target, RequestWaiter, timeout);
         }
 
         public Task<HelloWorld.Interface.IGreeterWithObserver> GetGreeter()
@@ -125,20 +135,20 @@ namespace HelloWorld.Interface
     [ProtoContract]
     public class SurrogateForIEntry
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForIEntry Convert(IEntry value)
         {
             if (value == null) return null;
-            return new SurrogateForIEntry { Actor = ((EntryRef)value).Actor };
+            return new SurrogateForIEntry { Target = ((EntryRef)value).Target };
         }
 
         [ProtoConverter]
         public static IEntry Convert(SurrogateForIEntry value)
         {
             if (value == null) return null;
-            return new EntryRef(value.Actor);
+            return new EntryRef(value.Target);
         }
     }
 
@@ -246,13 +256,23 @@ namespace HelloWorld.Interface
         {
         }
 
-        public GreeterRef(IActorRef actor) : base(actor)
+        public GreeterRef(IRequestTarget target) : base(target)
         {
         }
 
-        public GreeterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public GreeterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
+
+        public GreeterRef(IActorRef actor) : base(new AkkaActorTarget(actor))
+        {
+        }
+
+        public GreeterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(new AkkaActorTarget(actor), requestWaiter, timeout)
+        {
+        }
+
+        public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
 
         public IGreeter_NoReply WithNoReply()
         {
@@ -261,12 +281,12 @@ namespace HelloWorld.Interface
 
         public GreeterRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new GreeterRef(Actor, requestWaiter, Timeout);
+            return new GreeterRef(Target, requestWaiter, Timeout);
         }
 
         public GreeterRef WithTimeout(TimeSpan? timeout)
         {
-            return new GreeterRef(Actor, RequestWaiter, timeout);
+            return new GreeterRef(Target, RequestWaiter, timeout);
         }
 
         public Task<System.Int32> GetCount()
@@ -305,20 +325,20 @@ namespace HelloWorld.Interface
     [ProtoContract]
     public class SurrogateForIGreeter
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForIGreeter Convert(IGreeter value)
         {
             if (value == null) return null;
-            return new SurrogateForIGreeter { Actor = ((GreeterRef)value).Actor };
+            return new SurrogateForIGreeter { Target = ((GreeterRef)value).Target };
         }
 
         [ProtoConverter]
         public static IGreeter Convert(SurrogateForIGreeter value)
         {
             if (value == null) return null;
-            return new GreeterRef(value.Actor);
+            return new GreeterRef(value.Target);
         }
     }
 
@@ -411,13 +431,23 @@ namespace HelloWorld.Interface
         {
         }
 
-        public GreeterWithObserverRef(IActorRef actor) : base(actor)
+        public GreeterWithObserverRef(IRequestTarget target) : base(target)
         {
         }
 
-        public GreeterWithObserverRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(actor, requestWaiter, timeout)
+        public GreeterWithObserverRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
+
+        public GreeterWithObserverRef(IActorRef actor) : base(new AkkaActorTarget(actor))
+        {
+        }
+
+        public GreeterWithObserverRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(new AkkaActorTarget(actor), requestWaiter, timeout)
+        {
+        }
+
+        public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {
@@ -426,12 +456,12 @@ namespace HelloWorld.Interface
 
         public GreeterWithObserverRef WithRequestWaiter(IRequestWaiter requestWaiter)
         {
-            return new GreeterWithObserverRef(Actor, requestWaiter, Timeout);
+            return new GreeterWithObserverRef(Target, requestWaiter, Timeout);
         }
 
         public GreeterWithObserverRef WithTimeout(TimeSpan? timeout)
         {
-            return new GreeterWithObserverRef(Actor, RequestWaiter, timeout);
+            return new GreeterWithObserverRef(Target, RequestWaiter, timeout);
         }
 
         public Task Subscribe(HelloWorld.Interface.IGreetObserver observer)
@@ -502,20 +532,20 @@ namespace HelloWorld.Interface
     [ProtoContract]
     public class SurrogateForIGreeterWithObserver
     {
-        [ProtoMember(1)] public IActorRef Actor;
+        [ProtoMember(1)] public IRequestTarget Target;
 
         [ProtoConverter]
         public static SurrogateForIGreeterWithObserver Convert(IGreeterWithObserver value)
         {
             if (value == null) return null;
-            return new SurrogateForIGreeterWithObserver { Actor = ((GreeterWithObserverRef)value).Actor };
+            return new SurrogateForIGreeterWithObserver { Target = ((GreeterWithObserverRef)value).Target };
         }
 
         [ProtoConverter]
         public static IGreeterWithObserver Convert(SurrogateForIGreeterWithObserver value)
         {
             if (value == null) return null;
-            return new GreeterWithObserverRef(value.Actor);
+            return new GreeterWithObserverRef(value.Target);
         }
     }
 
