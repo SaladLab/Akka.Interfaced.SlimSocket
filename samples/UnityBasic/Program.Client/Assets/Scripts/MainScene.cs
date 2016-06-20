@@ -13,17 +13,26 @@ public class MainScene : MonoBehaviour, IGreetObserver
 
     void Start()
     {
-        var comm = CommunicatorHelper.CreateCommunicator<InterfaceProtobufSerializer>(
-            G.Logger, new IPEndPoint(IPAddress.Loopback, 5000));
-        comm.Start();
-        G.Comm = comm;
+        var channelFactory = ChannelFactoryBuilder.Build<InterfaceProtobufSerializer>(
+            endPoint: new IPEndPoint(IPAddress.Loopback, 5001),
+            createChannelLogger: () => G.Logger);
+
+        G.Channel = channelFactory.Create();
 
         StartCoroutine(ProcessTest());
     }
 
     IEnumerator ProcessTest()
     {
-        var entry = G.Comm.CreateRef<EntryRef>();
+        var t0 = G.Channel.ConnectAsync();
+        yield return t0.WaitHandle;
+        if (t0.Exception != null)
+        {
+            WriteLine("Connection Failed: " + t0.Exception.Message);
+            yield break;
+        }
+
+        var entry = G.Channel.CreateRef<EntryRef>();
 
         WriteLine("Start ProcessTest");
         WriteLine("");
@@ -51,7 +60,7 @@ public class MainScene : MonoBehaviour, IGreetObserver
     {
         WriteLine("*** Greeter ***");
 
-        var observer = G.Comm.CreateObserver<IGreetObserver>(this);
+        var observer = G.Channel.CreateObserver<IGreetObserver>(this);
         yield return greeter.Subscribe(observer).WaitHandle;
 
         var t1 = greeter.Greet("World");
@@ -67,7 +76,7 @@ public class MainScene : MonoBehaviour, IGreetObserver
         ShowResult(t3, "GetCount()");
 
         yield return greeter.Unsubscribe(observer).WaitHandle;
-        // G.Comm.RemoveObserver(observer);
+        // G.Channel.RemoveObserver(observer);
 
         WriteLine("");
     }
