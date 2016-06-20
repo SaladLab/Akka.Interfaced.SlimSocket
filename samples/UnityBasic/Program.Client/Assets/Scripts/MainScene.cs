@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Net;
 using Akka.Interfaced;
+using Akka.Interfaced.SlimSocket;
 using Akka.Interfaced.SlimSocket.Client;
+using Common.Logging;
 using UnityBasic.Interface;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,18 +15,32 @@ public class MainScene : MonoBehaviour, IGreetObserver
 
     void Start()
     {
-        var channelFactory = ChannelFactoryBuilder.Build<InterfaceProtobufSerializer>(
-            endPoint: new IPEndPoint(IPAddress.Loopback, 5001),
-            createChannelLogger: () => G.Logger);
-
-        G.Channel = channelFactory.Create();
-
-        StartCoroutine(ProcessTest());
+        OnTcpButton();
     }
 
-    IEnumerator ProcessTest()
+    public void OnTcpButton()
     {
-        var t0 = G.Channel.ConnectAsync();
+        StartCoroutine(ProcessTest(ChannelType.Tcp));
+    }
+
+    public void OnUdpButton()
+    {
+        StartCoroutine(ProcessTest(ChannelType.Udp));
+    }
+
+    IEnumerator ProcessTest(ChannelType channelType)
+    {
+        LogText.text = "ProcessTest(" + channelType + ")\n";
+
+        // Create channel and connect to gateway
+
+        var channelFactory = ChannelFactoryBuilder.Build<InterfaceProtobufSerializer>(
+            endPoint: new IPEndPoint(IPAddress.Loopback, 5001),
+            createChannelLogger: () => LogManager.GetLogger("Channel"));
+        channelFactory.Type = channelType;
+        var channel = channelFactory.Create();
+
+        var t0 = channel.ConnectAsync();
         yield return t0.WaitHandle;
         if (t0.Exception != null)
         {
@@ -32,14 +48,16 @@ public class MainScene : MonoBehaviour, IGreetObserver
             yield break;
         }
 
-        var entry = G.Channel.CreateRef<EntryRef>();
+        // Start communicating with actors via channel
+
+        var entry = channel.CreateRef<EntryRef>();
 
         WriteLine("Start ProcessTest");
         WriteLine("");
 
         var t1 = entry.GetGreeter();
         yield return t1.WaitHandle;
-        yield return StartCoroutine(ProcessGreeter(t1.Result));
+        yield return StartCoroutine(ProcessGreeter(channel, t1.Result));
 
         var t2 = entry.GetCalculator();
         yield return t2.WaitHandle;
@@ -52,15 +70,23 @@ public class MainScene : MonoBehaviour, IGreetObserver
         var t4 = entry.GetPedantic();
         yield return t4.WaitHandle;
         yield return StartCoroutine(ProcessPedantic(t4.Result));
+
+        var t5 = entry.GetGreeterOnAnotherChannel();
+        yield return t5.WaitHandle;
+        yield return StartCoroutine(ProcessGreeterOnAnotherChannel(channelType, t5.Result));
+
+        channel.Close();
+
+        WriteLine("Done!");
     }
 
     // Tests
 
-    IEnumerator ProcessGreeter(IGreeterWithObserver greeter)
+    IEnumerator ProcessGreeter(IChannel channel, IGreeterWithObserver greeter)
     {
         WriteLine("*** Greeter ***");
 
-        var observer = G.Channel.CreateObserver<IGreetObserver>(this);
+        var observer = channel.CreateObserver<IGreetObserver>(this);
         yield return greeter.Subscribe(observer).WaitHandle;
 
         var t1 = greeter.Greet("World");
@@ -76,7 +102,7 @@ public class MainScene : MonoBehaviour, IGreetObserver
         ShowResult(t3, "GetCount()");
 
         yield return greeter.Unsubscribe(observer).WaitHandle;
-        // G.Channel.RemoveObserver(observer);
+        channel.RemoveObserver(observer);
 
         WriteLine("");
     }
@@ -157,6 +183,36 @@ public class MainScene : MonoBehaviour, IGreetObserver
         ShowResult(t6, "TestReturnClass");
 
         WriteLine("");
+    }
+
+    IEnumerator ProcessGreeterOnAnotherChannel(ChannelType channelType, string address)
+    {
+        WriteLine("*** ProcessGreeterOnAnotherChannel ***");
+
+        // Connect to secondary gateway
+
+        var channelFactory = ChannelFactoryBuilder.Build<InterfaceProtobufSerializer>(
+            createChannelLogger: () => LogManager.GetLogger("Channel2"));
+        channelFactory.Type = channelType;
+        channelFactory.SetAddress(address);
+        var channel = channelFactory.Create();
+
+        var t0 = channel.ConnectAsync();
+        yield return t0.WaitHandle;
+        if (t0.Exception != null)
+        {
+            WriteLine("Connection Failed: " + t0.Exception.Message);
+            yield break;
+        }
+
+        // Test Greeter
+
+        var greeter = channel.CreateRef<GreeterWithObserverRef>();
+        yield return ProcessGreeter(channel, greeter);
+
+        // Disconnect to secondary gateway
+
+        channel.Close();
     }
 
     // Utilities

@@ -451,6 +451,7 @@ namespace UnityBasic.Interface
                 { typeof(GetCalculator_Invoke), typeof(GetCalculator_Return) },
                 { typeof(GetCounter_Invoke), typeof(GetCounter_Return) },
                 { typeof(GetGreeter_Invoke), typeof(GetGreeter_Return) },
+                { typeof(GetGreeterOnAnotherChannel_Invoke), typeof(GetGreeterOnAnotherChannel_Return) },
                 { typeof(GetPedantic_Invoke), typeof(GetPedantic_Return) },
             };
         }
@@ -579,6 +580,39 @@ namespace UnityBasic.Interface
         }
 
         [ProtoContract, TypeAlias]
+        public class GetGreeterOnAnotherChannel_Invoke
+            : IInterfacedPayload, IAsyncInvokable
+        {
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public async Task<IValueGetable> InvokeAsync(object __target)
+            {
+                var __v = await ((IEntry)__target).GetGreeterOnAnotherChannel();
+                return (IValueGetable)(new GetGreeterOnAnotherChannel_Return { v = __v });
+            }
+        }
+
+        [ProtoContract, TypeAlias]
+        public class GetGreeterOnAnotherChannel_Return
+            : IInterfacedPayload, IValueGetable
+        {
+            [ProtoMember(1)] public System.String v;
+
+            public Type GetInterfaceType()
+            {
+                return typeof(IEntry);
+            }
+
+            public object Value
+            {
+                get { return v; }
+            }
+        }
+
+        [ProtoContract, TypeAlias]
         public class GetPedantic_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
@@ -625,6 +659,7 @@ namespace UnityBasic.Interface
         void GetCalculator();
         void GetCounter();
         void GetGreeter();
+        void GetGreeterOnAnotherChannel();
         void GetPedantic();
     }
 
@@ -691,6 +726,14 @@ namespace UnityBasic.Interface
             return SendRequestAndReceive<UnityBasic.Interface.IGreeterWithObserver>(requestMessage);
         }
 
+        public Task<System.String> GetGreeterOnAnotherChannel()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetGreeterOnAnotherChannel_Invoke {  }
+            };
+            return SendRequestAndReceive<System.String>(requestMessage);
+        }
+
         public Task<UnityBasic.Interface.IPedantic> GetPedantic()
         {
             var requestMessage = new RequestMessage {
@@ -719,6 +762,14 @@ namespace UnityBasic.Interface
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IEntry_PayloadTable.GetGreeter_Invoke {  }
+            };
+            SendRequest(requestMessage);
+        }
+
+        void IEntry_NoReply.GetGreeterOnAnotherChannel()
+        {
+            var requestMessage = new RequestMessage {
+                InvokePayload = new IEntry_PayloadTable.GetGreeterOnAnotherChannel_Invoke {  }
             };
             SendRequest(requestMessage);
         }
@@ -758,6 +809,7 @@ namespace UnityBasic.Interface
         UnityBasic.Interface.ICalculator GetCalculator();
         UnityBasic.Interface.ICounter GetCounter();
         UnityBasic.Interface.IGreeterWithObserver GetGreeter();
+        System.String GetGreeterOnAnotherChannel();
         UnityBasic.Interface.IPedantic GetPedantic();
     }
 }

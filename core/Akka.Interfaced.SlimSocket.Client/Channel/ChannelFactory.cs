@@ -23,6 +23,15 @@ namespace Akka.Interfaced.SlimSocket.Client
             UdpConfig = new NetPeerConfiguration("SlimSocket");
         }
 
+        public void SetAddress(string address)
+        {
+            var parts = address.Split('|'); // address|port|token
+            if (parts.Length < 3)
+                throw new ArgumentException(nameof(address));
+            ConnectEndPoint = new IPEndPoint(IPAddress.Parse(parts[0]), int.Parse(parts[1]));
+            ConnectToken = parts[2];
+        }
+
         public IChannel Create()
         {
             switch (Type)

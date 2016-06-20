@@ -178,10 +178,9 @@ namespace Akka.Interfaced.SlimSocket
             var token = await entry.GetGreeterOnAnotherChannel();
             await Task.Delay(TimeSpan.FromSeconds(1));
             var exception = await Record.ExceptionAsync(() => CreateSecondaryClientChannelAsync(type, token));
-            Assert.NotNull(exception);
 
             // Assert
-            //Assert.Equal(false, connected);
+            Assert.NotNull(exception);
         }
 
         private IActorRef CreatePrimaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
