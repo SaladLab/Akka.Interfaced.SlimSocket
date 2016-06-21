@@ -57,7 +57,7 @@ namespace Akka.Interfaced.SlimSocket
             };
 
             var udpConfig = ((NetPeerConfiguration)factory.UdpConfig);
-            udpConfig.MaximumHandshakeAttempts = 1; // to fail faster
+            udpConfig.MaximumHandshakeAttempts = 2; // to fail faster
 
             return factory.Create();
         }
