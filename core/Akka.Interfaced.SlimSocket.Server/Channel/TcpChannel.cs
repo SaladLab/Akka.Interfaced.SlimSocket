@@ -134,11 +134,13 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
+        // BEWARE: Called by Network Thread
         protected void OnConnectionClose(TcpConnection connection, int reason)
         {
             _self.Tell(PoisonPill.Instance);
         }
 
+        // BEWARE: Called by Network Thread
         protected void OnConnectionReceive(TcpConnection connection, object packet)
         {
             // The thread that call this function is different from actor context thread.
