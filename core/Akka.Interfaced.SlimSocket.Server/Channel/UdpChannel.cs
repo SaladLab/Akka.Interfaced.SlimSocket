@@ -26,26 +26,18 @@ namespace Akka.Interfaced.SlimSocket.Server
             public Packet Packet;
         }
 
-        public UdpChannel(GatewayInitiator initiator, object connection)
+        public UdpChannel(GatewayInitiator initiator, object connection, object channelItem, ActorBoundGatewayMessage.Open message = null)
         {
-            // open by client connection.
-            var netConnection = (NetConnection)connection;
-            _initiator = initiator;
-            _logger = _initiator.CreateChannelLogger(netConnection.RemoteEndPoint, connection);
-            _connection = netConnection;
-            _packetSerializer = initiator.PacketSerializer;
-        }
-
-        public UdpChannel(GatewayInitiator initiator, object connection, ActorBoundGatewayMessage.Open message)
-        {
-            // open by registerd token.
             var netConnection = (NetConnection)connection;
             _initiator = initiator;
             _logger = _initiator.CreateChannelLogger(netConnection.RemoteEndPoint, connection);
             _connection = netConnection;
             _packetSerializer = initiator.PacketSerializer;
 
-            BindActor(message.Actor, message.Types.Select(t => new BoundType(t)));
+            ((UdpGateway.ChannelItem)channelItem).Channel = this;
+
+            if (message != null)
+                BindActor(message.Actor, message.Types.Select(t => new BoundType(t)));
         }
 
         protected override void PreStart()
@@ -68,6 +60,10 @@ namespace Akka.Interfaced.SlimSocket.Server
                     }
                 }
             }
+
+            // accept it
+
+            _connection.Approve();
         }
 
         protected override void PostStop()
@@ -141,12 +137,11 @@ namespace Akka.Interfaced.SlimSocket.Server
             _self.Tell(PoisonPill.Instance);
         }
 
-        protected void OnConnectionReceive(Packet packet)
+        protected internal void OnConnectionReceive(Packet p)
         {
             // The thread that call this function is different from actor context thread.
             // To deal with this contention lock protection is required.
 
-            var p = packet as Packet;
             if (p == null)
             {
                 _eventStream.Publish(new Warning(

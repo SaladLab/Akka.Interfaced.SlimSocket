@@ -19,8 +19,15 @@ namespace Akka.Interfaced.SlimSocket.Server
         private IActorRef _self;
         private NetServer _server;
         private Thread _serverThread;
-        private readonly ConcurrentDictionary<NetConnection, IActorRef> _connectionMap = new ConcurrentDictionary<NetConnection, IActorRef>();
         private bool _isStopped;
+
+        internal class ChannelItem
+        {
+            public IActorRef Actor;
+            public UdpChannel Channel;
+        }
+
+        private readonly ConcurrentDictionary<NetConnection, ChannelItem> _channelMap = new ConcurrentDictionary<NetConnection, ChannelItem>();
 
         internal class WaitingItem
         {
@@ -132,7 +139,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             // stop all running client sessions
 
-            if (_connectionMap.Count > 0)
+            if (_channelMap.Count > 0)
             {
                 Context.ActorSelection("*").Tell(PoisonPill.Instance);
             }
@@ -156,7 +163,8 @@ namespace Akka.Interfaced.SlimSocket.Server
                 }
             }
 
-            IActorRef channel;
+            var channelItem = new ChannelItem();
+
             if (_initiator.TokenRequired)
             {
                 WaitingItem item;
@@ -170,29 +178,28 @@ namespace Akka.Interfaced.SlimSocket.Server
                     _waitingMap.Remove(m.Token);
                 }
 
-                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, item.Message)));
+                channelItem.Actor = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, channelItem, item.Message)));
             }
             else
             {
-                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection)));
+                channelItem.Actor = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, channelItem, null)));
             }
 
-            if (channel == null)
+            if (channelItem.Actor == null)
             {
                 m.SenderConnection.Deny("Server Deny");
                 _logger?.TraceFormat("Deny a connection. (EndPoint={0})", m.SenderEndPoint);
                 return;
             }
 
-            if (_connectionMap.TryAdd(m.SenderConnection, channel) == false)
+            if (_channelMap.TryAdd(m.SenderConnection, channelItem) == false)
             {
                 _logger?.ErrorFormat("Failed in adding new connection. (EndPoint={0})", m.SenderEndPoint);
                 m.SenderConnection.Deny();
-                channel.Tell(PoisonPill.Instance);
+                channelItem.Actor.Tell(PoisonPill.Instance);
                 return;
             }
 
-            m.SenderConnection.Approve();
             _logger?.TraceFormat("Accept a connection. (EndPoint={0})", m.SenderEndPoint);
         }
 
@@ -264,10 +271,10 @@ namespace Akka.Interfaced.SlimSocket.Server
                             switch (status)
                             {
                                 case NetConnectionStatus.Disconnected:
-                                    IActorRef disconnectedSession = null;
-                                    if (_connectionMap.TryRemove(msg.SenderConnection, out disconnectedSession))
+                                    ChannelItem disconnectedChannel;
+                                    if (_channelMap.TryRemove(msg.SenderConnection, out disconnectedChannel))
                                     {
-                                        disconnectedSession.Tell(new UdpChannel.CloseMessage());
+                                        disconnectedChannel.Actor.Tell(new UdpChannel.CloseMessage());
                                     }
                                     else
                                     {
@@ -278,15 +285,16 @@ namespace Akka.Interfaced.SlimSocket.Server
                             break;
 
                         case NetIncomingMessageType.Data:
-                            IActorRef dataSession = null;
 #if DEBUG
                             Console.WriteLine($"Data: Length={msg.LengthBytes}");
 #endif
-                            if (_connectionMap.TryGetValue(msg.SenderConnection, out dataSession))
+                            ChannelItem dataChannel = null;
+                            if (_channelMap.TryGetValue(msg.SenderConnection, out dataChannel))
                             {
                                 var workStream = new MemoryStream(msg.ReadBytes(msg.LengthBytes), 0, msg.LengthBytes, false, true);
-                                var packet = _packetSerializer.Deserialize(workStream);
-                                dataSession.Tell(new UdpChannel.ReceiveMessage { Packet = (Packet)packet });
+                                var packet = _packetSerializer.Deserialize(workStream) as Packet;
+                                if (packet != null)
+                                    dataChannel.Channel.OnConnectionReceive(packet);
                             }
                             break;
                     }
