@@ -67,46 +67,51 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         protected void OnConnectionReceive(TcpConnection connection, object packet)
         {
-            // This will be destroyed anyway after this call.
-
-            _self.Tell(PoisonPill.Instance);
             _connection.Closed -= OnConnectionClose;
             _connection.Received -= OnConnectionReceive;
 
-            // Before token is validated
-
-            var p = packet as Packet;
-            if (p == null)
+            try
             {
-                _eventStream.Publish(new Warning(
-                    _self.Path.ToString(), GetType(),
-                    $"Receives null packet from {_connection?.RemoteEndPoint}"));
-                return;
+                // Before token is validated
+
+                var p = packet as Packet;
+                if (p == null)
+                {
+                    _eventStream.Publish(new Warning(
+                        _self.Path.ToString(), GetType(),
+                        $"Receives null packet from {_connection?.RemoteEndPoint}"));
+                    return;
+                }
+
+                if (p.Type != PacketType.System || (p.Message is string) == false)
+                {
+                    _eventStream.Publish(new Warning(
+                        _self.Path.ToString(), GetType(),
+                        $"Receives a bad packet without a message from {_connection?.RemoteEndPoint}"));
+                    return;
+                }
+
+                // Try to open
+
+                var token = (string)p.Message;
+                var succeeded = _gateway.EstablishChannel(token, _connection);
+                if (succeeded)
+                {
+                    // set null to avoid closing connection in PostStop
+                    _connection = null;
+                }
+                else
+                {
+                    _eventStream.Publish(new Warning(
+                        _self.Path.ToString(), GetType(),
+                        $"Receives wrong token({token}) from {_connection?.RemoteEndPoint}"));
+                    return;
+                }
             }
-
-            if (p.Type != PacketType.System || (p.Message is string) == false)
+            finally
             {
-                _eventStream.Publish(new Warning(
-                    _self.Path.ToString(), GetType(),
-                    $"Receives a bad packet without a message from {_connection?.RemoteEndPoint}"));
-                return;
-            }
-
-            // Try to open
-
-            var token = (string)p.Message;
-            var channel = _gateway.EstablishChannel(token, _connection);
-            if (channel)
-            {
-                // set null to avoid closing connection in PostStop
-                _connection = null;
-            }
-            else
-            {
-                _eventStream.Publish(new Warning(
-                    _self.Path.ToString(), GetType(),
-                    $"Receives wrong token({token}) from {_connection?.RemoteEndPoint}"));
-                return;
+                // This actor will be destroyed anyway after this call.
+                _self.Tell(PoisonPill.Instance);
             }
         }
     }
