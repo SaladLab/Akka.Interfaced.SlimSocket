@@ -42,7 +42,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="LidgrenUdpNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\LidgrenUdpNet.1.0.2\lib\net45\LidgrenUdpNet.dll</HintPath>
+      <HintPath>..\..\packages\LidgrenUdpNet.1.0.3\lib\net45\LidgrenUdpNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NetLegacySupport.Action, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
