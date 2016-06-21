@@ -26,15 +26,13 @@ namespace Akka.Interfaced.SlimSocket.Server
             public Packet Packet;
         }
 
-        public UdpChannel(GatewayInitiator initiator, object connection, object channelItem, ActorBoundGatewayMessage.Open message = null)
+        public UdpChannel(GatewayInitiator initiator, object connection, ActorBoundGatewayMessage.Open message = null)
         {
             var netConnection = (NetConnection)connection;
             _initiator = initiator;
             _logger = _initiator.CreateChannelLogger(netConnection.RemoteEndPoint, connection);
             _connection = netConnection;
             _packetSerializer = initiator.PacketSerializer;
-
-            ((UdpGateway.ChannelItem)channelItem).Channel = this;
 
             if (message != null)
                 BindActor(message.Actor, message.Types.Select(t => new BoundType(t)));
@@ -63,6 +61,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             // accept it
 
+            _connection.MessageHandler = OnConnectionMessage;
             _connection.Approve();
         }
 
@@ -210,6 +209,21 @@ namespace Akka.Interfaced.SlimSocket.Server
                 RequestId = p.RequestId,
                 InvokePayload = (IInterfacedPayload)p.Message
             }, _self);
+        }
+
+        // BEWARE: Called by network thread.
+        private bool OnConnectionMessage(NetIncomingMessage msg)
+        {
+            if (msg.MessageType == NetIncomingMessageType.Data)
+            {
+                var workStream = new MemoryStream(msg.ReadBytes(msg.LengthBytes), 0, msg.LengthBytes, false, true);
+                var packet = _packetSerializer.Deserialize(workStream) as Packet;
+                if (packet != null)
+                    OnConnectionReceive(packet);
+                return true;
+            }
+
+            return false;
         }
     }
 }

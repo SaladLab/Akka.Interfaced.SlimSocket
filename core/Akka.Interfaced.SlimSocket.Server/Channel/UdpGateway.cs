@@ -19,15 +19,8 @@ namespace Akka.Interfaced.SlimSocket.Server
         private IActorRef _self;
         private NetServer _server;
         private Thread _serverThread;
+        private readonly ConcurrentDictionary<NetConnection, IActorRef> _channelMap = new ConcurrentDictionary<NetConnection, IActorRef>();
         private bool _isStopped;
-
-        internal class ChannelItem
-        {
-            public IActorRef Actor;
-            public UdpChannel Channel;
-        }
-
-        private readonly ConcurrentDictionary<NetConnection, ChannelItem> _channelMap = new ConcurrentDictionary<NetConnection, ChannelItem>();
 
         internal class WaitingItem
         {
@@ -163,8 +156,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 }
             }
 
-            var channelItem = new ChannelItem();
-
+            IActorRef channel;
             if (_initiator.TokenRequired)
             {
                 WaitingItem item;
@@ -178,25 +170,25 @@ namespace Akka.Interfaced.SlimSocket.Server
                     _waitingMap.Remove(m.Token);
                 }
 
-                channelItem.Actor = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, channelItem, item.Message)));
+                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, item.Message)));
             }
             else
             {
-                channelItem.Actor = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, channelItem, null)));
+                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, null)));
             }
 
-            if (channelItem.Actor == null)
+            if (channel == null)
             {
                 m.SenderConnection.Deny("Server Deny");
                 _logger?.TraceFormat("Deny a connection. (EndPoint={0})", m.SenderEndPoint);
                 return;
             }
 
-            if (_channelMap.TryAdd(m.SenderConnection, channelItem) == false)
+            if (_channelMap.TryAdd(m.SenderConnection, channel) == false)
             {
                 _logger?.ErrorFormat("Failed in adding new connection. (EndPoint={0})", m.SenderEndPoint);
                 m.SenderConnection.Deny();
-                channelItem.Actor.Tell(PoisonPill.Instance);
+                channel.Tell(PoisonPill.Instance);
                 return;
             }
 
@@ -271,30 +263,16 @@ namespace Akka.Interfaced.SlimSocket.Server
                             switch (status)
                             {
                                 case NetConnectionStatus.Disconnected:
-                                    ChannelItem disconnectedChannel;
+                                    IActorRef disconnectedChannel;
                                     if (_channelMap.TryRemove(msg.SenderConnection, out disconnectedChannel))
                                     {
-                                        disconnectedChannel.Actor.Tell(new UdpChannel.CloseMessage());
+                                        disconnectedChannel.Tell(new UdpChannel.CloseMessage());
                                     }
                                     else
                                     {
                                         _logger.ErrorFormat($"Failed in removing connection in Disconnected.");
                                     }
                                     break;
-                            }
-                            break;
-
-                        case NetIncomingMessageType.Data:
-#if DEBUG
-                            Console.WriteLine($"Data: Length={msg.LengthBytes}");
-#endif
-                            ChannelItem dataChannel = null;
-                            if (_channelMap.TryGetValue(msg.SenderConnection, out dataChannel))
-                            {
-                                var workStream = new MemoryStream(msg.ReadBytes(msg.LengthBytes), 0, msg.LengthBytes, false, true);
-                                var packet = _packetSerializer.Deserialize(workStream) as Packet;
-                                if (packet != null)
-                                    dataChannel.Channel.OnConnectionReceive(packet);
                             }
                             break;
                     }
