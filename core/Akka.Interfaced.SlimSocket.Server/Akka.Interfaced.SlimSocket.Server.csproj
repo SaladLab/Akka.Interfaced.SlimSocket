@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.props" Condition="Exists('..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,6 +14,9 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <CodeAnalysisRuleSet>..\..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <AkkaInterfacedSourceInclude>Interface\\.*</AkkaInterfacedSourceInclude>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,6 +47,10 @@
     </Reference>
     <Reference Include="Akka.Interfaced-Base, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Akka.Interfaced-Base.0.4.0\lib\net45\Akka.Interfaced-Base.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Akka.Interfaced.SlimServer, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Interfaced.SlimServer.0.4.0\lib\net45\Akka.Interfaced.SlimServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
@@ -77,10 +85,11 @@
   <ItemGroup>
     <Compile Include="Channel\UdpChannel.cs" />
     <Compile Include="Channel\UdpGateway.cs" />
+    <Compile Include="Interface\IGateway.cs" />
+    <Compile Include="Properties\Akka.Interfaced.CodeGen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfoGenerated.cs" />
     <Compile Include="Channel\TcpGateway.cs" />
-    <Compile Include="Channel\GatewayMessage.cs" />
     <Compile Include="Channel\GatewayInitiator.cs" />
     <Compile Include="Channel\TcpChannel.cs" />
     <Compile Include="Channel\TokenChecker.cs" />
@@ -111,6 +120,14 @@
     <Analyzer Include="..\..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.props'))" />
+    <Error Condition="!Exists('..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.targets'))" />
+  </Target>
+  <Import Project="..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.targets" Condition="Exists('..\..\packages\Akka.Interfaced.Templates.0.4.0\build\Akka.Interfaced.Templates.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -6,6 +6,7 @@ using Akka.Interfaced.SlimSocket.Server;
 using Common.Logging;
 using HelloWorld.Interface;
 using Akka.Interfaced.SlimSocket;
+using Akka.Interfaced.SlimServer;
 
 namespace HelloWorld.Program.Server
 {
@@ -39,16 +40,17 @@ namespace HelloWorld.Program.Server
                 PacketSerializer = serializer,
                 CreateInitialActors = (context, connection) => new[]
                 {
-                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self))),
-                                 new[] { new ActorBoundChannelMessage.InterfaceType(typeof(IEntry)) })
+                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(new ActorBoundChannelRef(context.Self)))),
+                                 new TaggedType[] { typeof(IEntry) },
+                                 ChannelClosedNotificationType.Default)
                 }
             };
 
-            var gateway = (type == ChannelType.Tcp)
+            var gatewayActor = (type == ChannelType.Tcp)
                 ? system.ActorOf(Props.Create(() => new TcpGateway(initiator)))
                 : system.ActorOf(Props.Create(() => new UdpGateway(initiator)));
-
-            gateway.Tell(new GatewayMessage.Start());
+            var gateway = new GatewayRef(gatewayActor);
+            gateway.Start().Wait();
         }
     }
 }

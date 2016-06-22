@@ -10,9 +10,9 @@ namespace Akka.Interfaced.SlimSocket
         private static readonly Server.PacketSerializer s_serverSerializer = Server.PacketSerializer.CreatePacketSerializer();
         private static readonly Client.PacketSerializer s_clientSerializer = Client.PacketSerializer.CreatePacketSerializer();
 
-        public static IActorRef CreateGateway(ActorSystem system, ChannelType type, string name, IPEndPoint endPoint,
-                                              XunitOutputLogger.Source outputSource,
-                                              Action<Server.GatewayInitiator> clientInitiatorSetup = null)
+        public static Server.GatewayRef CreateGateway(ActorSystem system, ChannelType type, string name, IPEndPoint endPoint,
+                                                      XunitOutputLogger.Source outputSource,
+                                                      Action<Server.GatewayInitiator> clientInitiatorSetup = null)
         {
             // initialize gateway initiator
 
@@ -32,16 +32,17 @@ namespace Akka.Interfaced.SlimSocket
 
             // create gateway and start it
 
-            IActorRef gateway = (type == ChannelType.Tcp)
+            var gatewayActor = (type == ChannelType.Tcp)
                 ? system.ActorOf(Props.Create(() => new Server.TcpGateway(initiator)))
                 : system.ActorOf(Props.Create(() => new Server.UdpGateway(initiator)));
-            gateway.Tell(new Server.GatewayMessage.Start());
+            var gateway = new Server.GatewayRef(gatewayActor);
+            gateway.Start().Wait();
 
             return gateway;
         }
 
         public static Client.IChannel CreateClientChannel(ChannelType type, string name, IPEndPoint endPoint, string token,
-                                                             XunitOutputLogger.Source outputSource)
+                                                          XunitOutputLogger.Source outputSource)
         {
             // create channel and start it
 

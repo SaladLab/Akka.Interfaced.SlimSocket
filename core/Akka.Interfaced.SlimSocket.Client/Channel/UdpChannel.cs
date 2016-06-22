@@ -121,7 +121,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         {
             var messages = new List<NetIncomingMessage>();
 
-            while (true)
+            while (_state != ChannelStateType.Closed)
             {
                 var readed = _client.ReadMessages(messages);
                 if (readed < 1)

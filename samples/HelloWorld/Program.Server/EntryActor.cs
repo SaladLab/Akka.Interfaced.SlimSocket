@@ -2,35 +2,26 @@
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Interfaced;
+using Akka.Interfaced.SlimServer;
 using HelloWorld.Interface;
 
 namespace HelloWorld.Program.Server
 {
     public class EntryActor : InterfacedActor, IEntry
     {
-        private readonly IActorRef _channel;
+        private readonly ActorBoundChannelRef _channel;
 
-        public EntryActor(IActorRef channel)
+        public EntryActor(ActorBoundChannelRef channel)
         {
             _channel = channel;
         }
 
+        [ResponsiveExceptionAll]
         async Task<IGreeterWithObserver> IEntry.GetGreeter()
         {
             var actor = Context.ActorOf<GreetingActor>();
-
-            try
-            {
-                var reply = await _channel.Ask<ActorBoundChannelMessage.BindReply>(
-                    new ActorBoundChannelMessage.Bind(actor, typeof(IGreeterWithObserver)));
-                if (reply.ActorId != 0)
-                    return new GreeterWithObserverRef(new BoundActorTarget(reply.ActorId));
-            }
-            catch (Exception)
-            {
-            }
-
-            return null;
+            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
+            return (actorId != 0) ? new GreeterWithObserverRef(new BoundActorTarget(actorId)) : null;
         }
     }
 }

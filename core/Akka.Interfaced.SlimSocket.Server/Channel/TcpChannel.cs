@@ -3,11 +3,12 @@ using System.Net.Sockets;
 using System.Linq;
 using Akka.Actor;
 using Akka.Event;
+using Akka.Interfaced.SlimServer;
 using Common.Logging;
 
 namespace Akka.Interfaced.SlimSocket.Server
 {
-    public class TcpChannel : ActorBoundChannel
+    public class TcpChannel : ActorBoundChannelBase
     {
         private GatewayInitiator _initiator;
         private ILog _logger;
@@ -15,6 +16,10 @@ namespace Akka.Interfaced.SlimSocket.Server
         private EventStream _eventStream;
         private Socket _socket;
         private TcpConnection _connection;
+
+        internal class CloseMessage
+        {
+        }
 
         public TcpChannel(GatewayInitiator initiator, Socket socket)
         {
@@ -25,7 +30,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             _connection = new TcpConnection(_logger) { Settings = initiator.ConnectionSettings };
         }
 
-        public TcpChannel(GatewayInitiator initiator, TcpConnection connection, ActorBoundGatewayMessage.Open message)
+        public TcpChannel(GatewayInitiator initiator, TcpConnection connection, Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> bindingActor)
         {
             // open by registerd token.
             _initiator = initiator;
@@ -33,7 +38,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             _socket = connection.Socket;
             _connection = connection;
 
-            BindActor(message.Actor, message.Types.Select(t => new BoundType(t)));
+            BindActor(bindingActor.Item1, bindingActor.Item2.Select(t => new BoundType(t)), bindingActor.Item3);
         }
 
         protected override void PreStart()
@@ -134,14 +139,20 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
-        // BEWARE: Called by Network Thread
-        protected void OnConnectionClose(TcpConnection connection, int reason)
+        [MessageHandler]
+        private void Handle(CloseMessage m)
         {
-            _self.Tell(PoisonPill.Instance);
+            Close();
         }
 
         // BEWARE: Called by Network Thread
-        protected void OnConnectionReceive(TcpConnection connection, object packet)
+        private void OnConnectionClose(TcpConnection connection, int reason)
+        {
+            _self.Tell(new CloseMessage());
+        }
+
+        // BEWARE: Called by Network Thread
+        private void OnConnectionReceive(TcpConnection connection, object packet)
         {
             // The thread that call this function is different from actor context thread.
             // To deal with this contention lock protection is required.
@@ -207,7 +218,12 @@ namespace Akka.Interfaced.SlimSocket.Server
             var observerUpdatable = p.Message as IPayloadObserverUpdatable;
             if (observerUpdatable != null)
             {
-                observerUpdatable.Update(o => ((InterfacedObserver)o).Channel = new ActorNotificationChannel(_self));
+                observerUpdatable.Update(o =>
+                {
+                    var observer = (InterfacedObserver)o;
+                    if (observer != null)
+                        observer.Channel = new ActorNotificationChannel(_self);
+                });
             }
 
             actor.Actor.Tell(new RequestMessage

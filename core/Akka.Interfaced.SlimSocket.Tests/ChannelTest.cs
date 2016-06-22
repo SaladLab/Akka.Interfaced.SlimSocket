@@ -4,6 +4,7 @@ using System.Net;
 using Akka.Actor;
 using Xunit;
 using Xunit.Abstractions;
+using Akka.Interfaced.SlimServer;
 
 namespace Akka.Interfaced.SlimSocket
 {
@@ -183,28 +184,29 @@ namespace Akka.Interfaced.SlimSocket
             Assert.NotNull(exception);
         }
 
-        private IActorRef CreatePrimaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
+        private Server.GatewayRef CreatePrimaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
         {
             return ChannelHelper.CreateGateway(_system, type, "1", _testEndPoint, _outputSource, initiator =>
             {
-                initiator.GatewayInitialized = a => { _environment.Gateway = a; };
+                initiator.GatewayInitialized = a => { _environment.Gateway = new ActorBoundGatewayRef(a); };
                 initiator.CreateInitialActors = (IActorContext context, object socket) => new[]
                 {
                     Tuple.Create(
-                        context.ActorOf(Props.Create(() => new EntryActor(_environment, context.Self))),
-                        new[] { new ActorBoundChannelMessage.InterfaceType(typeof(IEntry)) })
+                        context.ActorOf(Props.Create(() => new EntryActor(_environment, new ActorBoundChannelRef(context.Self)))),
+                        new TaggedType[] { typeof(IEntry) },
+                        ChannelClosedNotificationType.Default)
                 };
 
                 initiatorSetup?.Invoke(initiator);
             });
         }
 
-        private IActorRef CreateSecondaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
+        private Server.GatewayRef CreateSecondaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
         {
             return ChannelHelper.CreateGateway(_system, type, "2", new IPEndPoint(_testEndPoint.Address, _testEndPoint.Port + 1), _outputSource, initiator =>
             {
                 initiator.TokenRequired = true;
-                initiator.GatewayInitialized = a => { _environment.Gateway2nd = a; };
+                initiator.GatewayInitialized = a => { _environment.Gateway2nd = new ActorBoundGatewayRef(a); };
 
                 initiatorSetup?.Invoke(initiator);
             });

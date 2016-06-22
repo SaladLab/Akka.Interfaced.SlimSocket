@@ -36,6 +36,7 @@ namespace HelloWorld.Program.Client
 
             await greeter.Unsubscribe(observer);
             channel.RemoveObserver(observer);
+            channel.Close();
         }
 
         void IGreetObserver.Event(string message)

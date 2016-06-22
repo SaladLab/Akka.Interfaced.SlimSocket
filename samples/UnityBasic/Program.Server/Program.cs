@@ -2,10 +2,11 @@
 using System.Net;
 using Akka.Actor;
 using Akka.Interfaced;
+using Akka.Interfaced.SlimServer;
+using Akka.Interfaced.SlimSocket;
 using Akka.Interfaced.SlimSocket.Server;
 using Common.Logging;
 using UnityBasic.Interface;
-using Akka.Interfaced.SlimSocket;
 
 namespace UnityBasic.Program.Server
 {
@@ -37,22 +38,23 @@ namespace UnityBasic.Program.Server
             {
                 ListenEndPoint = new IPEndPoint(IPAddress.Any, port),
                 GatewayLogger = LogManager.GetLogger("Gateway"),
-                GatewayInitialized = a => { environment.Gateway = a; },
+                GatewayInitialized = a => { environment.Gateway = new ActorBoundGatewayRef(a); },
                 CreateChannelLogger = (ep, _) => LogManager.GetLogger($"Channel({ep}"),
                 ConnectionSettings = new TcpConnectionSettings { PacketSerializer = serializer },
                 PacketSerializer = serializer,
                 CreateInitialActors = (context, connection) => new[]
                 {
-                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(environment, context.Self))),
-                                 new[] { new ActorBoundChannelMessage.InterfaceType(typeof(IEntry)) })
+                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(environment, new ActorBoundChannelRef(context.Self)))),
+                                 new TaggedType[] { typeof(IEntry) },
+                                 ChannelClosedNotificationType.Default)
                 }
             };
 
-            var gateway = (type == ChannelType.Tcp)
+            var gatewayActor = (type == ChannelType.Tcp)
                 ? system.ActorOf(Props.Create(() => new TcpGateway(initiator)))
                 : system.ActorOf(Props.Create(() => new UdpGateway(initiator)));
-
-            gateway.Tell(new GatewayMessage.Start());
+            var gateway = new GatewayRef(gatewayActor);
+            gateway.Start().Wait();
 
             // Second gateway
 
@@ -62,17 +64,17 @@ namespace UnityBasic.Program.Server
                 ConnectEndPoint = new IPEndPoint(IPAddress.Loopback, port2),
                 GatewayLogger = LogManager.GetLogger("Gateway2"),
                 TokenRequired = true,
-                GatewayInitialized = a => { environment.Gateway2nd = a; },
+                GatewayInitialized = a => { environment.Gateway2nd = new ActorBoundGatewayRef(a); },
                 CreateChannelLogger = (ep, _) => LogManager.GetLogger($"Channel2({ep}"),
                 ConnectionSettings = new TcpConnectionSettings { PacketSerializer = serializer },
                 PacketSerializer = serializer,
             };
 
-            var gateway2 = (type == ChannelType.Tcp)
+            var gatewayActor2 = (type == ChannelType.Tcp)
                 ? system.ActorOf(Props.Create(() => new TcpGateway(initiator2)))
                 : system.ActorOf(Props.Create(() => new UdpGateway(initiator2)));
-
-            gateway2.Tell(new GatewayMessage.Start());
+            var gateway2 = new GatewayRef(gatewayActor2);
+            gateway2.Start().Wait();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using Akka.Actor;
+using Akka.Interfaced.SlimServer;
 using Common.Logging;
 using Lidgren.Network;
 
@@ -19,7 +20,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         public TcpConnectionSettings ConnectionSettings { get; set; }
         public IPacketSerializer PacketSerializer { get; set; }
         public object UdpConfig { get; set; }
-        public Func<IActorContext, object, Tuple<IActorRef, ActorBoundChannelMessage.InterfaceType[]>[]> CreateInitialActors { get; set; }
+        public Func<IActorContext, object, Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType>[]> CreateInitialActors { get; set; }
 
         public GatewayInitiator()
         {

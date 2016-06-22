@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Akka.Actor;
-using Akka.Interfaced.SlimSocket.Server;
+using Akka.Interfaced.SlimServer;
 
 namespace Akka.Interfaced.SlimSocket
 {
     public class EntryActorEnvironment
     {
-        public IActorRef Gateway;
-        public IActorRef Gateway2nd;
+        public ActorBoundGatewayRef Gateway;
+        public ActorBoundGatewayRef Gateway2nd;
     }
 
     public class EntryActor : InterfacedActor, IEntry
     {
         private readonly EntryActorEnvironment _environment;
-        private readonly IActorRef _channel;
+        private readonly ActorBoundChannelRef _channel;
 
-        public EntryActor(EntryActorEnvironment environment, IActorRef channel)
+        public EntryActor(EntryActorEnvironment environment, ActorBoundChannelRef channel)
         {
             _environment = environment;
-            _channel = channel;
+            _channel = channel.WithRequestWaiter(this);
         }
 
         Task<string> IEntry.Echo(string message)
         {
+            // TODO: Now PoisonPill but close command?
             if (message == "Close")
-                _channel.Tell(PoisonPill.Instance);
+                _channel.Actor.Tell(PoisonPill.Instance);
 
             return Task.FromResult(message);
         }
@@ -34,23 +35,16 @@ namespace Akka.Interfaced.SlimSocket
         async Task<IGreeterWithObserver> IEntry.GetGreeter()
         {
             var actor = Context.ActorOf<GreetingActor>();
-            var reply = await _channel.Ask<ActorBoundChannelMessage.BindReply>(
-                new ActorBoundChannelMessage.Bind(actor, typeof(IGreeterWithObserver)));
-            return (reply.ActorId != 0)
-                ? new GreeterWithObserverRef(new BoundActorTarget(reply.ActorId))
-                : null;
+            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
+            return (actorId != 0) ? new GreeterWithObserverRef(new BoundActorTarget(actorId)) : null;
         }
 
         [ResponsiveExceptionAll]
         async Task<string> IEntry.GetGreeterOnAnotherChannel()
         {
-            if (_environment.Gateway2nd == null)
-                throw new InvalidOperationException("Gateway2nd not found!");
-
             var actor = Context.ActorOf<GreetingActor>();
-            var reply = await _environment.Gateway2nd.Ask<ActorBoundGatewayMessage.OpenReply>(
-                new ActorBoundGatewayMessage.Open(actor, typeof(IGreeterWithObserver)));
-            return reply.Address;
+            var address = await _environment.Gateway2nd.OpenChannel(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
+            return address;
         }
     }
 }

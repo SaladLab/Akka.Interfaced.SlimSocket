@@ -3,12 +3,13 @@ using System.IO;
 using System.Linq;
 using Akka.Actor;
 using Akka.Event;
+using Akka.Interfaced.SlimServer;
 using Common.Logging;
 using Lidgren.Network;
 
 namespace Akka.Interfaced.SlimSocket.Server
 {
-    public class UdpChannel : ActorBoundChannel
+    public class UdpChannel : ActorBoundChannelBase
     {
         private GatewayInitiator _initiator;
         private ILog _logger;
@@ -21,12 +22,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         {
         }
 
-        internal class ReceiveMessage
-        {
-            public Packet Packet;
-        }
-
-        public UdpChannel(GatewayInitiator initiator, object connection, ActorBoundGatewayMessage.Open message = null)
+        public UdpChannel(GatewayInitiator initiator, object connection, Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> bindingActor = null)
         {
             var netConnection = (NetConnection)connection;
             _initiator = initiator;
@@ -34,8 +30,8 @@ namespace Akka.Interfaced.SlimSocket.Server
             _connection = netConnection;
             _packetSerializer = initiator.PacketSerializer;
 
-            if (message != null)
-                BindActor(message.Actor, message.Types.Select(t => new BoundType(t)));
+            if (bindingActor != null)
+                BindActor(bindingActor.Item1, bindingActor.Item2.Select(t => new BoundType(t)), bindingActor.Item3);
         }
 
         protected override void PreStart()
@@ -112,31 +108,13 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
-        protected override void OnReceive(object message)
+        [MessageHandler]
+        private void Handle(CloseMessage m)
         {
-            var close = message as CloseMessage;
-            if (close != null)
-            {
-                OnConnectionClose();
-                return;
-            }
-
-            var receive = message as ReceiveMessage;
-            if (receive != null)
-            {
-                OnConnectionReceive(receive.Packet);
-                return;
-            }
-
-            base.OnReceive(message);
+            Close();
         }
 
-        protected void OnConnectionClose()
-        {
-            _self.Tell(PoisonPill.Instance);
-        }
-
-        protected internal void OnConnectionReceive(Packet p)
+        private void OnConnectionReceive(Packet p)
         {
             // The thread that call this function is different from actor context thread.
             // To deal with this contention lock protection is required.
@@ -201,7 +179,12 @@ namespace Akka.Interfaced.SlimSocket.Server
             var observerUpdatable = p.Message as IPayloadObserverUpdatable;
             if (observerUpdatable != null)
             {
-                observerUpdatable.Update(o => ((InterfacedObserver)o).Channel = new ActorNotificationChannel(_self));
+                observerUpdatable.Update(o =>
+                {
+                    var observer = (InterfacedObserver)o;
+                    if (observer != null)
+                        observer.Channel = new ActorNotificationChannel(_self);
+                });
             }
 
             actor.Actor.Tell(new RequestMessage

@@ -6,12 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using Akka.Actor;
+using Akka.Interfaced.SlimServer;
 using Common.Logging;
 using Lidgren.Network;
 
 namespace Akka.Interfaced.SlimSocket.Server
 {
-    public class UdpGateway : ReceiveActor
+    public class UdpGateway : InterfacedActor, IGatewaySync, IActorBoundGatewaySync
     {
         private readonly GatewayInitiator _initiator;
         private readonly ILog _logger;
@@ -24,7 +25,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         internal class WaitingItem
         {
-            public ActorBoundGatewayMessage.Open Message;
+            public Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> BindingActor;
             public DateTime Time;
         }
 
@@ -61,13 +62,6 @@ namespace Akka.Interfaced.SlimSocket.Server
             _logger = initiator.GatewayLogger;
             _packetSerializer = initiator.PacketSerializer;
 
-            Receive<GatewayMessage.Start>(m => Handle(m));
-            Receive<GatewayMessage.Stop>(m => Handle(m));
-            Receive<AcceptMessage>(m => Handle(m));
-            Receive<ActorBoundGatewayMessage.Open>(m => Handle(m));
-            Receive<TimeoutTimerMessage>(m => Handle(m));
-            // Receive<Terminated>(m => Handle(m));
-
             if (initiator.TokenRequired && initiator.TokenTimeout != TimeSpan.Zero)
             {
                 _timeoutCanceler = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(
@@ -91,7 +85,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 _timeoutCanceler.Cancel();
         }
 
-        private void Handle(GatewayMessage.Start m)
+        void IGatewaySync.Start()
         {
             _logger?.InfoFormat("Start Listening. (EndPoint={0})", _initiator.ListenEndPoint);
 
@@ -114,7 +108,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
-        private void Handle(GatewayMessage.Stop m)
+        void IGatewaySync.Stop()
         {
             if (_isStopped)
                 return;
@@ -142,6 +136,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
+        [MessageHandler]
         private void Handle(AcceptMessage m)
         {
             if (_isStopped)
@@ -170,7 +165,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                     _waitingMap.Remove(m.Token);
                 }
 
-                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, item.Message)));
+                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, item.BindingActor)));
             }
             else
             {
@@ -180,7 +175,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             if (channel == null)
             {
                 m.SenderConnection.Deny("Server Deny");
-                _logger?.TraceFormat("Deny a connection. (EndPoint={0})", m.SenderEndPoint);
+                _logger?.ErrorFormat("Deny a connection. (EndPoint={0})", m.SenderEndPoint);
                 return;
             }
 
@@ -195,13 +190,10 @@ namespace Akka.Interfaced.SlimSocket.Server
             _logger?.TraceFormat("Accept a connection. (EndPoint={0})", m.SenderEndPoint);
         }
 
-        private void Handle(ActorBoundGatewayMessage.Open m)
+        string IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, ChannelClosedNotificationType channelClosedNotification)
         {
             if (_isStopped)
-            {
-                Sender.Tell(new ActorBoundGatewayMessage.OpenReply(null));
-                return;
-            }
+                return null;
 
             // create token and add to waiting list
 
@@ -215,7 +207,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                     {
                         _waitingMap.Add(token, new WaitingItem
                         {
-                            Message = m,
+                            BindingActor = Tuple.Create(actor, types, channelClosedNotification),
                             Time = DateTime.UtcNow
                         });
                         break;
@@ -226,9 +218,10 @@ namespace Akka.Interfaced.SlimSocket.Server
             var address = string.Join("|", _initiator.ConnectEndPoint.Address.ToString(),
                                            _initiator.ConnectEndPoint.Port.ToString(),
                                            token);
-            Sender.Tell(new ActorBoundGatewayMessage.OpenReply(address));
+            return address;
         }
 
+        [MessageHandler]
         private void Handle(TimeoutTimerMessage m)
         {
             lock (_waitingMap)
