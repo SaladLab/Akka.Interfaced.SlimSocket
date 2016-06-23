@@ -29,6 +29,7 @@ let solution =
                               Dependencies = 
                                   [ ("Akka.Interfaced.SlimSocket.Base", "")
                                     ("Akka.Interfaced", "")
+                                    ("Akka.Interfaced.SlimServer", "")
                                     ("Common.Logging.Core", "") ] } ]
 
 Target "Clean" <| fun _ -> cleanBin
