@@ -38,22 +38,21 @@ namespace UnityBasic.Program.Server
             {
                 ListenEndPoint = new IPEndPoint(IPAddress.Any, port),
                 GatewayLogger = LogManager.GetLogger("Gateway"),
-                GatewayInitialized = a => { environment.Gateway = new ActorBoundGatewayRef(a); },
+                GatewayInitialized = a => { environment.Gateway = a.Cast<ActorBoundGatewayRef>(); },
                 CreateChannelLogger = (ep, _) => LogManager.GetLogger($"Channel({ep}"),
                 ConnectionSettings = new TcpConnectionSettings { PacketSerializer = serializer },
                 PacketSerializer = serializer,
                 CreateInitialActors = (context, connection) => new[]
                 {
-                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(environment, new ActorBoundChannelRef(context.Self)))),
+                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(environment, context.Self.Cast<ActorBoundChannelRef>()))),
                                  new TaggedType[] { typeof(IEntry) },
                                  (ActorBindingFlags)0)
                 }
             };
 
-            var gatewayActor = (type == ChannelType.Tcp)
-                ? system.ActorOf(Props.Create(() => new TcpGateway(initiator)))
-                : system.ActorOf(Props.Create(() => new UdpGateway(initiator)));
-            var gateway = new GatewayRef(gatewayActor);
+            var gateway = (type == ChannelType.Tcp)
+                ? system.ActorOf(Props.Create(() => new TcpGateway(initiator))).Cast<GatewayRef>()
+                : system.ActorOf(Props.Create(() => new UdpGateway(initiator))).Cast<GatewayRef>();
             gateway.Start().Wait();
 
             // Second gateway
@@ -64,16 +63,15 @@ namespace UnityBasic.Program.Server
                 ConnectEndPoint = new IPEndPoint(IPAddress.Loopback, port2),
                 GatewayLogger = LogManager.GetLogger("Gateway2"),
                 TokenRequired = true,
-                GatewayInitialized = a => { environment.Gateway2nd = new ActorBoundGatewayRef(a); },
+                GatewayInitialized = a => { environment.Gateway2nd = a.Cast<ActorBoundGatewayRef>(); },
                 CreateChannelLogger = (ep, _) => LogManager.GetLogger($"Channel2({ep}"),
                 ConnectionSettings = new TcpConnectionSettings { PacketSerializer = serializer },
                 PacketSerializer = serializer,
             };
 
-            var gatewayActor2 = (type == ChannelType.Tcp)
-                ? system.ActorOf(Props.Create(() => new TcpGateway(initiator2)))
-                : system.ActorOf(Props.Create(() => new UdpGateway(initiator2)));
-            var gateway2 = new GatewayRef(gatewayActor2);
+            var gateway2 = (type == ChannelType.Tcp)
+                ? system.ActorOf(Props.Create(() => new TcpGateway(initiator2))).Cast<GatewayRef>()
+                : system.ActorOf(Props.Create(() => new UdpGateway(initiator2))).Cast<GatewayRef>();
             gateway2.Start().Wait();
         }
     }

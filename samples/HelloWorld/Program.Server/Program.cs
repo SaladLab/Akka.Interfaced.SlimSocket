@@ -40,16 +40,15 @@ namespace HelloWorld.Program.Server
                 PacketSerializer = serializer,
                 CreateInitialActors = (context, connection) => new[]
                 {
-                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(new ActorBoundChannelRef(context.Self)))),
+                    Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(context.Self.Cast<ActorBoundChannelRef>()))),
                                  new TaggedType[] { typeof(IEntry) },
                                  (ActorBindingFlags)0)
                 }
             };
 
-            var gatewayActor = (type == ChannelType.Tcp)
-                ? system.ActorOf(Props.Create(() => new TcpGateway(initiator)))
-                : system.ActorOf(Props.Create(() => new UdpGateway(initiator)));
-            var gateway = new GatewayRef(gatewayActor);
+            var gateway = (type == ChannelType.Tcp)
+                ? system.ActorOf(Props.Create(() => new TcpGateway(initiator))).Cast<GatewayRef>()
+                : system.ActorOf(Props.Create(() => new UdpGateway(initiator))).Cast<GatewayRef>();
             gateway.Start().Wait();
         }
     }

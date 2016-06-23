@@ -170,6 +170,8 @@ namespace UnityBasic.Interface
 
     public class CalculatorRef : InterfacedActorRef, ICalculator, ICalculator_NoReply
     {
+        public override Type InterfaceType => typeof(ICalculator);
+
         public CalculatorRef() : base(null)
         {
         }
@@ -181,8 +183,6 @@ namespace UnityBasic.Interface
         public CalculatorRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(ICalculator);
 
         public ICalculator_NoReply WithNoReply()
         {
@@ -343,6 +343,8 @@ namespace UnityBasic.Interface
 
     public class CounterRef : InterfacedActorRef, ICounter, ICounter_NoReply
     {
+        public override Type InterfaceType => typeof(ICounter);
+
         public CounterRef() : base(null)
         {
         }
@@ -354,8 +356,6 @@ namespace UnityBasic.Interface
         public CounterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(ICounter);
 
         public ICounter_NoReply WithNoReply()
         {
@@ -649,6 +649,8 @@ namespace UnityBasic.Interface
 
     public class EntryRef : InterfacedActorRef, IEntry, IEntry_NoReply
     {
+        public override Type InterfaceType => typeof(IEntry);
+
         public EntryRef() : base(null)
         {
         }
@@ -660,8 +662,6 @@ namespace UnityBasic.Interface
         public EntryRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(IEntry);
 
         public IEntry_NoReply WithNoReply()
         {
@@ -871,6 +871,8 @@ namespace UnityBasic.Interface
 
     public class GreeterRef : InterfacedActorRef, IGreeter, IGreeter_NoReply
     {
+        public override Type InterfaceType => typeof(IGreeter);
+
         public GreeterRef() : base(null)
         {
         }
@@ -882,8 +884,6 @@ namespace UnityBasic.Interface
         public GreeterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(IGreeter);
 
         public IGreeter_NoReply WithNoReply()
         {
@@ -1029,6 +1029,8 @@ namespace UnityBasic.Interface
 
     public class GreeterWithObserverRef : InterfacedActorRef, IGreeterWithObserver, IGreeterWithObserver_NoReply
     {
+        public override Type InterfaceType => typeof(IGreeterWithObserver);
+
         public GreeterWithObserverRef() : base(null)
         {
         }
@@ -1040,8 +1042,6 @@ namespace UnityBasic.Interface
         public GreeterWithObserverRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(IGreeterWithObserver);
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {
@@ -1363,6 +1363,8 @@ namespace UnityBasic.Interface
 
     public class PedanticRef : InterfacedActorRef, IPedantic, IPedantic_NoReply
     {
+        public override Type InterfaceType => typeof(IPedantic);
+
         public PedanticRef() : base(null)
         {
         }
@@ -1374,8 +1376,6 @@ namespace UnityBasic.Interface
         public PedanticRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(IPedantic);
 
         public IPedantic_NoReply WithNoReply()
         {

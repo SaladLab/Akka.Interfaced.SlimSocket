@@ -19,9 +19,8 @@ namespace HelloWorld.Program.Server
         [ResponsiveExceptionAll]
         async Task<IGreeterWithObserver> IEntry.GetGreeter()
         {
-            var actor = Context.ActorOf<GreetingActor>();
-            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
-            return (actorId != 0) ? new GreeterWithObserverRef(new BoundActorTarget(actorId)) : null;
+            var greeter = Context.InterfacedActorOf<GreetingActor>().Cast<GreeterWithObserverRef>();
+            return (await _channel.BindActor(greeter)).Cast<GreeterWithObserverRef>();
         }
     }
 }

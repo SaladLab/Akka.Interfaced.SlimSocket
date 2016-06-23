@@ -66,6 +66,8 @@ namespace Akka.Interfaced.SlimSocket.Server
 
     public class GatewayRef : InterfacedActorRef, IGateway, IGateway_NoReply
     {
+        public override Type InterfaceType => typeof(IGateway);
+
         public GatewayRef() : base(null)
         {
         }
@@ -77,24 +79,6 @@ namespace Akka.Interfaced.SlimSocket.Server
         public GatewayRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public GatewayRef(IActorRef actor) : base(new AkkaActorTarget(actor))
-        {
-        }
-
-        public GatewayRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(new AkkaActorTarget(actor), requestWaiter, timeout)
-        {
-        }
-
-        public static implicit operator GatewayRef(TypedActorRef typedActor)
-        {
-            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGateway));
-            return new GatewayRef(typedActor.Actor);
-        }
-
-        public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
-
-        public override Type InterfaceType => typeof(IGateway);
 
         public IGateway_NoReply WithNoReply()
         {

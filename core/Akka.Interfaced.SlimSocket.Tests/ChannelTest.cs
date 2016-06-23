@@ -188,11 +188,11 @@ namespace Akka.Interfaced.SlimSocket
         {
             return ChannelHelper.CreateGateway(_system, type, "1", _testEndPoint, _outputSource, initiator =>
             {
-                initiator.GatewayInitialized = a => { _environment.Gateway = new ActorBoundGatewayRef(a); };
+                initiator.GatewayInitialized = a => { _environment.Gateway = a.Cast<ActorBoundGatewayRef>(); };
                 initiator.CreateInitialActors = (IActorContext context, object socket) => new[]
                 {
                     Tuple.Create(
-                        context.ActorOf(Props.Create(() => new EntryActor(_environment, new ActorBoundChannelRef(context.Self)))),
+                        context.ActorOf(Props.Create(() => new EntryActor(_environment, context.Self.Cast<ActorBoundChannelRef>()))),
                         new TaggedType[] { typeof(IEntry) },
                         (ActorBindingFlags)0)
                 };
@@ -206,7 +206,7 @@ namespace Akka.Interfaced.SlimSocket
             return ChannelHelper.CreateGateway(_system, type, "2", new IPEndPoint(_testEndPoint.Address, _testEndPoint.Port + 1), _outputSource, initiator =>
             {
                 initiator.TokenRequired = true;
-                initiator.GatewayInitialized = a => { _environment.Gateway2nd = new ActorBoundGatewayRef(a); };
+                initiator.GatewayInitialized = a => { _environment.Gateway2nd = a.Cast<ActorBoundGatewayRef>(); };
 
                 initiatorSetup?.Invoke(initiator);
             });

@@ -32,10 +32,9 @@ namespace Akka.Interfaced.SlimSocket
 
             // create gateway and start it
 
-            var gatewayActor = (type == ChannelType.Tcp)
-                ? system.ActorOf(Props.Create(() => new Server.TcpGateway(initiator)))
-                : system.ActorOf(Props.Create(() => new Server.UdpGateway(initiator)));
-            var gateway = new Server.GatewayRef(gatewayActor);
+            var gateway = (type == ChannelType.Tcp)
+                ? system.ActorOf(Props.Create(() => new Server.TcpGateway(initiator))).Cast<Server.GatewayRef>()
+                : system.ActorOf(Props.Create(() => new Server.UdpGateway(initiator))).Cast<Server.GatewayRef>();
             gateway.Start().Wait();
 
             return gateway;

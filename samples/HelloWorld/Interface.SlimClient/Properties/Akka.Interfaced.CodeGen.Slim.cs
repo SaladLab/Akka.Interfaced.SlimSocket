@@ -102,6 +102,8 @@ namespace HelloWorld.Interface
 
     public class EntryRef : InterfacedActorRef, IEntry, IEntry_NoReply
     {
+        public override Type InterfaceType => typeof(IEntry);
+
         public EntryRef() : base(null)
         {
         }
@@ -113,8 +115,6 @@ namespace HelloWorld.Interface
         public EntryRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(IEntry);
 
         public IEntry_NoReply WithNoReply()
         {
@@ -260,6 +260,8 @@ namespace HelloWorld.Interface
 
     public class GreeterRef : InterfacedActorRef, IGreeter, IGreeter_NoReply
     {
+        public override Type InterfaceType => typeof(IGreeter);
+
         public GreeterRef() : base(null)
         {
         }
@@ -271,8 +273,6 @@ namespace HelloWorld.Interface
         public GreeterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(IGreeter);
 
         public IGreeter_NoReply WithNoReply()
         {
@@ -418,6 +418,8 @@ namespace HelloWorld.Interface
 
     public class GreeterWithObserverRef : InterfacedActorRef, IGreeterWithObserver, IGreeterWithObserver_NoReply
     {
+        public override Type InterfaceType => typeof(IGreeterWithObserver);
+
         public GreeterWithObserverRef() : base(null)
         {
         }
@@ -429,8 +431,6 @@ namespace HelloWorld.Interface
         public GreeterWithObserverRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public override Type InterfaceType => typeof(IGreeterWithObserver);
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {

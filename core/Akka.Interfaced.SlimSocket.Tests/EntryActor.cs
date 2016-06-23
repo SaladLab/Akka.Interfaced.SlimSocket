@@ -24,9 +24,9 @@ namespace Akka.Interfaced.SlimSocket
 
         Task<string> IEntry.Echo(string message)
         {
-            // TODO: Now PoisonPill but close command?
+            // Force channel to be closed
             if (message == "Close")
-                _channel.Actor.Tell(PoisonPill.Instance);
+                _channel.CastToIActorRef().Tell(InterfacedPoisonPill.Instance);
 
             return Task.FromResult(message);
         }
@@ -34,9 +34,8 @@ namespace Akka.Interfaced.SlimSocket
         [ResponsiveExceptionAll]
         async Task<IGreeterWithObserver> IEntry.GetGreeter()
         {
-            var actor = Context.ActorOf<GreetingActor>();
-            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
-            return (actorId != 0) ? new GreeterWithObserverRef(new BoundActorTarget(actorId)) : null;
+            var actor = Context.InterfacedActorOf<GreetingActor>().Cast<GreeterWithObserverRef>();
+            return (await _channel.BindActor(actor)).Cast<GreeterWithObserverRef>();
         }
 
         [ResponsiveExceptionAll]

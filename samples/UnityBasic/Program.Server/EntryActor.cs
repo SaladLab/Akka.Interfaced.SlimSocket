@@ -27,37 +27,32 @@ namespace UnityBasic.Program.Server
 
         async Task<IGreeterWithObserver> IEntry.GetGreeter()
         {
-            var actor = Context.ActorOf<GreetingActor>();
-            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
-            return (actorId != 0) ? new GreeterWithObserverRef(new BoundActorTarget(actorId)) : null;
+            var greeter = Context.InterfacedActorOf<GreetingActor>().Cast<GreeterWithObserverRef>();
+            return (await _channel.BindActor(greeter)).Cast<GreeterWithObserverRef>();
         }
 
         async Task<string> IEntry.GetGreeterOnAnotherChannel()
         {
-            var actor = Context.ActorOf<GreetingActor>();
-            var address = await _environment.Gateway2nd.OpenChannel(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
-            return address;
+            var greeter = Context.InterfacedActorOf<GreetingActor>().Cast<GreeterWithObserverRef>();
+            return await _environment.Gateway2nd.OpenChannel(greeter);
         }
 
         async Task<ICalculator> IEntry.GetCalculator()
         {
-            var actor = Context.ActorOf<CalculatorActor>();
-            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(ICalculator) });
-            return (actorId != 0) ? new CalculatorRef(new BoundActorTarget(actorId)) : null;
+            var calculator = Context.InterfacedActorOf<CalculatorActor>().Cast<CalculatorRef>();
+            return (await _channel.BindActor(calculator)).Cast<CalculatorRef>();
         }
 
         async Task<ICounter> IEntry.GetCounter()
         {
-            var actor = Context.ActorOf<CounterActor>();
-            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(ICounter) });
-            return (actorId != 0) ? new CounterRef(new BoundActorTarget(actorId)) : null;
+            CounterRef counter = Context.InterfacedActorOf<CounterActor>().Cast<CounterRef>();
+            return (await _channel.BindActor(counter)).Cast<CounterRef>();
         }
 
         async Task<IPedantic> IEntry.GetPedantic()
         {
-            var actor = Context.ActorOf<PedanticActor>();
-            var actorId = await _channel.BindActor(actor, new TaggedType[] { typeof(IPedantic) });
-            return (actorId != 0) ? new PedanticRef(new BoundActorTarget(actorId)) : null;
+            var pedantic = Context.InterfacedActorOf<PedanticActor>().Cast<PedanticRef>();
+            return (await _channel.BindActor(pedantic)).Cast<PedanticRef>();
         }
     }
 }

@@ -78,6 +78,8 @@ namespace HelloWorld.Interface
 
     public class EntryRef : InterfacedActorRef, IEntry, IEntry_NoReply
     {
+        public override Type InterfaceType => typeof(IEntry);
+
         public EntryRef() : base(null)
         {
         }
@@ -89,24 +91,6 @@ namespace HelloWorld.Interface
         public EntryRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public EntryRef(IActorRef actor) : base(new AkkaActorTarget(actor))
-        {
-        }
-
-        public EntryRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(new AkkaActorTarget(actor), requestWaiter, timeout)
-        {
-        }
-
-        public static implicit operator EntryRef(TypedActorRef typedActor)
-        {
-            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IEntry));
-            return new EntryRef(typedActor.Actor);
-        }
-
-        public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
-
-        public override Type InterfaceType => typeof(IEntry);
 
         public IEntry_NoReply WithNoReply()
         {
@@ -260,6 +244,8 @@ namespace HelloWorld.Interface
 
     public class GreeterRef : InterfacedActorRef, IGreeter, IGreeter_NoReply
     {
+        public override Type InterfaceType => typeof(IGreeter);
+
         public GreeterRef() : base(null)
         {
         }
@@ -271,24 +257,6 @@ namespace HelloWorld.Interface
         public GreeterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public GreeterRef(IActorRef actor) : base(new AkkaActorTarget(actor))
-        {
-        }
-
-        public GreeterRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(new AkkaActorTarget(actor), requestWaiter, timeout)
-        {
-        }
-
-        public static implicit operator GreeterRef(TypedActorRef typedActor)
-        {
-            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGreeter));
-            return new GreeterRef(typedActor.Actor);
-        }
-
-        public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
-
-        public override Type InterfaceType => typeof(IGreeter);
 
         public IGreeter_NoReply WithNoReply()
         {
@@ -443,6 +411,8 @@ namespace HelloWorld.Interface
 
     public class GreeterWithObserverRef : InterfacedActorRef, IGreeterWithObserver, IGreeterWithObserver_NoReply
     {
+        public override Type InterfaceType => typeof(IGreeterWithObserver);
+
         public GreeterWithObserverRef() : base(null)
         {
         }
@@ -454,24 +424,6 @@ namespace HelloWorld.Interface
         public GreeterWithObserverRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
-
-        public GreeterWithObserverRef(IActorRef actor) : base(new AkkaActorTarget(actor))
-        {
-        }
-
-        public GreeterWithObserverRef(IActorRef actor, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(new AkkaActorTarget(actor), requestWaiter, timeout)
-        {
-        }
-
-        public static implicit operator GreeterWithObserverRef(TypedActorRef typedActor)
-        {
-            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGreeterWithObserver));
-            return new GreeterWithObserverRef(typedActor.Actor);
-        }
-
-        public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
-
-        public override Type InterfaceType => typeof(IGreeterWithObserver);
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {
