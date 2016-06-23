@@ -36,13 +36,13 @@
   },
   "MergedDependencies": {
     "AkkaInterfaced": {
-      "Version": "0.4.0"
+      "Version": "0.4.1"
     },
     "CommonLogging": {
       "Version": "3.3.1"
     },
     "LidgrenUdpNet": {
-      "Version": "1.0.2"
+      "Version": "1.0.4"
     },
     "NetLegacySupport": {
       "Version": "1.1.0"
