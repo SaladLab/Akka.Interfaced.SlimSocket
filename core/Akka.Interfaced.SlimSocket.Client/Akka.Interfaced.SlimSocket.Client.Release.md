@@ -1,6 +1,9 @@
 ## 0.4.0 (Released 2016/06/23)
 
 * Sync with Akka.Interfaced 0.4.1
+* Revamp channel system.
+* Add UdpChannel with Lidgren.Network.
+* Add Token connection for TCP and UDP.
 
 ## 0.3.1 (Released 2016/05/29)
 

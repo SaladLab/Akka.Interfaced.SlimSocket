@@ -1,6 +1,9 @@
 ## 0.4.0 (Released 2016/06/23)
 
 * Sync with Akka.Interfaced 0.4.1
+* Revamp gateway and channel system with new SlimServer.
+* Add UdpChannel with Lidgren.Network.
+* Add Token connection for TCP and UDP.
 
 ## 0.3.2 (Released 2016/05/30)
 
