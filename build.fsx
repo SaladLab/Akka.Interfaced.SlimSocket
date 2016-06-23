@@ -22,6 +22,7 @@ let solution =
                                   [ ("Akka.Interfaced.SlimSocket.Base", "")
                                     ("Akka.Interfaced-Base", "")
                                     ("Common.Logging.Core", "")
+                                    ("LidgrenUdpNet", "")
                                     ("NetLegacySupport.Tuple", "") ] }
           { emptyProject with Name = "Akka.Interfaced.SlimSocket.Server"
                               Folder = "./core/Akka.Interfaced.SlimSocket.Server"
@@ -30,6 +31,7 @@ let solution =
                                   [ ("Akka.Interfaced.SlimSocket.Base", "")
                                     ("Akka.Interfaced", "")
                                     ("Akka.Interfaced.SlimServer", "")
+                                    ("LidgrenUdpNet", "")
                                     ("Common.Logging.Core", "") ] } ]
 
 Target "Clean" <| fun _ -> cleanBin
