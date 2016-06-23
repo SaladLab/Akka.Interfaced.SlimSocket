@@ -182,6 +182,8 @@ namespace UnityBasic.Interface
         {
         }
 
+        public override Type InterfaceType => typeof(ICalculator);
+
         public ICalculator_NoReply WithNoReply()
         {
             return this;
@@ -352,6 +354,8 @@ namespace UnityBasic.Interface
         public CounterRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
+
+        public override Type InterfaceType => typeof(ICounter);
 
         public ICounter_NoReply WithNoReply()
         {
@@ -657,6 +661,8 @@ namespace UnityBasic.Interface
         {
         }
 
+        public override Type InterfaceType => typeof(IEntry);
+
         public IEntry_NoReply WithNoReply()
         {
             return this;
@@ -877,6 +883,8 @@ namespace UnityBasic.Interface
         {
         }
 
+        public override Type InterfaceType => typeof(IGreeter);
+
         public IGreeter_NoReply WithNoReply()
         {
             return this;
@@ -1032,6 +1040,8 @@ namespace UnityBasic.Interface
         public GreeterWithObserverRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
+
+        public override Type InterfaceType => typeof(IGreeterWithObserver);
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {
@@ -1364,6 +1374,8 @@ namespace UnityBasic.Interface
         public PedanticRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
+
+        public override Type InterfaceType => typeof(IPedantic);
 
         public IPedantic_NoReply WithNoReply()
         {

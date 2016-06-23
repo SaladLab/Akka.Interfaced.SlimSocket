@@ -19,7 +19,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         internal class WaitingItem
         {
-            public Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> BindingActor;
+            public Tuple<IActorRef, TaggedType[], ActorBindingFlags> BindingActor;
             public DateTime Time;
         }
 
@@ -39,9 +39,9 @@ namespace Akka.Interfaced.SlimSocket.Server
         private class AcceptByTokenMessage
         {
             public TcpConnection Connection { get; }
-            public Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> BindingActor { get; }
+            public Tuple<IActorRef, TaggedType[], ActorBindingFlags> BindingActor { get; }
 
-            public AcceptByTokenMessage(TcpConnection connection, Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> bindingActor)
+            public AcceptByTokenMessage(TcpConnection connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor)
             {
                 Connection = connection;
                 BindingActor = bindingActor;
@@ -193,8 +193,22 @@ namespace Akka.Interfaced.SlimSocket.Server
             _channelSet.Add(channel);
         }
 
-        string IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, ChannelClosedNotificationType channelClosedNotification)
+        [ResponsiveExceptionAll]
+        string IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, ActorBindingFlags bindingFlags)
         {
+            if (actor == null)
+                throw new ArgumentNullException(nameof(actor));
+
+            var targetActor = ((AkkaActorTarget)actor.Target).Actor;
+            return ((IActorBoundGatewaySync)this).OpenChannel(targetActor, new TaggedType[] { actor.InterfaceType }, bindingFlags);
+        }
+
+        [ResponsiveExceptionAll]
+        string IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, ActorBindingFlags bindingFlags)
+        {
+            if (actor == null)
+                throw new ArgumentNullException(nameof(actor));
+
             if (_isStopped)
                 return null;
 
@@ -210,7 +224,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                     {
                         _waitingMap.Add(token, new WaitingItem
                         {
-                            BindingActor = Tuple.Create(actor, types, channelClosedNotification),
+                            BindingActor = Tuple.Create(actor, types, bindingFlags),
                             Time = DateTime.UtcNow
                         });
                         break;

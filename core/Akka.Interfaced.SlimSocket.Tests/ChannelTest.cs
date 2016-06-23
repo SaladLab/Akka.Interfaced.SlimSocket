@@ -194,7 +194,7 @@ namespace Akka.Interfaced.SlimSocket
                     Tuple.Create(
                         context.ActorOf(Props.Create(() => new EntryActor(_environment, new ActorBoundChannelRef(context.Self)))),
                         new TaggedType[] { typeof(IEntry) },
-                        ChannelClosedNotificationType.Default)
+                        (ActorBindingFlags)0)
                 };
 
                 initiatorSetup?.Invoke(initiator);

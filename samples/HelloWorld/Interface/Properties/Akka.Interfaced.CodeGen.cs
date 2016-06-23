@@ -98,7 +98,15 @@ namespace HelloWorld.Interface
         {
         }
 
+        public static implicit operator EntryRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IEntry));
+            return new EntryRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IEntry);
 
         public IEntry_NoReply WithNoReply()
         {
@@ -272,7 +280,15 @@ namespace HelloWorld.Interface
         {
         }
 
+        public static implicit operator GreeterRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGreeter));
+            return new GreeterRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IGreeter);
 
         public IGreeter_NoReply WithNoReply()
         {
@@ -447,7 +463,15 @@ namespace HelloWorld.Interface
         {
         }
 
+        public static implicit operator GreeterWithObserverRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGreeterWithObserver));
+            return new GreeterWithObserverRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IGreeterWithObserver);
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {

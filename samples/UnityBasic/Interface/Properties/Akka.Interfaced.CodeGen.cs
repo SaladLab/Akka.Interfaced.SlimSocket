@@ -168,7 +168,15 @@ namespace UnityBasic.Interface
         {
         }
 
+        public static implicit operator CalculatorRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(ICalculator));
+            return new CalculatorRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(ICalculator);
 
         public ICalculator_NoReply WithNoReply()
         {
@@ -359,7 +367,15 @@ namespace UnityBasic.Interface
         {
         }
 
+        public static implicit operator CounterRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(ICounter));
+            return new CounterRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(ICounter);
 
         public ICounter_NoReply WithNoReply()
         {
@@ -685,7 +701,15 @@ namespace UnityBasic.Interface
         {
         }
 
+        public static implicit operator EntryRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IEntry));
+            return new EntryRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IEntry);
 
         public IEntry_NoReply WithNoReply()
         {
@@ -927,7 +951,15 @@ namespace UnityBasic.Interface
         {
         }
 
+        public static implicit operator GreeterRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGreeter));
+            return new GreeterRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IGreeter);
 
         public IGreeter_NoReply WithNoReply()
         {
@@ -1102,7 +1134,15 @@ namespace UnityBasic.Interface
         {
         }
 
+        public static implicit operator GreeterWithObserverRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGreeterWithObserver));
+            return new GreeterWithObserverRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IGreeterWithObserver);
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {
@@ -1457,7 +1497,15 @@ namespace UnityBasic.Interface
         {
         }
 
+        public static implicit operator PedanticRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IPedantic));
+            return new PedanticRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IPedantic);
 
         public IPedantic_NoReply WithNoReply()
         {

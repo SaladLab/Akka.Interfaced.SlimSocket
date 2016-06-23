@@ -86,7 +86,15 @@ namespace Akka.Interfaced.SlimSocket.Server
         {
         }
 
+        public static implicit operator GatewayRef(TypedActorRef typedActor)
+        {
+            InterfacedActorOfExtensions.CheckIfActorImplementsOrThrow(typedActor.Type, typeof(IGateway));
+            return new GatewayRef(typedActor.Actor);
+        }
+
         public IActorRef Actor => ((AkkaActorTarget)Target)?.Actor;
+
+        public override Type InterfaceType => typeof(IGateway);
 
         public IGateway_NoReply WithNoReply()
         {

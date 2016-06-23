@@ -42,7 +42,7 @@ namespace HelloWorld.Program.Server
                 {
                     Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(new ActorBoundChannelRef(context.Self)))),
                                  new TaggedType[] { typeof(IEntry) },
-                                 ChannelClosedNotificationType.Default)
+                                 (ActorBindingFlags)0)
                 }
             };
 

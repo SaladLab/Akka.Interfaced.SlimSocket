@@ -46,7 +46,7 @@ namespace UnityBasic.Program.Server
                 {
                     Tuple.Create(context.ActorOf(Props.Create(() => new EntryActor(environment, new ActorBoundChannelRef(context.Self)))),
                                  new TaggedType[] { typeof(IEntry) },
-                                 ChannelClosedNotificationType.Default)
+                                 (ActorBindingFlags)0)
                 }
             };
 

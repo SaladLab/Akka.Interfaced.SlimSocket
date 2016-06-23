@@ -114,6 +114,8 @@ namespace HelloWorld.Interface
         {
         }
 
+        public override Type InterfaceType => typeof(IEntry);
+
         public IEntry_NoReply WithNoReply()
         {
             return this;
@@ -270,6 +272,8 @@ namespace HelloWorld.Interface
         {
         }
 
+        public override Type InterfaceType => typeof(IGreeter);
+
         public IGreeter_NoReply WithNoReply()
         {
             return this;
@@ -425,6 +429,8 @@ namespace HelloWorld.Interface
         public GreeterWithObserverRef(IRequestTarget target, IRequestWaiter requestWaiter, TimeSpan? timeout = null) : base(target, requestWaiter, timeout)
         {
         }
+
+        public override Type InterfaceType => typeof(IGreeterWithObserver);
 
         public IGreeterWithObserver_NoReply WithNoReply()
         {

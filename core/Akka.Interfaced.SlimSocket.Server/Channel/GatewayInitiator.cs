@@ -20,7 +20,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         public TcpConnectionSettings ConnectionSettings { get; set; }
         public IPacketSerializer PacketSerializer { get; set; }
         public object UdpConfig { get; set; }
-        public Func<IActorContext, object, Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType>[]> CreateInitialActors { get; set; }
+        public Func<IActorContext, object, Tuple<IActorRef, TaggedType[], ActorBindingFlags>[]> CreateInitialActors { get; set; }
 
         public GatewayInitiator()
         {

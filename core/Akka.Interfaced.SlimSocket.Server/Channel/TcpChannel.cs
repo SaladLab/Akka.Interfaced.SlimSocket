@@ -30,7 +30,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             _connection = new TcpConnection(_logger) { Settings = initiator.ConnectionSettings };
         }
 
-        public TcpChannel(GatewayInitiator initiator, TcpConnection connection, Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> bindingActor)
+        public TcpChannel(GatewayInitiator initiator, TcpConnection connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor)
         {
             // open by registerd token.
             _initiator = initiator;

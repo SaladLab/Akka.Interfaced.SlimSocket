@@ -22,7 +22,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         {
         }
 
-        public UdpChannel(GatewayInitiator initiator, object connection, Tuple<IActorRef, TaggedType[], ChannelClosedNotificationType> bindingActor = null)
+        public UdpChannel(GatewayInitiator initiator, object connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor = null)
         {
             var netConnection = (NetConnection)connection;
             _initiator = initiator;
