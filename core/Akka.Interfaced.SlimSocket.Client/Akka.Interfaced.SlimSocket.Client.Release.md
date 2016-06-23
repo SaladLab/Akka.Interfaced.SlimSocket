@@ -1,3 +1,7 @@
+## 0.4.1 (Released 2016/06/23)
+
+* Fix missing nuget dependency to LidgrenUdpNet.
+
 ## 0.4.0 (Released 2016/06/23)
 
 * Sync with Akka.Interfaced 0.4.1
