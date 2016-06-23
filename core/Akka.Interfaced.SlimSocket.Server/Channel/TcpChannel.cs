@@ -53,7 +53,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             if (_initiator.CreateInitialActors != null)
             {
-                var actors = _initiator.CreateInitialActors(Context, _socket);
+                var actors = _initiator.CreateInitialActors(Context, _connection);
                 if (actors != null)
                 {
                     foreach (var actor in actors)
