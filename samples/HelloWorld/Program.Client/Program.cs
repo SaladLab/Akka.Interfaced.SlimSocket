@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Net;
+using System.Threading.Tasks;
 using Akka.Interfaced.SlimSocket;
 using Akka.Interfaced.SlimSocket.Client;
-using Common.Logging;
 using HelloWorld.Interface;
-using TypeAlias;
 
 namespace HelloWorld.Program.Client
 {

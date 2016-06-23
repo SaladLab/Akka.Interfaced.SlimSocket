@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Net;
-using System.Threading;
 using Akka.Interfaced.SlimSocket;
 using Akka.Interfaced.SlimSocket.Client;
-using Common.Logging;
 using HelloWorld.Interface;
 
 namespace HelloWorld.Program.Client
@@ -34,6 +32,7 @@ namespace HelloWorld.Program.Client
 
             greeter.Unsubscribe(observer);
             channel.RemoveObserver(observer);
+            channel.Close();
         }
 
         void IGreetObserver.Event(string message)
