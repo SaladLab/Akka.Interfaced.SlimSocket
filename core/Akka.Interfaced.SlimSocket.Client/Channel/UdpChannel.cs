@@ -137,9 +137,6 @@ namespace Akka.Interfaced.SlimSocket.Client
                         case NetIncomingMessageType.StatusChanged:
                             var status = (NetConnectionStatus)msg.ReadByte();
                             var reason = msg.ReadString();
-#if DEBUG
-                            Console.WriteLine($"StatusChanged: Status={status} Reason={reason}");
-#endif
                             if (status == NetConnectionStatus.Connected)
                             {
                                 OnConnect();

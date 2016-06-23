@@ -21,6 +21,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         private NetServer _server;
         private Thread _serverThread;
         private readonly ConcurrentDictionary<NetConnection, IActorRef> _channelMap = new ConcurrentDictionary<NetConnection, IActorRef>();
+        private readonly HashSet<IActorRef> _channelSet = new HashSet<IActorRef>();
         private bool _isStopped;
 
         internal class WaitingItem
@@ -116,7 +117,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             _logger?.Info("Stop listening.");
             _isStopped = true;
 
-            // stop listening
+            // stop listening and all running channels
 
             if (_server != null)
             {
@@ -124,13 +125,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 _server = null;
             }
 
-            // stop all running client sessions
-
-            if (_channelMap.Count > 0)
-            {
-                Context.ActorSelection("*").Tell(PoisonPill.Instance);
-            }
-            else
+            if (_channelSet.Count == 0)
             {
                 Context.Stop(Self);
             }
@@ -188,6 +183,9 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
 
             _logger?.TraceFormat("Accept a connection. (EndPoint={0})", m.SenderEndPoint);
+
+            Context.Watch(channel);
+            _channelSet.Add(channel);
         }
 
         [ResponsiveExceptionAll]
@@ -243,12 +241,21 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
+        [MessageHandler]
+        private void Handle(Terminated m)
+        {
+            _channelSet.Remove(m.ActorRef);
+
+            if (_isStopped && _channelSet.Count == 0)
+                Context.Stop(Self);
+        }
+
         private void ServerThreadWork()
         {
             // capture _server member to avoid race condition.
             var server = _server;
 
-            while (_isStopped == false)
+            while (_isStopped == false || _channelMap.Count > 0)
             {
                 NetIncomingMessage msg;
                 while ((msg = server.WaitMessage(100)) != null)
@@ -261,16 +268,13 @@ namespace Akka.Interfaced.SlimSocket.Server
 
                         case NetIncomingMessageType.StatusChanged:
                             var status = (NetConnectionStatus)msg.ReadByte();
-#if DEBUG
-                            Console.WriteLine($"StatusChanged: Status={status}");
-#endif
                             switch (status)
                             {
                                 case NetConnectionStatus.Disconnected:
                                     IActorRef disconnectedChannel;
                                     if (_channelMap.TryRemove(msg.SenderConnection, out disconnectedChannel))
                                     {
-                                        disconnectedChannel.Tell(new UdpChannel.CloseMessage());
+                                        disconnectedChannel.Tell(new UdpChannel.ClosedMessage());
                                     }
                                     else
                                     {

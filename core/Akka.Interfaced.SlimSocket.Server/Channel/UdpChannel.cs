@@ -18,8 +18,9 @@ namespace Akka.Interfaced.SlimSocket.Server
         private NetConnection _connection;
         private IPacketSerializer _packetSerializer;
 
-        internal class CloseMessage
+        internal class ClosedMessage
         {
+            public static ClosedMessage Instance = new ClosedMessage();
         }
 
         public UdpChannel(GatewayInitiator initiator, object connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor = null)
@@ -109,7 +110,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         }
 
         [MessageHandler]
-        private void Handle(CloseMessage m)
+        private void Handle(ClosedMessage m)
         {
             Close();
         }

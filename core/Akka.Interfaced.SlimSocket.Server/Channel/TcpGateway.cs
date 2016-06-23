@@ -116,7 +116,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             if (_channelSet.Count > 0)
             {
-                Context.ActorSelection("*").Tell(PoisonPill.Instance);
+                Context.ActorSelection("*").Tell(TcpChannel.CloseMessage.Instance);
             }
             else
             {

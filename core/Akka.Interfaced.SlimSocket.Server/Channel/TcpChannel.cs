@@ -19,6 +19,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         internal class CloseMessage
         {
+            public static CloseMessage Instance = new CloseMessage();
         }
 
         public TcpChannel(GatewayInitiator initiator, Socket socket)
@@ -104,9 +105,6 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         protected override void OnNotificationMessage(NotificationMessage message)
         {
-            if (_connection == null)
-                return;
-
             _connection.Send(new Packet
             {
                 Type = PacketType.Notification,
@@ -118,9 +116,6 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         protected override void OnResponseMessage(ResponseMessage message)
         {
-            if (_connection == null)
-                return;
-
             var actorId = GetBoundActorId(Sender);
             if (actorId != 0)
             {
@@ -142,13 +137,13 @@ namespace Akka.Interfaced.SlimSocket.Server
         [MessageHandler]
         private void Handle(CloseMessage m)
         {
-            Close();
+             _connection.Close();
         }
 
         // BEWARE: Called by Network Thread
         private void OnConnectionClose(TcpConnection connection, int reason)
         {
-            _self.Tell(new CloseMessage());
+            RunTask(() => Close(), _self);
         }
 
         // BEWARE: Called by Network Thread

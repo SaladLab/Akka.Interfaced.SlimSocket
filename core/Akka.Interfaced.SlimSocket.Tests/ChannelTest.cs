@@ -2,36 +2,38 @@
 using System.Threading.Tasks;
 using System.Net;
 using Akka.Actor;
+using Akka.Interfaced.SlimServer;
 using Xunit;
 using Xunit.Abstractions;
-using Akka.Interfaced.SlimServer;
 
 namespace Akka.Interfaced.SlimSocket
 {
-    public class ChannelTest : IDisposable
+    public class ChannelTest : TestKit.Xunit2.TestKit
     {
         private static readonly IPEndPoint s_lastTestEndPoint = new IPEndPoint(IPAddress.Loopback, 5060);
 
         private readonly XunitOutputLogger.Source _outputSource;
-        private readonly ActorSystem _system;
         private readonly IPEndPoint _testEndPoint;
         private readonly EntryActorEnvironment _environment;
 
         public ChannelTest(ITestOutputHelper output)
+            : base(output: output)
         {
             _outputSource = new XunitOutputLogger.Source { Output = output, Lock = new object(), Active = true };
-            _system = ActorSystem.Create("Test");
             _testEndPoint = s_lastTestEndPoint;
             s_lastTestEndPoint.Port += 2;
             _environment = new EntryActorEnvironment();
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _system.Terminate().Wait();
+            if (disposing)
+            {
+                lock (_outputSource.Lock)
+                    _outputSource.Active = false;
+            }
 
-            lock (_outputSource.Lock)
-                _outputSource.Active = false;
+            base.Dispose(disposing);
         }
 
         [Theory]
@@ -184,9 +186,33 @@ namespace Akka.Interfaced.SlimSocket
             Assert.NotNull(exception);
         }
 
+        [Theory]
+        [InlineData(ChannelType.Tcp, 0)]
+        [InlineData(ChannelType.Tcp, 2)]
+        [InlineData(ChannelType.Udp, 0)]
+        [InlineData(ChannelType.Udp, 2)]
+        public async Task GatewayStop_AllChannelClosed_ThenStop(ChannelType type, int clientCount)
+        {
+            // Arrange
+            var gateway = CreatePrimaryGateway(type);
+            for (int i = 0; i < clientCount; i++)
+            {
+                var clientChannel = await CreatePrimaryClientChannelAsync(type);
+                var entry = clientChannel.CreateRef<EntryRef>();
+                Assert.Equal("Test:" + i, await entry.Echo("Test:" + i));
+            }
+
+            // Act
+            await gateway.Stop();
+
+            // Assert
+            Watch(gateway.CastToIActorRef());
+            ExpectTerminated(gateway.CastToIActorRef());
+        }
+
         private Server.GatewayRef CreatePrimaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
         {
-            return ChannelHelper.CreateGateway(_system, type, "1", _testEndPoint, _outputSource, initiator =>
+            return ChannelHelper.CreateGateway(Sys, type, "1", _testEndPoint, _outputSource, initiator =>
             {
                 initiator.GatewayInitialized = a => { _environment.Gateway = a.Cast<ActorBoundGatewayRef>(); };
                 initiator.CreateInitialActors = (IActorContext context, object socket) => new[]
@@ -203,7 +229,7 @@ namespace Akka.Interfaced.SlimSocket
 
         private Server.GatewayRef CreateSecondaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
         {
-            return ChannelHelper.CreateGateway(_system, type, "2", new IPEndPoint(_testEndPoint.Address, _testEndPoint.Port + 1), _outputSource, initiator =>
+            return ChannelHelper.CreateGateway(Sys, type, "2", new IPEndPoint(_testEndPoint.Address, _testEndPoint.Port + 1), _outputSource, initiator =>
             {
                 initiator.TokenRequired = true;
                 initiator.GatewayInitialized = a => { _environment.Gateway2nd = a.Cast<ActorBoundGatewayRef>(); };
