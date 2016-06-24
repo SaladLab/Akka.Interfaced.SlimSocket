@@ -1,3 +1,10 @@
+## 0.4.2 (Released 2016/06/24)
+
+* Sync with Akka.Interfaced.SlimServer 0.4.2
+* Fix wrong `connnection` passing in TcpChannel.
+* Add Close to Tcp, UdpChannel.
+* Add partial to Tcp, UdpGateway. 
+
 ## 0.4.1 (Released 2016/06/23)
 
 * Fix missing nuget dependency to LidgrenUdpNet.
