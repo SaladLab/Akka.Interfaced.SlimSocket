@@ -131,7 +131,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             if (_channelSet.Count == 0)
             {
-                Context.Stop(Self);
+                Self.Tell(InterfacedPoisonPill.Instance);
             }
         }
 
@@ -251,7 +251,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             _channelSet.Remove(m.ActorRef);
 
             if (_isStopped && _channelSet.Count == 0)
-                Context.Stop(Self);
+                Self.Tell(InterfacedPoisonPill.Instance);
         }
 
         private void ServerThreadWork()
