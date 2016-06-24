@@ -109,13 +109,17 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
-        void IGatewaySync.Stop()
+        void IGatewaySync.Stop(bool stopListenOnly)
         {
-            if (_isStopped)
-                return;
+            _logger?.Info($"Stop (StopListenOnly={stopListenOnly})");
 
-            _logger?.Info("Stop listening.");
             _isStopped = true;
+
+            if (stopListenOnly)
+            {
+                _server.Configuration.AcceptIncomingConnections = false;
+                return;
+            }
 
             // stop listening and all running channels
 
@@ -274,7 +278,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                                     IActorRef disconnectedChannel;
                                     if (_channelMap.TryRemove(msg.SenderConnection, out disconnectedChannel))
                                     {
-                                        disconnectedChannel.Tell(new UdpChannel.ClosedMessage());
+                                        disconnectedChannel.Tell(UdpChannel.DisconnectedMessage.Instance);
                                     }
                                     else
                                     {

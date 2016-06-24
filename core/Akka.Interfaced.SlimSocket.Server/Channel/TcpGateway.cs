@@ -82,7 +82,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         void IGatewaySync.Start()
         {
-            _logger?.InfoFormat("Start Listening. (EndPoint={0})", _initiator.ListenEndPoint);
+            _logger?.InfoFormat("Start (EndPoint={0})", _initiator.ListenEndPoint);
 
             try
             {
@@ -96,15 +96,13 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
-        void IGatewaySync.Stop()
+        void IGatewaySync.Stop(bool stopListenOnly)
         {
-            if (_isStopped)
-                return;
-
-            _logger?.Info("Stop listening.");
-            _isStopped = true;
+            _logger?.Info($"Stop (StopListenOnly={stopListenOnly})");
 
             // stop listening
+
+            _isStopped = true;
 
             if (_tcpAcceptor != null)
             {
@@ -112,11 +110,17 @@ namespace Akka.Interfaced.SlimSocket.Server
                 _tcpAcceptor = null;
             }
 
+            if (stopListenOnly)
+                return;
+
             // stop all running channels
+
+            _isStopped = true;
 
             if (_channelSet.Count > 0)
             {
-                Context.ActorSelection("*").Tell(TcpChannel.CloseMessage.Instance);
+                foreach (var channel in _channelSet)
+                    channel.Cast<ActorBoundChannelRef>().WithNoReply().Close();
             }
             else
             {

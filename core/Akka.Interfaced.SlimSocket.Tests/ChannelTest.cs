@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Net;
+using System.Net.Sockets;
 using Akka.Actor;
 using Akka.Interfaced.SlimServer;
 using Xunit;
@@ -187,6 +188,26 @@ namespace Akka.Interfaced.SlimSocket
         }
 
         [Theory]
+        [InlineData(ChannelType.Tcp)]
+        [InlineData(ChannelType.Udp)]
+        public async Task CloseChannel_ChannelClosed(ChannelType type)
+        {
+            // Arrange
+            var gateway = CreatePrimaryGateway(type);
+            var clientChannel = await CreatePrimaryClientChannelAsync(type);
+            var entry = clientChannel.CreateRef<EntryRef>();
+            Assert.Equal("Test", await entry.Echo("Test"));
+            var serverChannel = (await ActorSelection(gateway.CastToIActorRef().Path + "/*").ResolveOne(TimeSpan.FromSeconds(1))).Cast<ActorBoundChannelRef>();
+
+            // Act
+            await serverChannel.Close();
+
+            // Assert
+            Watch(serverChannel.CastToIActorRef());
+            ExpectTerminated(serverChannel.CastToIActorRef());
+        }
+
+        [Theory]
         [InlineData(ChannelType.Tcp, 0)]
         [InlineData(ChannelType.Tcp, 2)]
         [InlineData(ChannelType.Udp, 0)]
@@ -208,6 +229,30 @@ namespace Akka.Interfaced.SlimSocket
             // Assert
             Watch(gateway.CastToIActorRef());
             ExpectTerminated(gateway.CastToIActorRef());
+        }
+
+        [Theory]
+        [InlineData(ChannelType.Tcp)]
+        [InlineData(ChannelType.Udp)]
+        public async Task GatewayStopListen_StopListeningAndKeepActiveConnections(ChannelType type)
+        {
+            // Arrange
+            var gateway = CreatePrimaryGateway(type);
+            var clientChannel = await CreatePrimaryClientChannelAsync(type);
+            var entry = clientChannel.CreateRef<EntryRef>();
+            Assert.Equal("Test", await entry.Echo("Test"));
+            var serverChannel = (await ActorSelection(gateway.CastToIActorRef().Path + "/*").ResolveOne(TimeSpan.FromSeconds(1))).Cast<ActorBoundChannelRef>();
+
+            // Act & Assert (Stop listening and further channels cannot be established)
+            await gateway.Stop(true);
+            var exception = await Record.ExceptionAsync(() => CreatePrimaryClientChannelAsync(type));
+            Assert.NotNull(exception);
+            Assert.Equal("Test2", await entry.Echo("Test2"));
+
+            // Act & Assert (Stop all and all channels are closed)
+            await gateway.Stop();
+            Watch(serverChannel.CastToIActorRef());
+            ExpectTerminated(serverChannel.CastToIActorRef());
         }
 
         private Server.GatewayRef CreatePrimaryGateway(ChannelType type, Action<Server.GatewayInitiator> initiatorSetup = null)
@@ -258,5 +303,8 @@ namespace Akka.Interfaced.SlimSocket
                 await channel.ConnectAsync();
             return channel;
         }
+
+        // Close method 확인
+        // Stop(listenonly) 확인
     }
 }
