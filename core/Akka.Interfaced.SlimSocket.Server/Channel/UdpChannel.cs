@@ -18,9 +18,9 @@ namespace Akka.Interfaced.SlimSocket.Server
         private NetConnection _connection;
         private IPacketSerializer _packetSerializer;
 
-        internal class ClosedMessage
+        internal class DisconnectedMessage
         {
-            public static ClosedMessage Instance = new ClosedMessage();
+            public static DisconnectedMessage Instance = new DisconnectedMessage();
         }
 
         public UdpChannel(GatewayInitiator initiator, object connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor = null)
@@ -109,8 +109,13 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
+        protected override void OnCloseRequest()
+        {
+            _connection.Disconnect("Close");
+        }
+
         [MessageHandler]
-        private void Handle(ClosedMessage m)
+        private void Handle(DisconnectedMessage m)
         {
             Close();
         }

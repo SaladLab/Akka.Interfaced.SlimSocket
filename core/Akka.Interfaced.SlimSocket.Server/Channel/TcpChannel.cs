@@ -17,11 +17,6 @@ namespace Akka.Interfaced.SlimSocket.Server
         private Socket _socket;
         private TcpConnection _connection;
 
-        internal class CloseMessage
-        {
-            public static CloseMessage Instance = new CloseMessage();
-        }
-
         public TcpChannel(GatewayInitiator initiator, Socket socket)
         {
             // open by client connection.
@@ -134,10 +129,9 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
         }
 
-        [MessageHandler]
-        private void Handle(CloseMessage m)
+        protected override void OnCloseRequest()
         {
-             _connection.Close();
+            _connection.Close();
         }
 
         // BEWARE: Called by Network Thread
