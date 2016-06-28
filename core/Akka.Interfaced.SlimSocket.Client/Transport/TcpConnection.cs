@@ -83,6 +83,13 @@ namespace Akka.Interfaced.SlimSocket.Client
                 _remoteEndPoint = _client.Client.RemoteEndPoint;
                 _logger?.TraceFormat("Connected {0} with {1}", _remoteEndPoint, _localEndPoint);
             }
+            catch (SocketException e)
+            {
+                _state = TcpState.Closed;
+                _logger?.TraceFormat("Connect Failed {0} with {1}", e, _remoteEndPoint, e.SocketErrorCode);
+                Closed?.Invoke(this, (int)e.SocketErrorCode);
+                return;
+            }
             catch (Exception e)
             {
                 _state = TcpState.Closed;
@@ -103,7 +110,7 @@ namespace Akka.Interfaced.SlimSocket.Client
                 Connected(this);
         }
 
-        public void Close()
+        public void Close(int reason = 0)
         {
             _logger?.TraceFormat("Closed From {0}", _remoteEndPoint);
 
@@ -114,7 +121,7 @@ namespace Akka.Interfaced.SlimSocket.Client
                 _state = TcpState.Closed;
 
                 if (Closed != null)
-                    Closed(this, 0);
+                    Closed(this, reason);
             }
         }
 
@@ -215,6 +222,12 @@ namespace Akka.Interfaced.SlimSocket.Client
             {
                 _client.GetStream().EndWrite(ar);
             }
+            catch (SocketException e)
+            {
+                _logger?.Info("ProcessSendCallback Exception", e);
+                Close((int)e.SocketErrorCode);
+                return;
+            }
             catch (Exception e)
             {
                 _logger?.Info("ProcessSendCallback Exception", e);
@@ -233,6 +246,11 @@ namespace Akka.Interfaced.SlimSocket.Client
                 _client.GetStream().BeginRead(
                     _recvBuf, _recvBufLen, _recvBuf.Length - _recvBufLen,
                     ProcessRecvCallback, null);
+            }
+            catch (SocketException e)
+            {
+                _logger?.Info("ProcessRecv Exception", e);
+                Close((int)e.SocketErrorCode);
             }
             catch (Exception e)
             {
@@ -253,6 +271,12 @@ namespace Akka.Interfaced.SlimSocket.Client
                     return;
                 }
                 _recvBufLen += readed;
+            }
+            catch (SocketException e)
+            {
+                _logger?.Info("ProcessRecvCallback Exception", e);
+                Close((int)e.SocketErrorCode);
+                return;
             }
             catch (Exception e)
             {
