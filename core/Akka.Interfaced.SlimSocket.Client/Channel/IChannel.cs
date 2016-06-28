@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Akka.Interfaced.SlimSocket.Client
 {
     public interface IChannel : IRequestWaiter
     {
         ChannelStateType State { get; }
+
+        event Action<IChannel, ChannelStateType> StateChanged;
 
         Task<bool> ConnectAsync();
 

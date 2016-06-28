@@ -22,7 +22,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         public ISlimTaskFactory TaskFactory { get; set; }
         public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
 
-        public event Action<ChannelBase, ChannelStateType> StateChanged;
+        public event Action<IChannel, ChannelStateType> StateChanged;
 
         protected volatile ChannelStateType _state;
         protected readonly ILog _logger;
