@@ -64,6 +64,7 @@
     <Compile Include="ExceptionSerializer.cs" />
     <Compile Include="IMessageSerializer.cs" />
     <Compile Include="IPacketSerializer.cs" />
+    <Compile Include="IPEndPointHelper.cs" />
     <Compile Include="Packet.cs" />
     <Compile Include="PacketSerializerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

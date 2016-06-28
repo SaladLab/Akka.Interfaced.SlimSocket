@@ -71,6 +71,9 @@
     <Compile Include="..\Akka.Interfaced.SlimSocket.Base\IPacketSerializer.cs">
       <Link>IPacketSerializer.cs</Link>
     </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Base\IPEndPointHelper.cs">
+      <Link>IPEndPointHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Akka.Interfaced.SlimSocket.Base\Packet.cs">
       <Link>Packet.cs</Link>
     </Compile>
