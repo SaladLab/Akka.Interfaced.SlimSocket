@@ -156,8 +156,8 @@ namespace Akka.Interfaced.SlimSocket
             var entry = clientChannel.CreateRef<EntryRef>();
 
             // Act
-            var token = await entry.GetGreeterOnAnotherChannel();
-            var clientChannel2nd = await CreateSecondaryClientChannelAsync(type, token);
+            var address = await entry.GetGreeterOnAnotherChannel();
+            var clientChannel2nd = await CreateSecondaryClientChannelAsync(address);
             var greeter = clientChannel2nd.CreateRef<GreeterRef>();
             var reply = await greeter.Greet("World");
             var count = await greeter.GetCount();
@@ -179,9 +179,9 @@ namespace Akka.Interfaced.SlimSocket
             var entry = clientChannel.CreateRef<EntryRef>();
 
             // Act
-            var token = await entry.GetGreeterOnAnotherChannel();
+            var address = await entry.GetGreeterOnAnotherChannel();
             await Task.Delay(TimeSpan.FromSeconds(1));
-            var exception = await Record.ExceptionAsync(() => CreateSecondaryClientChannelAsync(type, token));
+            var exception = await Record.ExceptionAsync(() => CreateSecondaryClientChannelAsync(address));
 
             // Assert
             Assert.NotNull(exception);
@@ -291,12 +291,13 @@ namespace Akka.Interfaced.SlimSocket
             return channel;
         }
 
-        private async Task<Client.IChannel> CreateSecondaryClientChannelAsync(ChannelType type, string address, bool connected = true)
+        private async Task<Client.IChannel> CreateSecondaryClientChannelAsync(string address, bool connected = true)
         {
-            var parts = address.Split('|'); // address|port|token
+            var parts = address.Split('|'); // type|endpoint|token
             if (parts.Length < 3)
                 throw new ArgumentException(nameof(address));
-            var endPoint = new IPEndPoint(IPAddress.Parse(parts[0]), int.Parse(parts[1]));
+            var type = (ChannelType)Enum.Parse(typeof(ChannelType), parts[0], true);
+            var endPoint = IPEndPointHelper.Parse(parts[1]);
             var token = parts[2];
             var channel = ChannelHelper.CreateClientChannel(type, "2", endPoint, token, _outputSource);
             if (connected)

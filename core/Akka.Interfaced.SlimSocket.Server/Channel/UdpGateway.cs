@@ -228,8 +228,8 @@ namespace Akka.Interfaced.SlimSocket.Server
                 }
             }
 
-            var address = string.Join("|", _initiator.ConnectEndPoint.Address.ToString(),
-                                           _initiator.ConnectEndPoint.Port.ToString(),
+            var address = string.Join("|", ChannelType.Udp.ToString(),
+                                           _initiator.ConnectEndPoint.ToString(),
                                            token);
             return address;
         }
