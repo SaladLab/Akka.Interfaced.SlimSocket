@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Net;
 using Common.Logging;
 using Lidgren.Network;
@@ -37,12 +36,12 @@ namespace Akka.Interfaced.SlimSocket.Client
 
             if (string.IsNullOrEmpty(address) == false)
             {
-                var parts = address.Split('|'); // type|endpoint|token
-                if (parts.Length < 3)
+                var parts = address.Split('|'); // type|endpoint|{token}
+                if (parts.Length < 2)
                     throw new ArgumentException(nameof(address));
                 type = (ChannelType)Enum.Parse(typeof(ChannelType), parts[0], true);
                 connectEndPoint = IPEndPointHelper.Parse(parts[1]);
-                connectToken = parts[2];
+                connectToken = parts.Length > 2 ? parts[2] : null;
             }
 
             switch (type)

@@ -34,14 +34,14 @@ public class MainScene : MonoBehaviour, IGreetObserver
 
         // Create channel and connect to gateway
 
-        var channelFactory = ChannelFactoryBuilder.Build<InterfaceProtobufSerializer>(
-            endPoint: new IPEndPoint(IPAddress.Loopback, 5001),
-            createChannelLogger: () => LogManager.GetLogger("Channel"));
-        channelFactory.Type = channelType;
-        channelFactory.ChannelRouter = (_, address) => null;
-        var channel = channelFactory.Create();
+        var communicator = UnityCommunicatorFactory.Create();
+        communicator.ChannelFactory.Type = channelType;
+        communicator.ChannelFactory.ConnectEndPoint = new IPEndPoint(IPAddress.Loopback, 5001);
+        communicator.ChannelFactory.CreateChannelLogger = () => LogManager.GetLogger("Channel");
+        communicator.ChannelFactory.PacketSerializer = PacketSerializer.CreatePacketSerializer<InterfaceProtobufSerializer>();
+        communicator.CreateChannel();
 
-        var t0 = channel.ConnectAsync();
+        var t0 = communicator.Channel.ConnectAsync();
         yield return t0.WaitHandle;
         if (t0.Exception != null)
         {
@@ -51,14 +51,14 @@ public class MainScene : MonoBehaviour, IGreetObserver
 
         // Start communicating with actors via channel
 
-        var entry = channel.CreateRef<EntryRef>();
+        var entry = communicator.Channel.CreateRef<EntryRef>();
 
         WriteLine("Start ProcessTest");
         WriteLine("");
 
         var t1 = entry.GetGreeter();
         yield return t1.WaitHandle;
-        yield return StartCoroutine(ProcessGreeter(channel, t1.Result));
+        yield return StartCoroutine(ProcessGreeter(communicator.Channel, t1.Result));
 
         var t2 = entry.GetCalculator();
         yield return t2.WaitHandle;
@@ -76,7 +76,7 @@ public class MainScene : MonoBehaviour, IGreetObserver
         yield return t5.WaitHandle;
         yield return StartCoroutine(ProcessGreeterOnAnotherChannel(t5.Result));
 
-        channel.Close();
+        communicator.Channel.Close();
 
         WriteLine("Done!");
     }
@@ -192,11 +192,23 @@ public class MainScene : MonoBehaviour, IGreetObserver
 
         // Connect to secondary gateway
 
+        var actorRef = (InterfacedActorRef)greeter;
+        if (actorRef.IsChannelConnected() == false)
+        {
+            yield return actorRef.ConnectChannelAsync().WaitHandle;
+        }
+
+        var channel = (IChannel)actorRef.RequestWaiter;
+        yield return ProcessGreeter(channel, greeter);
+
+        /*
         var target = (BoundActorTarget)(((InterfacedActorRef)greeter).Target);
         var channelFactory = ChannelFactoryBuilder.Build<InterfaceProtobufSerializer>(
             createChannelLogger: () => LogManager.GetLogger("Channel2"));
         var channel = channelFactory.Create(target.Address);
+        */
 
+        /*
         var t0 = channel.ConnectAsync();
         yield return t0.WaitHandle;
         if (t0.Exception != null)
@@ -204,11 +216,12 @@ public class MainScene : MonoBehaviour, IGreetObserver
             WriteLine("Connection Failed: " + t0.Exception.Message);
             yield break;
         }
+        */
 
         // Test Greeter
 
-        var newGreeter = channel.CreateRef<GreeterWithObserverRef>(target.Id);
-        yield return ProcessGreeter(channel, newGreeter);
+        //var newGreeter = channel.CreateRef<GreeterWithObserverRef>(target.Id);
+        //yield return ProcessGreeter(channel, newGreeter);
 
         // Disconnect to secondary gateway
 
