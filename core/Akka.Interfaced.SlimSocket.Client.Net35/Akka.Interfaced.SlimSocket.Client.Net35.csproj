@@ -77,8 +77,14 @@
     <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Channel\IChannel.cs">
       <Link>Channel\IChannel.cs</Link>
     </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Channel\IObserverRegistry.cs">
+      <Link>Channel\IObserverRegistry.cs</Link>
+    </Compile>
     <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Channel\ObserverEventDispatcher.cs">
       <Link>Channel\ObserverEventDispatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Channel\ObserverRegistry.cs">
+      <Link>Channel\ObserverRegistry.cs</Link>
     </Compile>
     <Compile Include="..\Akka.Interfaced.SlimSocket.Client\Channel\TcpChannel.cs">
       <Link>Channel\TcpChannel.cs</Link>

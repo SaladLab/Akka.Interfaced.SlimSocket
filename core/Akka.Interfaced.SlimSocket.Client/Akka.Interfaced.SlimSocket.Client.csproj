@@ -74,6 +74,8 @@
     <Compile Include="Channel\ChannelBase.cs" />
     <Compile Include="Channel\ChannelFactory.cs" />
     <Compile Include="Channel\IChannel.cs" />
+    <Compile Include="Channel\IObserverRegistry.cs" />
+    <Compile Include="Channel\ObserverRegistry.cs" />
     <Compile Include="Channel\UdpChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Channel\TcpChannel.cs" />

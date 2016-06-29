@@ -20,7 +20,7 @@ namespace Akka.Interfaced.SlimSocket.Client
     {
         public ChannelStateType State => _state;
         public ISlimTaskFactory TaskFactory { get; set; }
-        public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
+        public IObserverRegistry ObserverRegistry { get; set; }
 
         public event Action<IChannel, ChannelStateType> StateChanged;
         public Func<IChannel, string, IChannel> ChannelRouter { get; set; }
@@ -38,11 +38,6 @@ namespace Akka.Interfaced.SlimSocket.Client
         private int _lastRequestId = 0;
         private readonly ConcurrentDictionary<int, ResponseWaitingItem> _responseWaitingItems =
             new ConcurrentDictionary<int, ResponseWaitingItem>();
-
-        private int _lastObserverId;
-        private readonly List<Packet> _recvSimplePackets = new List<Packet>();
-        private readonly ConcurrentDictionary<int, InterfacedObserver> _observerChannelMap =
-            new ConcurrentDictionary<int, InterfacedObserver>();
 
         public ChannelBase(ILog logger)
         {
@@ -82,42 +77,13 @@ namespace Akka.Interfaced.SlimSocket.Client
         public TObserver CreateObserver<TObserver>(TObserver observer, bool startPending = false)
             where TObserver : IInterfacedObserver
         {
-            var proxy = InterfacedObserver.Create(typeof(TObserver));
-            proxy.ObserverId = IssueObserverId();
-            proxy.Channel = new ObserverEventDispatcher(observer, startPending);
-            AddObserver(proxy.ObserverId, proxy);
-            return (TObserver)(object)proxy;
+            return ObserverRegistry.Create(observer, startPending);
         }
 
         public void RemoveObserver<TObserver>(TObserver observer)
              where TObserver : IInterfacedObserver
         {
-            var proxy = (InterfacedObserver)(object)observer;
-            RemoveObserver(proxy.ObserverId);
-        }
-
-        private int IssueObserverId()
-        {
-            return ++_lastObserverId;
-        }
-
-        private void AddObserver(int observerId, InterfacedObserver observer)
-        {
-            _observerChannelMap.TryAdd(observerId, observer);
-        }
-
-        private void RemoveObserver(int observerId)
-        {
-            InterfacedObserver observer;
-            _observerChannelMap.TryRemove(observerId, out observer);
-        }
-
-        private InterfacedObserver GetObserver(int observerId)
-        {
-            InterfacedObserver observer;
-            return _observerChannelMap.TryGetValue(observerId, out observer)
-                       ? observer
-                       : null;
+            ObserverRegistry.Remove(observer);
         }
 
         protected void OnPacket(Packet packet)
@@ -125,23 +91,11 @@ namespace Akka.Interfaced.SlimSocket.Client
             switch (packet.Type)
             {
                 case PacketType.Notification:
-                    var observer = GetObserver(packet.ActorId);
-                    if (observer == null)
+                    if (ObserverRegistry.OnNotificationPacket(packet) == false)
                     {
                         _logger?.WarnFormat("Notification didn't find observer. (ObserverId={0}, Message={1})",
                                             packet.ActorId, packet.Message.GetType().Name);
-                        break;
                     }
-                    var notificationMessage = new NotificationMessage
-                    {
-                        ObserverId = packet.ActorId,
-                        NotificationId = packet.RequestId,
-                        InvokePayload = (IInvokable)packet.Message
-                    };
-                    if (ObserverEventPoster != null)
-                        ObserverEventPoster(_ => observer.Channel.Notify(notificationMessage));
-                    else
-                        observer.Channel.Notify(notificationMessage);
                     break;
 
                 case PacketType.Response:

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using Akka.Actor;
+using Akka.Interfaced.SlimSocket.Client;
 using Lidgren.Network;
 
 namespace Akka.Interfaced.SlimSocket
@@ -55,6 +56,7 @@ namespace Akka.Interfaced.SlimSocket
             var factory = new Client.ChannelFactory
             {
                 CreateChannelLogger = () => logger,
+                CreateObserverRegistry = () => new ObserverRegistry(),
                 PacketSerializer = s_clientSerializer
             };
 

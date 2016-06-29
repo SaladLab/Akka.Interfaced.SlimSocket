@@ -13,7 +13,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         public string ConnectToken { get; set; }
         public Func<ILog> CreateChannelLogger { get; set; }
         public ISlimTaskFactory TaskFactory { get; set; }
-        public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
+        public Func<IObserverRegistry> CreateObserverRegistry { get; set; }
         public Func<IChannel, string, IChannel> ChannelRouter { get; set; }
         public IPacketSerializer PacketSerializer { get; set; }
         public object UdpConfig { get; set; }
@@ -65,7 +65,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         private void InitializeChannel(ChannelBase channel)
         {
             channel.TaskFactory = TaskFactory;
-            channel.ObserverEventPoster = ObserverEventPoster;
+            channel.ObserverRegistry = CreateObserverRegistry?.Invoke();
             channel.ChannelRouter = ChannelRouter;
         }
     }
