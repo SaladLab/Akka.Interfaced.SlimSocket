@@ -11,6 +11,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         public class SurrogateForIRequestTarget
         {
             [ProtoMember(1)] public int Id;
+            [ProtoMember(2)] public string Address;
 
             [ProtoConverter]
             public static SurrogateForIRequestTarget Convert(IRequestTarget value)
@@ -19,7 +20,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 if (value == null)
                     return null;
                 var target = ((BoundActorTarget)value);
-                return new SurrogateForIRequestTarget { Id = target.Id };
+                return new SurrogateForIRequestTarget { Id = target.Id, Address = target.Address };
             }
 
             [ProtoConverter]
@@ -29,7 +30,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 // but implemented to keep this class symmetrical.
                 if (value == null)
                     return null;
-                return new BoundActorTarget(value.Id);
+                return new BoundActorTarget(value.Id, value.Address);
             }
         }
 
