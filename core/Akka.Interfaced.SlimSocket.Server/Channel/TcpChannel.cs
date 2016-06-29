@@ -17,22 +17,24 @@ namespace Akka.Interfaced.SlimSocket.Server
         private Socket _socket;
         private TcpConnection _connection;
 
-        public TcpChannel(GatewayInitiator initiator, Socket socket)
+        public TcpChannel(GatewayInitiator initiator, Socket socket, object tag)
         {
             // open by client connection.
             _initiator = initiator;
             _logger = _initiator.CreateChannelLogger(socket.RemoteEndPoint, socket);
             _socket = socket;
             _connection = new TcpConnection(_logger) { Settings = initiator.ConnectionSettings };
+            _tag = tag;
         }
 
-        public TcpChannel(GatewayInitiator initiator, TcpConnection connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor)
+        public TcpChannel(GatewayInitiator initiator, TcpConnection connection, object tag, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor)
         {
             // open by registerd token.
             _initiator = initiator;
             _logger = initiator.CreateChannelLogger(connection.RemoteEndPoint, connection.Socket);
             _socket = connection.Socket;
             _connection = connection;
+            _tag = tag;
 
             BindActor(bindingActor.Item1, bindingActor.Item2.Select(t => new BoundType(t)), bindingActor.Item3);
         }

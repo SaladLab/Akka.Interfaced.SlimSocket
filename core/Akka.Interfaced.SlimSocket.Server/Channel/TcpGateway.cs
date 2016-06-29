@@ -19,6 +19,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         internal class WaitingItem
         {
+            public object Tag;
             public Tuple<IActorRef, TaggedType[], ActorBindingFlags> BindingActor;
             public DateTime Time;
         }
@@ -39,11 +40,13 @@ namespace Akka.Interfaced.SlimSocket.Server
         private class AcceptByTokenMessage
         {
             public TcpConnection Connection { get; }
+            public object Tag;
             public Tuple<IActorRef, TaggedType[], ActorBindingFlags> BindingActor { get; }
 
-            public AcceptByTokenMessage(TcpConnection connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor)
+            public AcceptByTokenMessage(TcpConnection connection, object tag, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor)
             {
                 Connection = connection;
+                Tag = tag;
                 BindingActor = bindingActor;
             }
         }
@@ -155,7 +158,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             }
             else
             {
-                var channel = Context.ActorOf(Props.Create(() => new TcpChannel(_initiator, m.Socket)));
+                var channel = Context.ActorOf(Props.Create(() => new TcpChannel(_initiator, m.Socket, null)));
                 if (channel == null)
                 {
                     _logger?.TraceFormat("Deny a connection. (EndPoint={0})", m.Socket.RemoteEndPoint);
@@ -184,7 +187,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 }
             }
 
-            var channel = Context.ActorOf(Props.Create(() => new TcpChannel(_initiator, m.Connection, m.BindingActor)));
+            var channel = Context.ActorOf(Props.Create(() => new TcpChannel(_initiator, m.Connection, m.Tag, m.BindingActor)));
             if (channel == null)
             {
                 _logger?.TraceFormat("Deny a connection. (EndPoint={0})", m.Connection.RemoteEndPoint);
@@ -198,7 +201,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         }
 
         [ResponsiveExceptionAll]
-        InterfacedActorRef IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, ActorBindingFlags bindingFlags)
+        InterfacedActorRef IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, object tag, ActorBindingFlags bindingFlags)
         {
             if (actor == null)
                 throw new ArgumentNullException(nameof(actor));
@@ -212,7 +215,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         }
 
         [ResponsiveExceptionAll]
-        BoundActorTarget IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, ActorBindingFlags bindingFlags)
+        BoundActorTarget IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, object tag, ActorBindingFlags bindingFlags)
         {
             if (actor == null)
                 throw new ArgumentNullException(nameof(actor));
@@ -232,6 +235,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                     {
                         _waitingMap.Add(token, new WaitingItem
                         {
+                            Tag = tag,
                             BindingActor = Tuple.Create(actor, types, bindingFlags),
                             Time = DateTime.UtcNow
                         });
@@ -259,7 +263,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 _waitingMap.Remove(token);
             }
 
-            _self.Tell(new AcceptByTokenMessage(connection, item.BindingActor), _self);
+            _self.Tell(new AcceptByTokenMessage(connection, item.Tag, item.BindingActor), _self);
             return true;
         }
 

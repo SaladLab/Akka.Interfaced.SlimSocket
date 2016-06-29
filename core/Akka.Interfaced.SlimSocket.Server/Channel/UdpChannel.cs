@@ -23,13 +23,14 @@ namespace Akka.Interfaced.SlimSocket.Server
             public static DisconnectedMessage Instance = new DisconnectedMessage();
         }
 
-        public UdpChannel(GatewayInitiator initiator, object connection, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor = null)
+        public UdpChannel(GatewayInitiator initiator, object connection, object tag, Tuple<IActorRef, TaggedType[], ActorBindingFlags> bindingActor)
         {
             var netConnection = (NetConnection)connection;
             _initiator = initiator;
             _logger = _initiator.CreateChannelLogger(netConnection.RemoteEndPoint, connection);
             _connection = netConnection;
             _packetSerializer = initiator.PacketSerializer;
+            _tag = tag;
 
             if (bindingActor != null)
                 BindActor(bindingActor.Item1, bindingActor.Item2.Select(t => new BoundType(t)), bindingActor.Item3);

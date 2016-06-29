@@ -26,6 +26,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         internal class WaitingItem
         {
+            public object Tag;
             public Tuple<IActorRef, TaggedType[], ActorBindingFlags> BindingActor;
             public DateTime Time;
         }
@@ -164,11 +165,11 @@ namespace Akka.Interfaced.SlimSocket.Server
                     _waitingMap.Remove(m.Token);
                 }
 
-                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, item.BindingActor)));
+                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, item.Tag, item.BindingActor)));
             }
             else
             {
-                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, null)));
+                channel = Context.ActorOf(Props.Create(() => new UdpChannel(_initiator, m.SenderConnection, null, null)));
             }
 
             if (channel == null)
@@ -193,7 +194,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         }
 
         [ResponsiveExceptionAll]
-        InterfacedActorRef IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, ActorBindingFlags bindingFlags)
+        InterfacedActorRef IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, object tag, ActorBindingFlags bindingFlags)
         {
             if (actor == null)
                 throw new ArgumentNullException(nameof(actor));
@@ -207,7 +208,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         }
 
         [ResponsiveExceptionAll]
-        BoundActorTarget IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, ActorBindingFlags bindingFlags)
+        BoundActorTarget IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, object tag, ActorBindingFlags bindingFlags)
         {
             if (_isStopped)
                 return null;
@@ -224,6 +225,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                     {
                         _waitingMap.Add(token, new WaitingItem
                         {
+                            Tag = tag,
                             BindingActor = Tuple.Create(actor, types, bindingFlags),
                             Time = DateTime.UtcNow
                         });
