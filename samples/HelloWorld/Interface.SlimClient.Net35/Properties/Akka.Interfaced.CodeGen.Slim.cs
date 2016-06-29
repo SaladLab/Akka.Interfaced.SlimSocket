@@ -22,19 +22,21 @@ namespace HelloWorld.Interface
     public class SurrogateForIRequestTarget
     {
         [ProtoMember(1)] public int Id;
+        [ProtoMember(2)] public string Address;
 
         [ProtoConverter]
         public static SurrogateForIRequestTarget Convert(IRequestTarget value)
         {
             if (value == null) return null;
-            return new SurrogateForIRequestTarget { Id = ((BoundActorTarget)value).Id };
+            var target = ((BoundActorTarget)value);
+            return new SurrogateForIRequestTarget { Id = target.Id, Address = target.Address };
         }
 
         [ProtoConverter]
         public static IRequestTarget Convert(SurrogateForIRequestTarget value)
         {
             if (value == null) return null;
-            return new BoundActorTarget(value.Id);
+            return new BoundActorTarget(value.Id, value.Address);
         }
     }
 }
