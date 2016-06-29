@@ -198,17 +198,21 @@ namespace Akka.Interfaced.SlimSocket.Server
         }
 
         [ResponsiveExceptionAll]
-        string IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, ActorBindingFlags bindingFlags)
+        InterfacedActorRef IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, ActorBindingFlags bindingFlags)
         {
             if (actor == null)
                 throw new ArgumentNullException(nameof(actor));
 
             var targetActor = ((AkkaActorTarget)actor.Target).Actor;
-            return ((IActorBoundGatewaySync)this).OpenChannel(targetActor, new TaggedType[] { actor.InterfaceType }, bindingFlags);
+            var target = ((IActorBoundGatewaySync)this).OpenChannel(targetActor, new TaggedType[] { actor.InterfaceType }, bindingFlags);
+
+            var actorRef = (InterfacedActorRef)Activator.CreateInstance(actor.GetType());
+            InterfacedActorRefModifier.SetTarget(actorRef, target);
+            return actorRef;
         }
 
         [ResponsiveExceptionAll]
-        string IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, ActorBindingFlags bindingFlags)
+        BoundActorTarget IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, ActorBindingFlags bindingFlags)
         {
             if (actor == null)
                 throw new ArgumentNullException(nameof(actor));
@@ -239,7 +243,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             var address = string.Join("|", ChannelType.Tcp.ToString(),
                                            _initiator.ConnectEndPoint.ToString(),
                                            token);
-            return address;
+            return new BoundActorTarget(1, address);
         }
 
         // Called by Another Worker Threads

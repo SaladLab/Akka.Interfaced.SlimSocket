@@ -125,9 +125,9 @@ namespace Akka.Interfaced.SlimSocket
 
         [ProtoContract, TypeAlias]
         public class GetGreeterOnAnotherChannel_Return
-            : IInterfacedPayload, IValueGetable
+            : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public Akka.Interfaced.SlimSocket.IGreeterWithObserver v;
 
             public Type GetInterfaceType()
             {
@@ -137,6 +137,14 @@ namespace Akka.Interfaced.SlimSocket
             public object Value
             {
                 get { return v; }
+            }
+
+            void IPayloadActorRefUpdatable.Update(Action<object> updater)
+            {
+                if (v != null)
+                {
+                    updater(v); 
+                }
             }
         }
     }
@@ -195,12 +203,12 @@ namespace Akka.Interfaced.SlimSocket
             return SendRequestAndReceive<Akka.Interfaced.SlimSocket.IGreeterWithObserver>(requestMessage);
         }
 
-        public Task<System.String> GetGreeterOnAnotherChannel()
+        public Task<Akka.Interfaced.SlimSocket.IGreeterWithObserver> GetGreeterOnAnotherChannel()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IEntry_PayloadTable.GetGreeterOnAnotherChannel_Invoke {  }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<Akka.Interfaced.SlimSocket.IGreeterWithObserver>(requestMessage);
         }
 
         void IEntry_NoReply.Echo(System.String message)
@@ -253,7 +261,7 @@ namespace Akka.Interfaced.SlimSocket
     {
         System.String Echo(System.String message);
         Akka.Interfaced.SlimSocket.IGreeterWithObserver GetGreeter();
-        System.String GetGreeterOnAnotherChannel();
+        Akka.Interfaced.SlimSocket.IGreeterWithObserver GetGreeterOnAnotherChannel();
     }
 }
 

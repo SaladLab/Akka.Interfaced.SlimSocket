@@ -7,6 +7,6 @@ namespace Akka.Interfaced.SlimSocket
     {
         Task<string> Echo(string message);
         Task<IGreeterWithObserver> GetGreeter();
-        Task<string> GetGreeterOnAnotherChannel();
+        Task<IGreeterWithObserver> GetGreeterOnAnotherChannel();
     }
 }

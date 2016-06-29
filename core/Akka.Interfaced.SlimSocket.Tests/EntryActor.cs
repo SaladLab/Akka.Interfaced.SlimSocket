@@ -39,11 +39,10 @@ namespace Akka.Interfaced.SlimSocket
         }
 
         [ResponsiveExceptionAll]
-        async Task<string> IEntry.GetGreeterOnAnotherChannel()
+        async Task<IGreeterWithObserver> IEntry.GetGreeterOnAnotherChannel()
         {
-            var actor = Context.ActorOf<GreetingActor>();
-            var address = await _environment.Gateway2nd.OpenChannel(actor, new TaggedType[] { typeof(IGreeterWithObserver) });
-            return address;
+            var actor = Context.InterfacedActorOf<GreetingActor>().Cast<GreeterWithObserverRef>();
+            return (await _environment.Gateway2nd.OpenChannel(actor)).Cast<GreeterWithObserverRef>();
         }
     }
 }

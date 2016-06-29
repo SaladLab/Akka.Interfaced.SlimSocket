@@ -38,6 +38,7 @@ public class MainScene : MonoBehaviour, IGreetObserver
             endPoint: new IPEndPoint(IPAddress.Loopback, 5001),
             createChannelLogger: () => LogManager.GetLogger("Channel"));
         channelFactory.Type = channelType;
+        channelFactory.ChannelRouter = (_, address) => null;
         var channel = channelFactory.Create();
 
         var t0 = channel.ConnectAsync();
@@ -73,7 +74,7 @@ public class MainScene : MonoBehaviour, IGreetObserver
 
         var t5 = entry.GetGreeterOnAnotherChannel();
         yield return t5.WaitHandle;
-        yield return StartCoroutine(ProcessGreeterOnAnotherChannel(channelType, t5.Result));
+        yield return StartCoroutine(ProcessGreeterOnAnotherChannel(t5.Result));
 
         channel.Close();
 
@@ -185,17 +186,16 @@ public class MainScene : MonoBehaviour, IGreetObserver
         WriteLine("");
     }
 
-    IEnumerator ProcessGreeterOnAnotherChannel(ChannelType channelType, string address)
+    IEnumerator ProcessGreeterOnAnotherChannel(IGreeterWithObserver greeter)
     {
         WriteLine("*** ProcessGreeterOnAnotherChannel ***");
 
         // Connect to secondary gateway
 
+        var target = (BoundActorTarget)(((InterfacedActorRef)greeter).Target);
         var channelFactory = ChannelFactoryBuilder.Build<InterfaceProtobufSerializer>(
             createChannelLogger: () => LogManager.GetLogger("Channel2"));
-        channelFactory.Type = channelType;
-        channelFactory.SetAddress(address);
-        var channel = channelFactory.Create();
+        var channel = channelFactory.Create(target.Address);
 
         var t0 = channel.ConnectAsync();
         yield return t0.WaitHandle;
@@ -207,8 +207,8 @@ public class MainScene : MonoBehaviour, IGreetObserver
 
         // Test Greeter
 
-        var greeter = channel.CreateRef<GreeterWithObserverRef>();
-        yield return ProcessGreeter(channel, greeter);
+        var newGreeter = channel.CreateRef<GreeterWithObserverRef>(target.Id);
+        yield return ProcessGreeter(channel, newGreeter);
 
         // Disconnect to secondary gateway
 

@@ -14,6 +14,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         public Func<ILog> CreateChannelLogger { get; set; }
         public ISlimTaskFactory TaskFactory { get; set; }
         public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
+        public Func<IChannel, string, IChannel> ChannelRouter { get; set; }
         public IPacketSerializer PacketSerializer { get; set; }
         public object UdpConfig { get; set; }
 
@@ -23,28 +24,36 @@ namespace Akka.Interfaced.SlimSocket.Client
             UdpConfig = new NetPeerConfiguration("SlimSocket");
         }
 
-        public void SetAddress(string address)
-        {
-            var parts = address.Split('|'); // type|endpoint|token
-            if (parts.Length < 3)
-                throw new ArgumentException(nameof(address));
-            Type = (ChannelType)Enum.Parse(typeof(ChannelType), parts[0], true);
-            ConnectEndPoint = IPEndPointHelper.Parse(parts[1]);
-                new IPEndPoint(IPAddress.Parse(parts[0]), int.Parse(parts[1]));
-            ConnectToken = parts[2];
-        }
-
         public IChannel Create()
         {
-            switch (Type)
+            return Create(null);
+        }
+
+        public IChannel Create(string address)
+        {
+            var type = Type;
+            var connectEndPoint = ConnectEndPoint;
+            var connectToken = ConnectToken;
+
+            if (string.IsNullOrEmpty(address) == false)
+            {
+                var parts = address.Split('|'); // type|endpoint|token
+                if (parts.Length < 3)
+                    throw new ArgumentException(nameof(address));
+                type = (ChannelType)Enum.Parse(typeof(ChannelType), parts[0], true);
+                connectEndPoint = IPEndPointHelper.Parse(parts[1]);
+                connectToken = parts[2];
+            }
+
+            switch (type)
             {
                 case ChannelType.Tcp:
-                    var tcpChannel = new TcpChannel(CreateChannelLogger(), ConnectEndPoint, ConnectToken, PacketSerializer);
+                    var tcpChannel = new TcpChannel(CreateChannelLogger(), connectEndPoint, connectToken, PacketSerializer);
                     InitializeChannel(tcpChannel);
                     return tcpChannel;
 
                 case ChannelType.Udp:
-                    var udpChannel = new UdpChannel(CreateChannelLogger(), ConnectEndPoint, ConnectToken, PacketSerializer, (NetPeerConfiguration)UdpConfig);
+                    var udpChannel = new UdpChannel(CreateChannelLogger(), connectEndPoint, connectToken, PacketSerializer, (NetPeerConfiguration)UdpConfig);
                     InitializeChannel(udpChannel);
                     return udpChannel;
 
@@ -57,6 +66,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         {
             channel.TaskFactory = TaskFactory;
             channel.ObserverEventPoster = ObserverEventPoster;
+            channel.ChannelRouter = ChannelRouter;
         }
     }
 }

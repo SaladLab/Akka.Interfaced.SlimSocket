@@ -23,6 +23,7 @@ namespace Akka.Interfaced.SlimSocket.Client
         public Action<SendOrPostCallback> ObserverEventPoster { get; set; }
 
         public event Action<IChannel, ChannelStateType> StateChanged;
+        public Func<IChannel, string, IChannel> ChannelRouter { get; set; }
 
         protected volatile ChannelStateType _state;
         protected readonly ILog _logger;
@@ -151,7 +152,28 @@ namespace Akka.Interfaced.SlimSocket.Client
                         if (actorRefUpdatable != null)
                         {
                             actorRefUpdatable.Update(a =>
-                            InterfacedActorRefModifier.SetRequestWaiter((InterfacedActorRef)a, this));
+                            {
+                                var actorRef = (InterfacedActorRef)a;
+                                var target = (BoundActorTarget)actorRef.Target;
+                                if (string.IsNullOrEmpty(target.Address))
+                                {
+                                    // use this channel
+                                    InterfacedActorRefModifier.SetRequestWaiter(actorRef, this);
+                                }
+                                else
+                                {
+                                    // routed and use channel with specified address
+                                    if (ChannelRouter != null)
+                                    {
+                                        var channel = ChannelRouter(this, target.Address);
+                                        if (channel != null)
+                                        {
+                                            InterfacedActorRefModifier.SetTarget(actorRef, new BoundActorTarget(target.Id));
+                                            InterfacedActorRefModifier.SetRequestWaiter(actorRef, channel);
+                                        }
+                                    }
+                                }
+                            });
                         }
 
                         waitingItem.ResponseHandler(waitingItem.TaskCompletionSource, new ResponseMessage

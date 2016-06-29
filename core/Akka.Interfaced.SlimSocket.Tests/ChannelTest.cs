@@ -156,9 +156,7 @@ namespace Akka.Interfaced.SlimSocket
             var entry = clientChannel.CreateRef<EntryRef>();
 
             // Act
-            var address = await entry.GetGreeterOnAnotherChannel();
-            var clientChannel2nd = await CreateSecondaryClientChannelAsync(address);
-            var greeter = clientChannel2nd.CreateRef<GreeterRef>();
+            var greeter = await entry.GetGreeterOnAnotherChannel();
             var reply = await greeter.Greet("World");
             var count = await greeter.GetCount();
 
@@ -177,11 +175,13 @@ namespace Akka.Interfaced.SlimSocket
             var gateway2nd = CreateSecondaryGateway(type, i => { i.TokenTimeout = TimeSpan.FromSeconds(0.1); });
             var clientChannel = await CreatePrimaryClientChannelAsync(type);
             var entry = clientChannel.CreateRef<EntryRef>();
+            clientChannel.ChannelRouter = null;
 
             // Act
-            var address = await entry.GetGreeterOnAnotherChannel();
+            var greeter = await entry.GetGreeterOnAnotherChannel();
             await Task.Delay(TimeSpan.FromSeconds(1));
-            var exception = await Record.ExceptionAsync(() => CreateSecondaryClientChannelAsync(address));
+            var greeterTarget = (BoundActorTarget)(((GreeterWithObserverRef)greeter).Target);
+            var exception = await Record.ExceptionAsync(() => CreateSecondaryClientChannelAsync(greeterTarget.Address));
 
             // Assert
             Assert.NotNull(exception);
@@ -285,23 +285,33 @@ namespace Akka.Interfaced.SlimSocket
 
         private async Task<Client.IChannel> CreatePrimaryClientChannelAsync(ChannelType type, bool connected = true)
         {
-            var channel = ChannelHelper.CreateClientChannel(type, "1", _testEndPoint, null, _outputSource);
+            var channel = ChannelHelper.CreateClientChannel("1", type, _testEndPoint, _outputSource);
+
+            channel.ChannelRouter = (_, address) =>
+            {
+                try
+                {
+                    return CreateSecondaryClientChannelAsync(address, true).Result;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            };
+
             if (connected)
                 await channel.ConnectAsync();
+
             return channel;
         }
 
         private async Task<Client.IChannel> CreateSecondaryClientChannelAsync(string address, bool connected = true)
         {
-            var parts = address.Split('|'); // type|endpoint|token
-            if (parts.Length < 3)
-                throw new ArgumentException(nameof(address));
-            var type = (ChannelType)Enum.Parse(typeof(ChannelType), parts[0], true);
-            var endPoint = IPEndPointHelper.Parse(parts[1]);
-            var token = parts[2];
-            var channel = ChannelHelper.CreateClientChannel(type, "2", endPoint, token, _outputSource);
+            var channel = ChannelHelper.CreateClientChannel("2", address, _outputSource);
+
             if (connected)
                 await channel.ConnectAsync();
+
             return channel;
         }
 

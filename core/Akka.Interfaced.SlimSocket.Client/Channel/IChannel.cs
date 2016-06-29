@@ -9,6 +9,8 @@ namespace Akka.Interfaced.SlimSocket.Client
 
         event Action<IChannel, ChannelStateType> StateChanged;
 
+        Func<IChannel, string, IChannel> ChannelRouter { get; set; }
+
         Task<bool> ConnectAsync();
 
         void Close();

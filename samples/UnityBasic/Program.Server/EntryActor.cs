@@ -31,10 +31,10 @@ namespace UnityBasic.Program.Server
             return (await _channel.BindActor(greeter)).Cast<GreeterWithObserverRef>();
         }
 
-        async Task<string> IEntry.GetGreeterOnAnotherChannel()
+        async Task<IGreeterWithObserver> IEntry.GetGreeterOnAnotherChannel()
         {
             var greeter = Context.InterfacedActorOf<GreetingActor>().Cast<GreeterWithObserverRef>();
-            return await _environment.Gateway2nd.OpenChannel(greeter);
+            return (await _environment.Gateway2nd.OpenChannel(greeter)).Cast<GreeterWithObserverRef>();
         }
 
         async Task<ICalculator> IEntry.GetCalculator()

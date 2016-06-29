@@ -581,9 +581,9 @@ namespace UnityBasic.Interface
 
         [ProtoContract, TypeAlias]
         public class GetGreeterOnAnotherChannel_Return
-            : IInterfacedPayload, IValueGetable
+            : IInterfacedPayload, IValueGetable, IPayloadActorRefUpdatable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public UnityBasic.Interface.IGreeterWithObserver v;
 
             public Type GetInterfaceType()
             {
@@ -593,6 +593,14 @@ namespace UnityBasic.Interface
             public object Value
             {
                 get { return v; }
+            }
+
+            void IPayloadActorRefUpdatable.Update(Action<object> updater)
+            {
+                if (v != null)
+                {
+                    updater(v); 
+                }
             }
         }
 
@@ -702,12 +710,12 @@ namespace UnityBasic.Interface
             return SendRequestAndReceive<UnityBasic.Interface.IGreeterWithObserver>(requestMessage);
         }
 
-        public Task<System.String> GetGreeterOnAnotherChannel()
+        public Task<UnityBasic.Interface.IGreeterWithObserver> GetGreeterOnAnotherChannel()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IEntry_PayloadTable.GetGreeterOnAnotherChannel_Invoke {  }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<UnityBasic.Interface.IGreeterWithObserver>(requestMessage);
         }
 
         public Task<UnityBasic.Interface.IPedantic> GetPedantic()
@@ -785,7 +793,7 @@ namespace UnityBasic.Interface
         UnityBasic.Interface.ICalculator GetCalculator();
         UnityBasic.Interface.ICounter GetCounter();
         UnityBasic.Interface.IGreeterWithObserver GetGreeter();
-        System.String GetGreeterOnAnotherChannel();
+        UnityBasic.Interface.IGreeterWithObserver GetGreeterOnAnotherChannel();
         UnityBasic.Interface.IPedantic GetPedantic();
     }
 }

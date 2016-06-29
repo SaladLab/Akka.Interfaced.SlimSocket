@@ -40,8 +40,13 @@ namespace Akka.Interfaced.SlimSocket
             return gateway;
         }
 
-        public static Client.IChannel CreateClientChannel(ChannelType type, string name, IPEndPoint endPoint, string token,
+        public static Client.IChannel CreateClientChannel(string name, ChannelType type, IPEndPoint endPoint,
                                                           XunitOutputLogger.Source outputSource)
+        {
+            return CreateClientChannel(name, $"{type}|{endPoint}|", outputSource);
+        }
+
+        public static Client.IChannel CreateClientChannel(string name, string address, XunitOutputLogger.Source outputSource)
         {
             // create channel and start it
 
@@ -49,9 +54,6 @@ namespace Akka.Interfaced.SlimSocket
 
             var factory = new Client.ChannelFactory
             {
-                Type = type,
-                ConnectEndPoint = endPoint,
-                ConnectToken = token,
                 CreateChannelLogger = () => logger,
                 PacketSerializer = s_clientSerializer
             };
@@ -59,7 +61,7 @@ namespace Akka.Interfaced.SlimSocket
             var udpConfig = ((NetPeerConfiguration)factory.UdpConfig);
             udpConfig.MaximumHandshakeAttempts = 1; // to fail faster
 
-            return factory.Create();
+            return factory.Create(address);
         }
     }
 }
