@@ -14,6 +14,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         private ILog _logger;
 
         private bool _isDisposed;
+        private bool _isOpen;
         private Socket _socket;
         private IPEndPoint _localEndPoint;
         private IPEndPoint _remoteEndPoint;
@@ -37,6 +38,11 @@ namespace Akka.Interfaced.SlimSocket.Server
         private int _sendCount;
         private ConcurrentQueue<object> _sendQueue;
         private bool _isSendShutdown;
+
+        public bool IsOpen
+        {
+            get { return _isOpen; }
+        }
 
         public bool Active
         {
@@ -81,9 +87,14 @@ namespace Akka.Interfaced.SlimSocket.Server
         public event Action<TcpConnection, object> Received;
         public event Action<TcpConnection, SerializeError> SerializeErrored;
 
-        public TcpConnection(ILog logger)
+        public TcpConnection(ILog logger, Socket socket)
         {
             _logger = logger;
+
+            socket.LingerState = new LingerOption(true, 0);
+            _socket = socket;
+            _localEndPoint = (IPEndPoint)_socket.LocalEndPoint;
+            _remoteEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
         }
 
         ~TcpConnection()
@@ -91,24 +102,20 @@ namespace Akka.Interfaced.SlimSocket.Server
             Dispose(false);
         }
 
-        public void Open(Socket socket)
+        public void Open()
         {
-            if (socket == null)
-                throw new ArgumentException("socket");
-
             if (_isDisposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
-            if (_socket != null)
-                throw new InvalidOperationException("Already opened");
+            if (_isOpen)
+                throw new InvalidOperationException("Already Opened");
 
             if (Settings == null)
                 throw new InvalidOperationException("Settings");
 
-            socket.LingerState = new LingerOption(true, 0);
-            _socket = socket;
-
             ProcessOpen();
+
+            _isOpen = true;
 
             // 수신 시작
 
@@ -169,9 +176,6 @@ namespace Akka.Interfaced.SlimSocket.Server
 
         private void ProcessOpen()
         {
-            _localEndPoint = (IPEndPoint)_socket.LocalEndPoint;
-            _remoteEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
-
             // Initialize IO Buffers
 
             _receiveBuffer = new byte[Settings.ReceiveBufferSize];

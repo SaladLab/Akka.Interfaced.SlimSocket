@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using Akka.Actor;
 using Common.Logging;
@@ -23,7 +24,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             _gateway = gateway;
             _logger = initiator.CreateChannelLogger(socket.RemoteEndPoint, socket);
             _socket = socket;
-            _connection = new TcpConnection(_logger) { Settings = initiator.ConnectionSettings };
+            _connection = new TcpConnection(_logger, socket) { Settings = initiator.ConnectionSettings };
         }
 
         protected override void PreStart()
@@ -35,7 +36,7 @@ namespace Akka.Interfaced.SlimSocket.Server
 
             _connection.Closed += OnConnectionClose;
             _connection.Received += OnConnectionReceive;
-            _connection.Open(_socket);
+            _connection.Open();
 
             if (_initiator.TokenTimeout != TimeSpan.Zero)
             {
