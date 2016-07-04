@@ -35,7 +35,7 @@ namespace Akka.Interfaced.SlimSocket
         public class Echo_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.String message;
+            [ProtoMember(1)] public string message;
 
             public Type GetInterfaceType()
             {
@@ -53,7 +53,7 @@ namespace Akka.Interfaced.SlimSocket
         public class Echo_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public string v;
 
             public Type GetInterfaceType()
             {
@@ -151,7 +151,7 @@ namespace Akka.Interfaced.SlimSocket
 
     public interface IEntry_NoReply
     {
-        void Echo(System.String message);
+        void Echo(string message);
         void GetGreeter();
         void GetGreeterOnAnotherChannel();
     }
@@ -187,12 +187,12 @@ namespace Akka.Interfaced.SlimSocket
             return new EntryRef(Target, RequestWaiter, timeout);
         }
 
-        public Task<System.String> Echo(System.String message)
+        public Task<string> Echo(string message)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IEntry_PayloadTable.Echo_Invoke { message = message }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
         public Task<Akka.Interfaced.SlimSocket.IGreeterWithObserver> GetGreeter()
@@ -211,7 +211,7 @@ namespace Akka.Interfaced.SlimSocket
             return SendRequestAndReceive<Akka.Interfaced.SlimSocket.IGreeterWithObserver>(requestMessage);
         }
 
-        void IEntry_NoReply.Echo(System.String message)
+        void IEntry_NoReply.Echo(string message)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IEntry_PayloadTable.Echo_Invoke { message = message }
@@ -259,7 +259,7 @@ namespace Akka.Interfaced.SlimSocket
     [AlternativeInterface(typeof(IEntry))]
     public interface IEntrySync : IInterfacedActorSync
     {
-        System.String Echo(System.String message);
+        string Echo(string message);
         Akka.Interfaced.SlimSocket.IGreeterWithObserver GetGreeter();
         Akka.Interfaced.SlimSocket.IGreeterWithObserver GetGreeterOnAnotherChannel();
     }
@@ -301,7 +301,7 @@ namespace Akka.Interfaced.SlimSocket
         public class GetCount_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Int32 v;
+            [ProtoMember(1)] public int v;
 
             public Type GetInterfaceType()
             {
@@ -318,7 +318,7 @@ namespace Akka.Interfaced.SlimSocket
         public class Greet_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.String name;
+            [ProtoMember(1)] public string name;
 
             public Type GetInterfaceType()
             {
@@ -336,7 +336,7 @@ namespace Akka.Interfaced.SlimSocket
         public class Greet_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public string v;
 
             public Type GetInterfaceType()
             {
@@ -353,7 +353,7 @@ namespace Akka.Interfaced.SlimSocket
     public interface IGreeter_NoReply
     {
         void GetCount();
-        void Greet(System.String name);
+        void Greet(string name);
     }
 
     public class GreeterRef : InterfacedActorRef, IGreeter, IGreeter_NoReply
@@ -387,20 +387,20 @@ namespace Akka.Interfaced.SlimSocket
             return new GreeterRef(Target, RequestWaiter, timeout);
         }
 
-        public Task<System.Int32> GetCount()
+        public Task<int> GetCount()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task<System.String> Greet(System.String name)
+        public Task<string> Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
         void IGreeter_NoReply.GetCount()
@@ -411,7 +411,7 @@ namespace Akka.Interfaced.SlimSocket
             SendRequest(requestMessage);
         }
 
-        void IGreeter_NoReply.Greet(System.String name)
+        void IGreeter_NoReply.Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
@@ -443,8 +443,8 @@ namespace Akka.Interfaced.SlimSocket
     [AlternativeInterface(typeof(IGreeter))]
     public interface IGreeterSync : IInterfacedActorSync
     {
-        System.Int32 GetCount();
-        System.String Greet(System.String name);
+        int GetCount();
+        string Greet(string name);
     }
 }
 
@@ -570,20 +570,20 @@ namespace Akka.Interfaced.SlimSocket
             return SendRequestAndWait(requestMessage);
         }
 
-        public Task<System.Int32> GetCount()
+        public Task<int> GetCount()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task<System.String> Greet(System.String name)
+        public Task<string> Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
         void IGreeterWithObserver_NoReply.Subscribe(Akka.Interfaced.SlimSocket.IGreetObserver observer)
@@ -610,7 +610,7 @@ namespace Akka.Interfaced.SlimSocket
             SendRequest(requestMessage);
         }
 
-        void IGreeter_NoReply.Greet(System.String name)
+        void IGreeter_NoReply.Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
@@ -665,7 +665,7 @@ namespace Akka.Interfaced.SlimSocket
         [ProtoContract, TypeAlias]
         public class Event_Invoke : IInterfacedPayload, IInvokable
         {
-            [ProtoMember(1)] public System.String message;
+            [ProtoMember(1)] public string message;
 
             public Type GetInterfaceType()
             {
@@ -691,7 +691,7 @@ namespace Akka.Interfaced.SlimSocket
         {
         }
 
-        public void Event(System.String message)
+        public void Event(string message)
         {
             var payload = new IGreetObserver_PayloadTable.Event_Invoke { message = message };
             Notify(payload);
@@ -723,7 +723,7 @@ namespace Akka.Interfaced.SlimSocket
     [AlternativeInterface(typeof(IGreetObserver))]
     public interface IGreetObserverAsync : IInterfacedObserverSync
     {
-        Task Event(System.String message);
+        Task Event(string message);
     }
 }
 

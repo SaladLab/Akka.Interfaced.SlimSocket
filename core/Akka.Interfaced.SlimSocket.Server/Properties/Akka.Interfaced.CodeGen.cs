@@ -45,7 +45,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         public class Stop_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            public System.Boolean stopListenOnly;
+            public bool stopListenOnly;
 
             public Type GetInterfaceType()
             {
@@ -63,7 +63,7 @@ namespace Akka.Interfaced.SlimSocket.Server
     public interface IGateway_NoReply
     {
         void Start();
-        void Stop(System.Boolean stopListenOnly = false);
+        void Stop(bool stopListenOnly = false);
     }
 
     public class GatewayRef : InterfacedActorRef, IGateway, IGateway_NoReply
@@ -105,7 +105,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             return SendRequestAndWait(requestMessage);
         }
 
-        public Task Stop(System.Boolean stopListenOnly = false)
+        public Task Stop(bool stopListenOnly = false)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGateway_PayloadTable.Stop_Invoke { stopListenOnly = stopListenOnly }
@@ -121,7 +121,7 @@ namespace Akka.Interfaced.SlimSocket.Server
             SendRequest(requestMessage);
         }
 
-        void IGateway_NoReply.Stop(System.Boolean stopListenOnly)
+        void IGateway_NoReply.Stop(bool stopListenOnly)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGateway_PayloadTable.Stop_Invoke { stopListenOnly = stopListenOnly }
@@ -134,7 +134,7 @@ namespace Akka.Interfaced.SlimSocket.Server
     public interface IGatewaySync : IInterfacedActorSync
     {
         void Start();
-        void Stop(System.Boolean stopListenOnly = false);
+        void Stop(bool stopListenOnly = false);
     }
 }
 

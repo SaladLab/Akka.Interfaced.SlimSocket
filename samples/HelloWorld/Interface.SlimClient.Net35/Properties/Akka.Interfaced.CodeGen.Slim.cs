@@ -206,7 +206,7 @@ namespace HelloWorld.Interface
         public class GetCount_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Int32 v;
+            [ProtoMember(1)] public int v;
 
             public Type GetInterfaceType()
             {
@@ -223,7 +223,7 @@ namespace HelloWorld.Interface
         public class Greet_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.String name;
+            [ProtoMember(1)] public string name;
 
             public Type GetInterfaceType()
             {
@@ -240,7 +240,7 @@ namespace HelloWorld.Interface
         public class Greet_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public string v;
 
             public Type GetInterfaceType()
             {
@@ -257,7 +257,7 @@ namespace HelloWorld.Interface
     public interface IGreeter_NoReply
     {
         void GetCount();
-        void Greet(System.String name);
+        void Greet(string name);
     }
 
     public class GreeterRef : InterfacedActorRef, IGreeter, IGreeter_NoReply
@@ -291,20 +291,20 @@ namespace HelloWorld.Interface
             return new GreeterRef(Target, RequestWaiter, timeout);
         }
 
-        public Task<System.Int32> GetCount()
+        public Task<int> GetCount()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task<System.String> Greet(System.String name)
+        public Task<string> Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
         void IGreeter_NoReply.GetCount()
@@ -315,7 +315,7 @@ namespace HelloWorld.Interface
             SendRequest(requestMessage);
         }
 
-        void IGreeter_NoReply.Greet(System.String name)
+        void IGreeter_NoReply.Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
@@ -465,20 +465,20 @@ namespace HelloWorld.Interface
             return SendRequestAndWait(requestMessage);
         }
 
-        public Task<System.Int32> GetCount()
+        public Task<int> GetCount()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task<System.String> Greet(System.String name)
+        public Task<string> Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
         void IGreeterWithObserver_NoReply.Subscribe(HelloWorld.Interface.IGreetObserver observer)
@@ -505,7 +505,7 @@ namespace HelloWorld.Interface
             SendRequest(requestMessage);
         }
 
-        void IGreeter_NoReply.Greet(System.String name)
+        void IGreeter_NoReply.Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
@@ -576,7 +576,7 @@ namespace HelloWorld.Interface
         [ProtoContract, TypeAlias]
         public class Event_Invoke : IInterfacedPayload, IInvokable
         {
-            [ProtoMember(1)] public System.String message;
+            [ProtoMember(1)] public string message;
 
             public Type GetInterfaceType()
             {
@@ -602,7 +602,7 @@ namespace HelloWorld.Interface
         {
         }
 
-        public void Event(System.String message)
+        public void Event(string message)
         {
             var payload = new IGreetObserver_PayloadTable.Event_Invoke { message = message };
             Notify(payload);

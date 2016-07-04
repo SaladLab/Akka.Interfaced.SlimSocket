@@ -35,8 +35,8 @@ namespace UnityBasic.Interface
         public class Concat_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.String a;
-            [ProtoMember(2)] public System.String b;
+            [ProtoMember(1)] public string a;
+            [ProtoMember(2)] public string b;
 
             public Type GetInterfaceType()
             {
@@ -54,7 +54,7 @@ namespace UnityBasic.Interface
         public class Concat_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public string v;
 
             public Type GetInterfaceType()
             {
@@ -71,8 +71,8 @@ namespace UnityBasic.Interface
         public class Sum_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.Int32 a;
-            [ProtoMember(2)] public System.Int32 b;
+            [ProtoMember(1)] public int a;
+            [ProtoMember(2)] public int b;
 
             public Type GetInterfaceType()
             {
@@ -90,7 +90,7 @@ namespace UnityBasic.Interface
         public class Sum_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Int32 v;
+            [ProtoMember(1)] public int v;
 
             public Type GetInterfaceType()
             {
@@ -107,7 +107,7 @@ namespace UnityBasic.Interface
         public class Sum_2_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.Tuple<System.Int32, System.Int32> v;
+            [ProtoMember(1)] public System.Tuple<int, int> v;
 
             public Type GetInterfaceType()
             {
@@ -125,7 +125,7 @@ namespace UnityBasic.Interface
         public class Sum_2_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Int32 v;
+            [ProtoMember(1)] public int v;
 
             public Type GetInterfaceType()
             {
@@ -141,9 +141,9 @@ namespace UnityBasic.Interface
 
     public interface ICalculator_NoReply
     {
-        void Concat(System.String a, System.String b);
-        void Sum(System.Int32 a, System.Int32 b);
-        void Sum(System.Tuple<System.Int32, System.Int32> v);
+        void Concat(string a, string b);
+        void Sum(int a, int b);
+        void Sum(System.Tuple<int, int> v);
     }
 
     public class CalculatorRef : InterfacedActorRef, ICalculator, ICalculator_NoReply
@@ -177,31 +177,31 @@ namespace UnityBasic.Interface
             return new CalculatorRef(Target, RequestWaiter, timeout);
         }
 
-        public Task<System.String> Concat(System.String a, System.String b)
+        public Task<string> Concat(string a, string b)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICalculator_PayloadTable.Concat_Invoke { a = a, b = b }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
-        public Task<System.Int32> Sum(System.Int32 a, System.Int32 b)
+        public Task<int> Sum(int a, int b)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICalculator_PayloadTable.Sum_Invoke { a = a, b = b }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task<System.Int32> Sum(System.Tuple<System.Int32, System.Int32> v)
+        public Task<int> Sum(System.Tuple<int, int> v)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICalculator_PayloadTable.Sum_2_Invoke { v = v }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        void ICalculator_NoReply.Concat(System.String a, System.String b)
+        void ICalculator_NoReply.Concat(string a, string b)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICalculator_PayloadTable.Concat_Invoke { a = a, b = b }
@@ -209,7 +209,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void ICalculator_NoReply.Sum(System.Int32 a, System.Int32 b)
+        void ICalculator_NoReply.Sum(int a, int b)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICalculator_PayloadTable.Sum_Invoke { a = a, b = b }
@@ -217,7 +217,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void ICalculator_NoReply.Sum(System.Tuple<System.Int32, System.Int32> v)
+        void ICalculator_NoReply.Sum(System.Tuple<int, int> v)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICalculator_PayloadTable.Sum_2_Invoke { v = v }
@@ -249,9 +249,9 @@ namespace UnityBasic.Interface
     [AlternativeInterface(typeof(ICalculator))]
     public interface ICalculatorSync : IInterfacedActorSync
     {
-        System.String Concat(System.String a, System.String b);
-        System.Int32 Sum(System.Int32 a, System.Int32 b);
-        System.Int32 Sum(System.Tuple<System.Int32, System.Int32> v);
+        string Concat(string a, string b);
+        int Sum(int a, int b);
+        int Sum(System.Tuple<int, int> v);
     }
 }
 
@@ -291,7 +291,7 @@ namespace UnityBasic.Interface
         public class GetCounter_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Int32 v;
+            [ProtoMember(1)] public int v;
 
             public Type GetInterfaceType()
             {
@@ -308,7 +308,7 @@ namespace UnityBasic.Interface
         public class IncCounter_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.Int32 delta;
+            [ProtoMember(1)] public int delta;
 
             public Type GetInterfaceType()
             {
@@ -326,7 +326,7 @@ namespace UnityBasic.Interface
     public interface ICounter_NoReply
     {
         void GetCounter();
-        void IncCounter(System.Int32 delta);
+        void IncCounter(int delta);
     }
 
     public class CounterRef : InterfacedActorRef, ICounter, ICounter_NoReply
@@ -360,15 +360,15 @@ namespace UnityBasic.Interface
             return new CounterRef(Target, RequestWaiter, timeout);
         }
 
-        public Task<System.Int32> GetCounter()
+        public Task<int> GetCounter()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICounter_PayloadTable.GetCounter_Invoke {  }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task IncCounter(System.Int32 delta)
+        public Task IncCounter(int delta)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICounter_PayloadTable.IncCounter_Invoke { delta = delta }
@@ -384,7 +384,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void ICounter_NoReply.IncCounter(System.Int32 delta)
+        void ICounter_NoReply.IncCounter(int delta)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new ICounter_PayloadTable.IncCounter_Invoke { delta = delta }
@@ -416,8 +416,8 @@ namespace UnityBasic.Interface
     [AlternativeInterface(typeof(ICounter))]
     public interface ICounterSync : IInterfacedActorSync
     {
-        System.Int32 GetCounter();
-        void IncCounter(System.Int32 delta);
+        int GetCounter();
+        void IncCounter(int delta);
     }
 }
 
@@ -834,7 +834,7 @@ namespace UnityBasic.Interface
         public class GetCount_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Int32 v;
+            [ProtoMember(1)] public int v;
 
             public Type GetInterfaceType()
             {
@@ -851,7 +851,7 @@ namespace UnityBasic.Interface
         public class Greet_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.String name;
+            [ProtoMember(1)] public string name;
 
             public Type GetInterfaceType()
             {
@@ -869,7 +869,7 @@ namespace UnityBasic.Interface
         public class Greet_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public string v;
 
             public Type GetInterfaceType()
             {
@@ -886,7 +886,7 @@ namespace UnityBasic.Interface
     public interface IGreeter_NoReply
     {
         void GetCount();
-        void Greet(System.String name);
+        void Greet(string name);
     }
 
     public class GreeterRef : InterfacedActorRef, IGreeter, IGreeter_NoReply
@@ -920,20 +920,20 @@ namespace UnityBasic.Interface
             return new GreeterRef(Target, RequestWaiter, timeout);
         }
 
-        public Task<System.Int32> GetCount()
+        public Task<int> GetCount()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task<System.String> Greet(System.String name)
+        public Task<string> Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
         void IGreeter_NoReply.GetCount()
@@ -944,7 +944,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void IGreeter_NoReply.Greet(System.String name)
+        void IGreeter_NoReply.Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
@@ -976,8 +976,8 @@ namespace UnityBasic.Interface
     [AlternativeInterface(typeof(IGreeter))]
     public interface IGreeterSync : IInterfacedActorSync
     {
-        System.Int32 GetCount();
-        System.String Greet(System.String name);
+        int GetCount();
+        string Greet(string name);
     }
 }
 
@@ -1103,20 +1103,20 @@ namespace UnityBasic.Interface
             return SendRequestAndWait(requestMessage);
         }
 
-        public Task<System.Int32> GetCount()
+        public Task<int> GetCount()
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.GetCount_Invoke {  }
             };
-            return SendRequestAndReceive<System.Int32>(requestMessage);
+            return SendRequestAndReceive<int>(requestMessage);
         }
 
-        public Task<System.String> Greet(System.String name)
+        public Task<string> Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
         void IGreeterWithObserver_NoReply.Subscribe(UnityBasic.Interface.IGreetObserver observer)
@@ -1143,7 +1143,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void IGreeter_NoReply.Greet(System.String name)
+        void IGreeter_NoReply.Greet(string name)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IGreeter_PayloadTable.Greet_Invoke { name = name }
@@ -1220,7 +1220,7 @@ namespace UnityBasic.Interface
         public class TestOptional_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.Nullable<System.Int32> value;
+            [ProtoMember(1)] public System.Nullable<int> value;
 
             public Type GetInterfaceType()
             {
@@ -1238,7 +1238,7 @@ namespace UnityBasic.Interface
         public class TestOptional_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Nullable<System.Int32> v;
+            [ProtoMember(1)] public System.Nullable<int> v;
 
             public Type GetInterfaceType()
             {
@@ -1308,7 +1308,7 @@ namespace UnityBasic.Interface
         public class TestPassClass_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.String v;
+            [ProtoMember(1)] public string v;
 
             public Type GetInterfaceType()
             {
@@ -1325,8 +1325,8 @@ namespace UnityBasic.Interface
         public class TestReturnClass_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.Int32 value;
-            [ProtoMember(2)] public System.Int32 offset;
+            [ProtoMember(1)] public int value;
+            [ProtoMember(2)] public int offset;
 
             public Type GetInterfaceType()
             {
@@ -1361,7 +1361,7 @@ namespace UnityBasic.Interface
         public class TestTuple_Invoke
             : IInterfacedPayload, IAsyncInvokable
         {
-            [ProtoMember(1)] public System.Tuple<System.Int32, System.String> value;
+            [ProtoMember(1)] public System.Tuple<int, string> value;
 
             public Type GetInterfaceType()
             {
@@ -1379,7 +1379,7 @@ namespace UnityBasic.Interface
         public class TestTuple_Return
             : IInterfacedPayload, IValueGetable
         {
-            [ProtoMember(1)] public System.Tuple<System.Int32, System.String> v;
+            [ProtoMember(1)] public System.Tuple<int, string> v;
 
             public Type GetInterfaceType()
             {
@@ -1396,11 +1396,11 @@ namespace UnityBasic.Interface
     public interface IPedantic_NoReply
     {
         void TestCall();
-        void TestOptional(System.Nullable<System.Int32> value);
+        void TestOptional(System.Nullable<int> value);
         void TestParams(params System.Int32[] values);
         void TestPassClass(UnityBasic.Interface.TestParam param);
-        void TestReturnClass(System.Int32 value, System.Int32 offset);
-        void TestTuple(System.Tuple<System.Int32, System.String> value);
+        void TestReturnClass(int value, int offset);
+        void TestTuple(System.Tuple<int, string> value);
     }
 
     public class PedanticRef : InterfacedActorRef, IPedantic, IPedantic_NoReply
@@ -1442,12 +1442,12 @@ namespace UnityBasic.Interface
             return SendRequestAndWait(requestMessage);
         }
 
-        public Task<System.Nullable<System.Int32>> TestOptional(System.Nullable<System.Int32> value)
+        public Task<System.Nullable<int>> TestOptional(System.Nullable<int> value)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IPedantic_PayloadTable.TestOptional_Invoke { value = value }
             };
-            return SendRequestAndReceive<System.Nullable<System.Int32>>(requestMessage);
+            return SendRequestAndReceive<System.Nullable<int>>(requestMessage);
         }
 
         public Task<System.Int32[]> TestParams(params System.Int32[] values)
@@ -1458,15 +1458,15 @@ namespace UnityBasic.Interface
             return SendRequestAndReceive<System.Int32[]>(requestMessage);
         }
 
-        public Task<System.String> TestPassClass(UnityBasic.Interface.TestParam param)
+        public Task<string> TestPassClass(UnityBasic.Interface.TestParam param)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IPedantic_PayloadTable.TestPassClass_Invoke { param = param }
             };
-            return SendRequestAndReceive<System.String>(requestMessage);
+            return SendRequestAndReceive<string>(requestMessage);
         }
 
-        public Task<UnityBasic.Interface.TestResult> TestReturnClass(System.Int32 value, System.Int32 offset)
+        public Task<UnityBasic.Interface.TestResult> TestReturnClass(int value, int offset)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IPedantic_PayloadTable.TestReturnClass_Invoke { value = value, offset = offset }
@@ -1474,12 +1474,12 @@ namespace UnityBasic.Interface
             return SendRequestAndReceive<UnityBasic.Interface.TestResult>(requestMessage);
         }
 
-        public Task<System.Tuple<System.Int32, System.String>> TestTuple(System.Tuple<System.Int32, System.String> value)
+        public Task<System.Tuple<int, string>> TestTuple(System.Tuple<int, string> value)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IPedantic_PayloadTable.TestTuple_Invoke { value = value }
             };
-            return SendRequestAndReceive<System.Tuple<System.Int32, System.String>>(requestMessage);
+            return SendRequestAndReceive<System.Tuple<int, string>>(requestMessage);
         }
 
         void IPedantic_NoReply.TestCall()
@@ -1490,7 +1490,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void IPedantic_NoReply.TestOptional(System.Nullable<System.Int32> value)
+        void IPedantic_NoReply.TestOptional(System.Nullable<int> value)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IPedantic_PayloadTable.TestOptional_Invoke { value = value }
@@ -1514,7 +1514,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void IPedantic_NoReply.TestReturnClass(System.Int32 value, System.Int32 offset)
+        void IPedantic_NoReply.TestReturnClass(int value, int offset)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IPedantic_PayloadTable.TestReturnClass_Invoke { value = value, offset = offset }
@@ -1522,7 +1522,7 @@ namespace UnityBasic.Interface
             SendRequest(requestMessage);
         }
 
-        void IPedantic_NoReply.TestTuple(System.Tuple<System.Int32, System.String> value)
+        void IPedantic_NoReply.TestTuple(System.Tuple<int, string> value)
         {
             var requestMessage = new RequestMessage {
                 InvokePayload = new IPedantic_PayloadTable.TestTuple_Invoke { value = value }
@@ -1555,11 +1555,11 @@ namespace UnityBasic.Interface
     public interface IPedanticSync : IInterfacedActorSync
     {
         void TestCall();
-        System.Nullable<System.Int32> TestOptional(System.Nullable<System.Int32> value);
+        System.Nullable<int> TestOptional(System.Nullable<int> value);
         System.Int32[] TestParams(params System.Int32[] values);
-        System.String TestPassClass(UnityBasic.Interface.TestParam param);
-        UnityBasic.Interface.TestResult TestReturnClass(System.Int32 value, System.Int32 offset);
-        System.Tuple<System.Int32, System.String> TestTuple(System.Tuple<System.Int32, System.String> value);
+        string TestPassClass(UnityBasic.Interface.TestParam param);
+        UnityBasic.Interface.TestResult TestReturnClass(int value, int offset);
+        System.Tuple<int, string> TestTuple(System.Tuple<int, string> value);
     }
 }
 
@@ -1581,7 +1581,7 @@ namespace UnityBasic.Interface
         [ProtoContract, TypeAlias]
         public class Event_Invoke : IInterfacedPayload, IInvokable
         {
-            [ProtoMember(1)] public System.String message;
+            [ProtoMember(1)] public string message;
 
             public Type GetInterfaceType()
             {
@@ -1607,7 +1607,7 @@ namespace UnityBasic.Interface
         {
         }
 
-        public void Event(System.String message)
+        public void Event(string message)
         {
             var payload = new IGreetObserver_PayloadTable.Event_Invoke { message = message };
             Notify(payload);
@@ -1639,7 +1639,7 @@ namespace UnityBasic.Interface
     [AlternativeInterface(typeof(IGreetObserver))]
     public interface IGreetObserverAsync : IInterfacedObserverSync
     {
-        Task Event(System.String message);
+        Task Event(string message);
     }
 }
 
