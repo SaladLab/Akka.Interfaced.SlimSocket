@@ -50,6 +50,7 @@ namespace HelloWorld.Program.Client
                 Type = ChannelType.Tcp,
                 ConnectEndPoint = new IPEndPoint(IPAddress.Loopback, 5001),
                 CreateChannelLogger = () => null,
+                CreateObserverRegistry = () => new ObserverRegistry(),
                 PacketSerializer = PacketSerializer.CreatePacketSerializer()
             };
 
