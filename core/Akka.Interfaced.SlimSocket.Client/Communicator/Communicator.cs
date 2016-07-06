@@ -5,8 +5,7 @@ namespace Akka.Interfaced.SlimSocket.Client
     public class Communicator
     {
         public ChannelFactory ChannelFactory { get; }
-        public IChannel Channel { get; private set; }
-        public IList<IChannel> SubChannels { get; }
+        public IList<IChannel> Channels { get; }
         public IObserverRegistry ObserverRegistry { get; }
 
         public Communicator()
@@ -14,40 +13,43 @@ namespace Akka.Interfaced.SlimSocket.Client
             ChannelFactory = new ChannelFactory()
             {
                 CreateObserverRegistry = () => ObserverRegistry,
-                ChannelRouter = OnSubChannelCreating
+                ChannelRouter = OnChannelRouting
             };
-            SubChannels = new List<IChannel>();
+            Channels = new List<IChannel>();
             ObserverRegistry = new ObserverRegistry();
         }
 
-        public void CreateChannel()
-        {
-            Channel = ChannelFactory.Create();
-        }
-
-        private IChannel OnSubChannelCreating(IChannel parentChannel, string address)
+        public IChannel CreateChannel(string address = null)
         {
             var newChannel = ChannelFactory.Create(address);
-
-            newChannel.StateChanged += (channel, state) =>
-            {
-                if (state == ChannelStateType.Closed)
-                    OnSubChannelClosed(channel);
-            };
-
-            lock (SubChannels)
-            {
-                SubChannels.Add(newChannel);
-            }
-
+            OnChannelCreated(newChannel);
             return newChannel;
         }
 
-        private void OnSubChannelClosed(IChannel channel)
+        private IChannel OnChannelRouting(IChannel parentChannel, string address)
         {
-            lock (SubChannels)
+            return CreateChannel(address);
+        }
+
+        private void OnChannelCreated(IChannel newChannel)
+        {
+            newChannel.StateChanged += (channel, state) =>
             {
-                SubChannels.Remove(channel);
+                if (state == ChannelStateType.Closed)
+                    OnChannelClosed(channel);
+            };
+
+            lock (Channels)
+            {
+                Channels.Add(newChannel);
+            }
+        }
+
+        private void OnChannelClosed(IChannel channel)
+        {
+            lock (Channels)
+            {
+                Channels.Remove(channel);
             }
         }
     }
