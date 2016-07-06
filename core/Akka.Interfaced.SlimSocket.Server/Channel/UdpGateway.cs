@@ -246,8 +246,21 @@ namespace Akka.Interfaced.SlimSocket.Server
             lock (_waitingMap)
             {
                 var now = DateTime.UtcNow;
-                var timeoutKeys = _waitingMap.Where(i => (now - i.Value.Time) > _initiator.TokenTimeout).Select(i => i.Key);
-                timeoutKeys.ToList().ForEach(i => _waitingMap.Remove(i));
+                var timeoutItems = _waitingMap.Where(i => (now - i.Value.Time) > _initiator.TokenTimeout).ToList();
+                foreach (var i in timeoutItems)
+                {
+                    _waitingMap.Remove(i.Key);
+                    if (i.Value.BindingActor.Item3.HasFlag(ActorBindingFlags.OpenThenNotification))
+                    {
+                        i.Value.BindingActor.Item1.Tell(new NotificationMessage
+                        {
+                            InvokePayload = new IActorBoundChannelObserver_PayloadTable.ChannelOpenTimeout_Invoke
+                            {
+                                tag = i.Value.Tag
+                            },
+                        });
+                    }
+                }
             }
         }
 
