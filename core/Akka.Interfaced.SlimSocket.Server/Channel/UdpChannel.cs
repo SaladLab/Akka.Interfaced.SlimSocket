@@ -190,7 +190,7 @@ namespace Akka.Interfaced.SlimSocket.Server
                 {
                     var observer = (InterfacedObserver)o;
                     if (observer != null)
-                        observer.Channel = new ActorNotificationChannel(_self);
+                        observer.Channel = new AkkaReceiverNotificationChannel(_self);
                 });
             }
 

@@ -203,10 +203,10 @@ namespace Akka.Interfaced.SlimSocket.Server
         [ResponsiveExceptionAll]
         InterfacedActorRef IActorBoundGatewaySync.OpenChannel(InterfacedActorRef actor, object tag, ActorBindingFlags bindingFlags)
         {
-            if (actor == null)
+            var targetActor = actor.CastToIActorRef();
+            if (targetActor == null)
                 throw new ArgumentNullException(nameof(actor));
 
-            var targetActor = ((AkkaActorTarget)actor.Target).Actor;
             var target = ((IActorBoundGatewaySync)this).OpenChannel(targetActor, new TaggedType[] { actor.InterfaceType }, bindingFlags);
 
             var actorRef = (InterfacedActorRef)Activator.CreateInstance(actor.GetType());
