@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Interfaced;
 using Akka.Interfaced.SlimServer;
@@ -17,17 +20,22 @@ namespace UnityBasic.Program.Server
             if (typeof(ICalculator) == null)
                 throw new Exception("Force interface module to be loaded");
 
-            var system = ActorSystem.Create("MySystem");
-            DeadRequestProcessingActor.Install(system);
+            using (var system = ActorSystem.Create("MySystem", "akka.loglevel = DEBUG \n akka.actor.debug.lifecycle = on"))
+            {
+                DeadRequestProcessingActor.Install(system);
 
-            StartGateway(system, ChannelType.Tcp, 5001, 5002);
-            StartGateway(system, ChannelType.Udp, 5001, 5002);
+                var gateways = new List<GatewayRef>();
+                gateways.AddRange(StartGateway(system, ChannelType.Tcp, 5001, 5002));
+                gateways.AddRange(StartGateway(system, ChannelType.Udp, 5001, 5002));
 
-            Console.WriteLine("Please enter key to quit.");
-            Console.ReadLine();
+                Console.WriteLine("Please enter key to quit.");
+                Console.ReadLine();
+
+                Task.WaitAll(gateways.Select(g => g.Stop()).ToArray());
+            }
         }
 
-        private static void StartGateway(ActorSystem system, ChannelType type, int port, int port2)
+        private static GatewayRef[] StartGateway(ActorSystem system, ChannelType type, int port, int port2)
         {
             var serializer = PacketSerializer.CreatePacketSerializer();
             var environment = new EntryActorEnvironment();
@@ -73,6 +81,8 @@ namespace UnityBasic.Program.Server
                 ? system.ActorOf(Props.Create(() => new TcpGateway(initiator2))).Cast<GatewayRef>()
                 : system.ActorOf(Props.Create(() => new UdpGateway(initiator2))).Cast<GatewayRef>();
             gateway2.Start().Wait();
+
+            return new[] { gateway, gateway2 };
         }
     }
 }

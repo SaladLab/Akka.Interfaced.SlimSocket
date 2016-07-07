@@ -17,17 +17,22 @@ namespace HelloWorld.Program.Server
             if (typeof(IGreeter) == null)
                 throw new Exception("Force interface module to be loaded");
 
-            var system = ActorSystem.Create("MySystem", ""); // "akka.loglevel = DEBUG \n akka.actor.debug.lifecycle = on");
-            DeadRequestProcessingActor.Install(system);
+            using (var system = ActorSystem.Create("MySystem", "akka.loglevel = DEBUG \n akka.actor.debug.lifecycle = on"))
+            {
+                DeadRequestProcessingActor.Install(system);
 
-            StartGateway(system, ChannelType.Tcp, 5001);
-            StartGateway(system, ChannelType.Udp, 5001);
+                var tcpGateway = StartGateway(system, ChannelType.Tcp, 5001);
+                var udpGateway = StartGateway(system, ChannelType.Udp, 5001);
 
-            Console.WriteLine("Please enter key to quit.");
-            Console.ReadLine();
+                Console.WriteLine("Please enter key to quit.");
+                Console.ReadLine();
+
+                tcpGateway.Stop().Wait();
+                udpGateway.Stop().Wait();
+            }
         }
 
-        private static void StartGateway(ActorSystem system, ChannelType type, int port)
+        private static GatewayRef StartGateway(ActorSystem system, ChannelType type, int port)
         {
             var serializer = PacketSerializer.CreatePacketSerializer();
 
@@ -50,6 +55,7 @@ namespace HelloWorld.Program.Server
                 ? system.ActorOf(Props.Create(() => new TcpGateway(initiator))).Cast<GatewayRef>()
                 : system.ActorOf(Props.Create(() => new UdpGateway(initiator))).Cast<GatewayRef>();
             gateway.Start().Wait();
+            return gateway;
         }
     }
 }
