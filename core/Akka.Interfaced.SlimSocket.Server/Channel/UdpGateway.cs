@@ -208,7 +208,7 @@ namespace Akka.Interfaced.SlimSocket.Server
         }
 
         [ResponsiveExceptionAll]
-        BoundActorTarget IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, object tag, ActorBindingFlags bindingFlags)
+        IRequestTarget IActorBoundGatewaySync.OpenChannel(IActorRef actor, TaggedType[] types, object tag, ActorBindingFlags bindingFlags)
         {
             if (_isStopped)
                 return null;
