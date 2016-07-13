@@ -12,12 +12,12 @@ namespace Akka.Interfaced.SlimSocket.Client
         private readonly ConcurrentDictionary<int, InterfacedObserver> _observerMap =
             new ConcurrentDictionary<int, InterfacedObserver>();
 
-        public TObserver Create<TObserver>(TObserver observer, bool startPending = false)
+        public TObserver Create<TObserver>(TObserver observer, bool startPending = false, bool keepOrder = false)
             where TObserver : IInterfacedObserver
         {
             var proxy = InterfacedObserver.Create(typeof(TObserver));
             proxy.ObserverId = IssueObserverId();
-            proxy.Channel = new ObserverEventDispatcher(observer, startPending);
+            proxy.Channel = new ObserverEventDispatcher(observer, startPending, keepOrder);
             AddObserver(proxy.ObserverId, proxy);
             return (TObserver)(object)proxy;
         }
