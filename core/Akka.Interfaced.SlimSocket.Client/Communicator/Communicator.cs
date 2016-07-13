@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Akka.Interfaced.SlimSocket.Client
 {
@@ -24,6 +25,12 @@ namespace Akka.Interfaced.SlimSocket.Client
             var newChannel = ChannelFactory.Create(address);
             OnChannelCreated(newChannel);
             return newChannel;
+        }
+
+        public void CloseAllChannels()
+        {
+            foreach (var channel in Channels.ToList())
+                channel.Close();
         }
 
         private IChannel OnChannelRouting(IChannel parentChannel, string address)
