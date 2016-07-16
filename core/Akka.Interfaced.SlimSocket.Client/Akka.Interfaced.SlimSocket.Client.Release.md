@@ -1,3 +1,9 @@
+## 0.5.3 (Released 2016/07/16)
+
+* Sync with Akka.Interfaced 0.5.3
+* Add keepOrder to ObserverEventDispatcher.
+* Add CloseAllChannels to ObserverEventDispatcher.
+
 ## 0.5.2 (Released 2016/07/11)
 
 * Sync with Akka.Interfaced 0.5.2

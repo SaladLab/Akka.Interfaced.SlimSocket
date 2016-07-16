@@ -1,6 +1,6 @@
 {
   "id": "AkkaInterfacedSlimSocket",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "authors": [ "Esun Kim" ],
   "owners": [ "Esun Kim" ],
   "description": "SlimSocket-Client for Akka.Interfaced",
